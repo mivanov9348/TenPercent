@@ -1,0 +1,13 @@
+D:\Projects\TenPercent\TenPercent.Data\bin\Debug\net8.0\TenPercent.Data.deps.json
+D:\Projects\TenPercent\TenPercent.Data\bin\Debug\net8.0\TenPercent.Data.dll
+D:\Projects\TenPercent\TenPercent.Data\bin\Debug\net8.0\TenPercent.Data.pdb
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\TenPercent.Data.csproj.AssemblyReference.cache
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\TenPercent.Data.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\TenPercent.Data.AssemblyInfoInputs.cache
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\TenPercent.Data.AssemblyInfo.cs
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\TenPercent.Data.csproj.CoreCompileInputs.cache
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\TenPercent.Data.sourcelink.json
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\TenPercent.Data.dll
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\refint\TenPercent.Data.dll
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\TenPercent.Data.pdb
+D:\Projects\TenPercent\TenPercent.Data\obj\Debug\net8.0\ref\TenPercent.Data.dll

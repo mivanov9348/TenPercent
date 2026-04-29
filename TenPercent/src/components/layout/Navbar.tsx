@@ -1,13 +1,15 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Building2, Users, Wallet, ShoppingCart } from 'lucide-react';
+import { Home, Building2, Users, Wallet, ShoppingCart, Globe, Mail } from 'lucide-react';
 
 export default function Navbar() {
   const menuItems = [
     { name: 'Home', path: '/', icon: <Home size={18} /> },
+    {name: 'Inbox', path: '/inbox', icon: <Mail size={18} /> },
     { name: 'My Agency', path: '/agency', icon: <Building2 size={18} /> },
     { name: 'My Players', path: '/players', icon: <Users size={18} /> },
     { name: 'Finance', path: '/finance', icon: <Wallet size={18} /> },
     { name: 'Market', path: '/market', icon: <ShoppingCart size={18} /> },
+    { name: 'World', path: '/world', icon: <Globe size={18} /> },
   ];
 
   return (

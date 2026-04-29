@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 
 // Страници на играта
@@ -13,6 +13,12 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import CreateAgency from './pages/auth/CreateAgency';
 
+import WorldLayout from './pages/world/WorldLayout';
+import Standings from './pages/world/Standings';
+import Scorers from './pages/world/Scorers';
+import Awards from './pages/world/Awards';
+import Inbox from './pages/Inbox';
+
 function App() {
   return (
     <BrowserRouter>
@@ -25,10 +31,18 @@ function App() {
         {/* Защитени страници (С Navbar на играта) */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="inbox" element={<Inbox />} />
           <Route path="agency" element={<Agency />} />
           <Route path="players" element={<Players />} />
           <Route path="finance" element={<Finance />} />
           <Route path="market" element={<Market />} />
+          {/* World Routes с вложени (Nested) страници */}
+          <Route path="world" element={<WorldLayout />}>
+            <Route index element={<Navigate to="standings" replace />} />
+            <Route path="standings" element={<Standings />} />
+            <Route path="scorers" element={<Scorers />} />
+            <Route path="awards" element={<Awards />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

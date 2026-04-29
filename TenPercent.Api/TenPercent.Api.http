@@ -1,0 +1,6 @@
+@TenPercent.Api_HostAddress = http://localhost:5147
+
+GET {{TenPercent.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

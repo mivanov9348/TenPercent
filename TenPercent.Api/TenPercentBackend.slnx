@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../TenPercent.Data/TenPercent.Data.csproj" Id="a3b7997c-f04a-4205-bb10-01268221caea" />
+  <Project Path="TenPercent.Api.csproj" />
+</Solution>
