@@ -7,7 +7,7 @@ export default function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,7 +34,14 @@ export default function Login() {
 
       // Запазваме userId в браузъра
       localStorage.setItem('userId', data.userId.toString());
-      
+      localStorage.setItem('hasAgency', data.hasAgency.toString());
+
+      if (data.hasAgency) {
+        navigate('/'); 
+      } else {
+        navigate('/create-agency'); 
+      }
+
       // Влизаме в същинската игра
       navigate('/');
     } catch (err: any) {
@@ -67,8 +74,8 @@ export default function Login() {
             <label className="block text-sm font-medium text-gray-400 mb-2">Email</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-gray-950 border border-gray-800 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-yellow-500 transition-colors"
@@ -82,8 +89,8 @@ export default function Login() {
             <label className="block text-sm font-medium text-gray-400 mb-2">Парола</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-              <input 
-                type="password" 
+              <input
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-gray-950 border border-gray-800 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-yellow-500 transition-colors"
@@ -93,8 +100,8 @@ export default function Login() {
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isLoading}
             className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-400 transition-colors shadow-[0_0_15px_rgba(234,179,8,0.3)] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >

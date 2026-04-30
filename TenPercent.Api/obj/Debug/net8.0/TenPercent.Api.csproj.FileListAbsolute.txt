@@ -148,3 +148,4 @@ D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.pdb
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.genruntimeconfig.cache
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\ref\TenPercent.Api.dll
 D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\BCrypt.Net-Next.dll
+D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\Bogus.dll

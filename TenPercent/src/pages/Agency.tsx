@@ -1,22 +1,76 @@
-import { Building, Users, Wallet, TrendingUp, Star, Trophy, Target } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building, Users, Wallet, TrendingUp, Target, Trophy, Shield, Crown, Star, Loader2, AlertCircle } from 'lucide-react';
+
+// Дефинираме как изглеждат данните, които очакваме от C#
+interface AgencyData {
+  id: number;
+  name: string;
+  agentName: string;
+  logoId: number;
+  budget: number;
+  reputation: number;
+  level: number;
+  establishedAt: string;
+  totalPlayersCount: number;
+}
 
 export default function Agency() {
-  // Фейк данни, които по-късно ще идват от C# бекенда
-  const agencyInfo = {
-    name: "Elite Sports Group",
-    agentName: "Agent Smith",
-    level: 3,
-    reputation: 74, // От 100
-    established: "2026",
+  const [agency, setAgency] = useState<AgencyData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Взимаме данните при първоначално зареждане на страницата
+    const fetchAgency = async () => {
+      const userId = localStorage.getItem('userId');
+      if (!userId) return;
+
+      try {
+        // ВНИМАНИЕ: Смени порта с твоя!
+        const response = await fetch(`https://localhost:7135/api/agency/${userId}`);
+        if (!response.ok) throw new Error('Неуспешно зареждане на данните за агенцията.');
+        
+        const data = await response.json();
+        setAgency(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAgency();
+  }, []);
+
+  // Помощна функция за форматиране на бюджета
+  const formatMoney = (amount: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   };
 
-  const quickStats = [
-    { id: 1, title: "Total Players", value: "14", icon: <Users size={24} />, color: "text-blue-500" },
-    { id: 2, title: "Active Contracts", value: "11", icon: <Building size={24} />, color: "text-purple-500" },
-    { id: 3, title: "Weekly Income", value: "+$45,000", icon: <TrendingUp size={24} />, color: "text-emerald-500" },
-    { id: 4, title: "Total Revenue", value: "$1,250,000", icon: <Wallet size={24} />, color: "text-yellow-500" },
-  ];
+  // Помощна функция за избор на икона спрямо logoId
+  const renderLogo = (logoId: number) => {
+    switch (logoId) {
+      case 1: return <Shield size={48} />;
+      case 2: return <Crown size={48} />;
+      case 3: return <Star size={48} />;
+      case 4: return <Building size={48} />;
+      default: return <Trophy size={48} />;
+    }
+  };
 
+  if (isLoading) {
+    return <div className="flex h-64 items-center justify-center"><Loader2 className="animate-spin text-yellow-500" size={48} /></div>;
+  }
+
+  if (error || !agency) {
+    return (
+      <div className="flex items-center gap-3 text-red-500 bg-red-500/10 p-4 rounded-lg">
+        <AlertCircle /> <p>{error || 'Агенцията не е намерена.'}</p>
+      </div>
+    );
+  }
+
+  // Фейк данни за ъпгрейди (ще ги вържем към базата по-късно)
   const facilities = [
     { id: 1, name: "Scouting Network", level: 2, maxLevel: 5, description: "Подобрява качеството на генерираните играчи на пазара." },
     { id: 2, name: "Legal Department", level: 4, maxLevel: 5, description: "Увеличава твоя процент (%) при преговори за договори." },
@@ -26,53 +80,72 @@ export default function Agency() {
   return (
     <div className="space-y-8">
       
-      {/* 1. Хедър на агенцията */}
+      {/* 1. Хедър на агенцията (Вече с реални данни) */}
       <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 flex items-center justify-between shadow-lg relative overflow-hidden">
-        {/* Декоративен бекграунд елемент */}
         <div className="absolute -right-10 -top-10 text-gray-700/20">
           <Building size={200} />
         </div>
 
         <div className="relative z-10 flex items-center gap-6">
           <div className="w-24 h-24 bg-gray-900 border-2 border-yellow-500 rounded-xl flex items-center justify-center text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-            <Trophy size={48} />
+            {renderLogo(agency.logoId)}
           </div>
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-3xl font-black text-white uppercase tracking-wider">{agencyInfo.name}</h1>
-              <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">LEVEL {agencyInfo.level}</span>
+              <h1 className="text-3xl font-black text-white uppercase tracking-wider">{agency.name}</h1>
+              <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">LEVEL {agency.level}</span>
             </div>
-            <p className="text-gray-400 text-lg">CEO: <span className="text-gray-200">{agencyInfo.agentName}</span></p>
+            <p className="text-gray-400 text-lg">CEO: <span className="text-gray-200">{agency.agentName}</span></p>
             <div className="flex items-center gap-2 mt-2 text-sm">
               <span className="text-gray-500">Reputation:</span>
               <div className="w-32 h-2 bg-gray-900 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400" 
-                  style={{ width: `${agencyInfo.reputation}%` }}
+                  style={{ width: `${agency.reputation}%` }}
                 ></div>
               </div>
-              <span className="text-yellow-500 font-bold">{agencyInfo.reputation}/100</span>
+              <span className="text-yellow-500 font-bold">{agency.reputation}/100</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. Бързи статистики (4 колони) */}
+      {/* 2. Бързи статистики (Вече с реални данни за бюджет и играчи) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {quickStats.map((stat) => (
-          <div key={stat.id} className="bg-gray-800 border border-gray-700 rounded-xl p-5 flex items-center gap-4 hover:border-gray-500 transition-colors">
-            <div className={`p-3 bg-gray-900 rounded-lg ${stat.color}`}>
-              {stat.icon}
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 font-medium">{stat.title}</p>
-              <p className="text-xl font-bold text-white">{stat.value}</p>
-            </div>
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 flex items-center gap-4 hover:border-gray-500 transition-colors">
+          <div className="p-3 bg-gray-900 rounded-lg text-yellow-500"><Wallet size={24} /></div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Available Budget</p>
+            <p className="text-xl font-bold text-white font-mono">{formatMoney(agency.budget)}</p>
           </div>
-        ))}
+        </div>
+        
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 flex items-center gap-4 hover:border-gray-500 transition-colors">
+          <div className="p-3 bg-gray-900 rounded-lg text-blue-500"><Users size={24} /></div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Total Players</p>
+            <p className="text-xl font-bold text-white">{agency.totalPlayersCount}</p>
+          </div>
+        </div>
+
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 flex items-center gap-4 hover:border-gray-500 transition-colors">
+          <div className="p-3 bg-gray-900 rounded-lg text-purple-500"><Building size={24} /></div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Active Contracts</p>
+            <p className="text-xl font-bold text-white">{agency.totalPlayersCount}</p>
+          </div>
+        </div>
+
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 flex items-center gap-4 hover:border-gray-500 transition-colors">
+          <div className="p-3 bg-gray-900 rounded-lg text-emerald-500"><TrendingUp size={24} /></div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Weekly Income</p>
+            <p className="text-xl font-bold text-white">+$0</p>
+          </div>
+        </div>
       </div>
 
-      {/* 3. Инфраструктура / Ъпгрейди */}
+      {/* 3. Инфраструктура / Ъпгрейди (Остава статично за сега) */}
       <div>
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <Target className="text-yellow-500" />
@@ -89,7 +162,6 @@ export default function Agency() {
               </div>
               <p className="text-gray-400 text-sm mb-6 flex-1">{facility.description}</p>
               
-              {/* Бутон за ъпгрейд (заключен ако е на макс) */}
               <button 
                 className={`w-full py-2 rounded-lg font-bold text-sm transition-colors ${
                   facility.level === facility.maxLevel 

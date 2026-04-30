@@ -84,6 +84,53 @@ namespace TenPercent.Data.Migrations
                     b.ToTable("Agents");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.Club", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("League")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PrimaryColor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Reputation")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TransferBudget")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("WageBudget")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Clubs");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Player", b =>
                 {
                     b.Property<int>("Id")
@@ -98,7 +145,16 @@ namespace TenPercent.Data.Migrations
                     b.Property<int?>("AgencyId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ClubId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ContractYearsLeft")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Defending")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Dribbling")
                         .HasColumnType("int");
 
                     b.Property<string>("Form")
@@ -106,13 +162,27 @@ namespace TenPercent.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("MarketValue")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Nationality")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Overall")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Pace")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Passing")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Physical")
                         .HasColumnType("int");
 
                     b.Property<string>("Position")
@@ -122,12 +192,18 @@ namespace TenPercent.Data.Migrations
                     b.Property<int>("Potential")
                         .HasColumnType("int");
 
+                    b.Property<int>("Shooting")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("WeeklyWage")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AgencyId");
+
+                    b.HasIndex("ClubId");
 
                     b.ToTable("Players");
                 });
@@ -186,9 +262,17 @@ namespace TenPercent.Data.Migrations
                 {
                     b.HasOne("TenPercent.Data.Models.Agency", "Agency")
                         .WithMany("Players")
-                        .HasForeignKey("AgencyId");
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("TenPercent.Data.Models.Club", "Club")
+                        .WithMany("Players")
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Agency");
+
+                    b.Navigation("Club");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Agency", b =>
@@ -199,6 +283,11 @@ namespace TenPercent.Data.Migrations
             modelBuilder.Entity("TenPercent.Data.Models.Agent", b =>
                 {
                     b.Navigation("Agency");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Club", b =>
+                {
+                    b.Navigation("Players");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.User", b =>

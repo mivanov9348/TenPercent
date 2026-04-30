@@ -1,5 +1,21 @@
 [
   {
+    "ContainingType": "TenPercent.Api.Controllers.AgencyController",
+    "Method": "GetMyAgency",
+    "RelativePath": "api/Agency/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "TenPercent.Api.Controllers.AuthController",
     "Method": "CreateAgency",
     "RelativePath": "api/Auth/create-agency",

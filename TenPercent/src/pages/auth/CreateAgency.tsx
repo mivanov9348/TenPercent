@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building, Shield, Crown, Star } from 'lucide-react';
+import { Building, Shield, Crown, Star, Loader2, AlertCircle } from 'lucide-react';
 
 export default function CreateAgency() {
   const navigate = useNavigate();
+  
+  const [agencyName, setAgencyName] = useState('');
+  const [agentName, setAgentName] = useState('');
   const [selectedLogo, setSelectedLogo] = useState<number | null>(null);
+  
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const logos = [
     { id: 1, icon: <Shield size={40} />, color: 'text-blue-500' },
@@ -13,11 +19,41 @@ export default function CreateAgency() {
     { id: 4, icon: <Building size={40} />, color: 'text-red-500' },
   ];
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLogo) return alert('Моля, избери лого!');
-    // Записваме данните и влизаме в играта
-    navigate('/');
+    if (!selectedLogo) return setError('Моля, избери емблема!');
+    
+    setError('');
+    setIsLoading(true);
+
+    const userId = localStorage.getItem('userId');
+
+    try {
+      const response = await fetch('https://localhost:7135/api/auth/create-agency', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: parseInt(userId || '0'), 
+          agentName, 
+          agencyName, 
+          logoId: selectedLogo 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data || 'Грешка при създаване на агенция.');
+
+      // Обновяваме флага, че вече имаме агенция!
+      localStorage.setItem('hasAgency', 'true');
+      
+      // Влизаме в същинската игра
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -28,12 +64,21 @@ export default function CreateAgency() {
           <p className="text-gray-400">Първата стъпка към върха на спортния мениджмънт</p>
         </div>
 
+        {error && (
+          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/50 rounded-lg flex items-center gap-3 text-red-500 text-sm">
+            <AlertCircle size={18} />
+            <p>{error}</p>
+          </div>
+        )}
+
         <form onSubmit={handleCreate} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-bold text-yellow-500 mb-2 uppercase tracking-wide">Име на Агенцията</label>
               <input 
                 type="text" 
+                value={agencyName}
+                onChange={e => setAgencyName(e.target.value)}
                 placeholder="напр. Elite Sports Group"
                 className="w-full bg-gray-950 border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-yellow-500 text-lg" 
                 required 
@@ -43,6 +88,8 @@ export default function CreateAgency() {
               <label className="block text-sm font-bold text-yellow-500 mb-2 uppercase tracking-wide">Име на Агента (Ти)</label>
               <input 
                 type="text" 
+                value={agentName}
+                onChange={e => setAgentName(e.target.value)}
                 placeholder="Твоето име"
                 className="w-full bg-gray-950 border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-yellow-500 text-lg" 
                 required 
@@ -72,9 +119,10 @@ export default function CreateAgency() {
           <div className="pt-4">
             <button 
               type="submit" 
-              className="w-full bg-yellow-500 text-black font-black text-lg py-4 rounded-xl hover:bg-yellow-400 transition-colors shadow-[0_0_20px_rgba(234,179,8,0.4)]"
+              disabled={isLoading}
+              className="w-full bg-yellow-500 text-black font-black text-lg py-4 rounded-xl hover:bg-yellow-400 transition-colors shadow-[0_0_20px_rgba(234,179,8,0.4)] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              СТАРТИРАЙ КАРИЕРАТА
+              {isLoading ? <Loader2 className="animate-spin" size={24} /> : 'СТАРТИРАЙ КАРИЕРАТА'}
             </button>
           </div>
         </form>

@@ -60,6 +60,10 @@
               "target": "Package",
               "version": "[4.1.0, )"
             },
+            "Bogus": {
+              "target": "Package",
+              "version": "[35.6.5, )"
+            },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[8.0.10, )"
