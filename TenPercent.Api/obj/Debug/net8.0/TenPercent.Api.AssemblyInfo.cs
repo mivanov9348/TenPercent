@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TenPercent.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+536ef07aedbf863792911186a9411f23e47c2451")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b4431b40f6046d5b7f09b4e67c75d3fb0b9daa0d")]
 [assembly: System.Reflection.AssemblyProductAttribute("TenPercent.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TenPercent.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

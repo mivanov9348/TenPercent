@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Building2, Users, Wallet, ShoppingCart, LogOut } from 'lucide-react';
+import { Home, Building2, Users, Wallet, ShoppingCart, LogOut, Globe } from 'lucide-react';
 
 export default function Navbar() {
   const [budget, setBudget] = useState<number | null>(null);
@@ -46,6 +46,7 @@ export default function Navbar() {
     { name: 'My Players', path: '/players', icon: <Users size={18} /> },
     { name: 'Finance', path: '/finance', icon: <Wallet size={18} /> },
     { name: 'Market', path: '/market', icon: <ShoppingCart size={18} /> },
+    {name: 'World', path: '/world/standings', icon: <Globe size={18} /> },
   ];
 
   return (

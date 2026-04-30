@@ -100,9 +100,8 @@ namespace TenPercent.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("League")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Level")
                         .HasColumnType("int");
@@ -128,7 +127,79 @@ namespace TenPercent.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LeagueId");
+
                     b.ToTable("Clubs");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Fixture", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AwayClubId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwayGoals")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Gameweek")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HomeClubId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HomeGoals")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsPlayed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ScheduledDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Season")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AwayClubId");
+
+                    b.HasIndex("HomeClubId");
+
+                    b.HasIndex("LeagueId");
+
+                    b.ToTable("Fixtures");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.League", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Reputation")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Leagues");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Player", b =>
@@ -208,6 +279,51 @@ namespace TenPercent.Data.Migrations
                     b.ToTable("Players");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.PlayerPerformance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Assists")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FixtureId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Goals")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InjuryDays")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MatchRating")
+                        .HasPrecision(4, 1)
+                        .HasColumnType("decimal(4,1)");
+
+                    b.Property<int>("MinutesPlayed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RedCards")
+                        .HasColumnType("int");
+
+                    b.Property<int>("YellowCards")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FixtureId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("PlayerPerformances");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -227,6 +343,10 @@ namespace TenPercent.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -234,6 +354,34 @@ namespace TenPercent.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.WorldState", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CurrentGameweek")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentSeason")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsSimulationRunning")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("NextMatchdayDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalGameweeks")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorldStates");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Agency", b =>
@@ -258,6 +406,44 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.Club", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.League", "League")
+                        .WithMany("Clubs")
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("League");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Fixture", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.Club", "AwayClub")
+                        .WithMany()
+                        .HasForeignKey("AwayClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TenPercent.Data.Models.Club", "HomeClub")
+                        .WithMany()
+                        .HasForeignKey("HomeClubId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TenPercent.Data.Models.League", "League")
+                        .WithMany("Fixtures")
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AwayClub");
+
+                    b.Navigation("HomeClub");
+
+                    b.Navigation("League");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Player", b =>
                 {
                     b.HasOne("TenPercent.Data.Models.Agency", "Agency")
@@ -275,6 +461,25 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("Club");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.PlayerPerformance", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.Fixture", "Fixture")
+                        .WithMany("Performances")
+                        .HasForeignKey("FixtureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TenPercent.Data.Models.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Fixture");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Agency", b =>
                 {
                     b.Navigation("Players");
@@ -288,6 +493,18 @@ namespace TenPercent.Data.Migrations
             modelBuilder.Entity("TenPercent.Data.Models.Club", b =>
                 {
                     b.Navigation("Players");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Fixture", b =>
+                {
+                    b.Navigation("Performances");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.League", b =>
+                {
+                    b.Navigation("Clubs");
+
+                    b.Navigation("Fixtures");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.User", b =>

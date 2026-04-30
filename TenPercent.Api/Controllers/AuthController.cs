@@ -43,11 +43,10 @@ namespace TenPercent.Api.Controllers
             return Ok(new { userId = user.Id, message = "Registration successful!" });
         }
 
-        // POST: api/auth/login
+        // POST: api/auth/login 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            // Намираме потребителя, КАТО включваме и Агента му, за да видим дали има такъв
             var user = await _context.Users
                 .Include(u => u.Agent)
                 .FirstOrDefaultAsync(u => u.Email == dto.Email);
@@ -57,13 +56,13 @@ namespace TenPercent.Api.Controllers
                 return Unauthorized("Invalid email or password.");
             }
 
-            // Проверяваме дали този потребител вече си е създал Агенция/Агент
             bool hasAgency = user.Agent != null;
 
             return Ok(new
             {
                 userId = user.Id,
-                hasAgency = hasAgency, // Връщаме тази информация на React!
+                hasAgency = hasAgency,
+                role = user.Role, 
                 message = "Login successful!"
             });
         }

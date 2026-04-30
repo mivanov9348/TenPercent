@@ -17,12 +17,9 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // ВНИМАНИЕ: Смени порта
       const response = await fetch('https://localhost:7135/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
@@ -32,18 +29,20 @@ export default function Login() {
         throw new Error(data || 'Грешен имейл или парола.');
       }
 
-      // Запазваме userId в браузъра
+      // Запазваме данните в браузъра
       localStorage.setItem('userId', data.userId.toString());
       localStorage.setItem('hasAgency', data.hasAgency.toString());
+      localStorage.setItem('role', data.role); // ЗАПАЗВАМЕ И РОЛЯТА
 
-      if (data.hasAgency) {
-        navigate('/'); 
+      // ЛОГИКАТА ЗА ПРЕНАСОЧВАНЕ:
+      if (data.role === 'Admin') {
+        navigate('/admin'); // Админът отива в своя панел
+      } else if (data.hasAgency) {
+        navigate('/'); // Играч с агенция отива в дашборда
       } else {
-        navigate('/create-agency'); 
+        navigate('/create-agency'); // Играч без агенция отива да си я създаде
       }
-
-      // Влизаме в същинската игра
-      navigate('/');
+      
     } catch (err: any) {
       setError(err.message);
     } finally {

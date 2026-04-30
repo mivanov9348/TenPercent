@@ -3,20 +3,35 @@
     using Bogus;
     using TenPercent.Api.Services.Interfaces;
     using TenPercent.Data.Models;
+
     public class PlayerGeneratorService : IPlayerGeneratorService
     {
         private readonly Random _rand = new Random();
         private readonly string[] _positions = { "ST", "MID", "DEF", "GK" };
 
-        public Player GeneratePlayer(string type, int? clubId)
+        public List<Player> GenerateMultiplePlayers(int count, string type, int? clubId, string? position = null)
         {
-            var faker = new Faker("en"); 
+            var players = new List<Player>();
+            for (int i = 0; i < count; i++)
+            {
+                players.Add(GeneratePlayer(type, clubId, position));
+            }
+            return players;
+        }
+
+        // ТУК Е ПОПРАВКАТА: Добавен е третият параметър string? position = null
+        public Player GeneratePlayer(string type, int? clubId, string? position = null)
+        {
+            var faker = new Faker("en");
 
             var player = new Player
             {
                 Name = $"{faker.Name.FirstName(Bogus.DataSets.Name.Gender.Male)} {faker.Name.LastName()}",
                 Nationality = faker.Address.Country(),
-                Position = _positions[_rand.Next(_positions.Length)],
+
+                // ТУК Е ПОПРАВКАТА: Ако сме подали позиция, ползваме нея. Ако не, избираме рандом.
+                Position = position ?? _positions[_rand.Next(_positions.Length)],
+
                 ClubId = clubId,
                 Form = "Good"
             };
@@ -52,15 +67,6 @@
             return player;
         }
 
-        public List<Player> GenerateMultiplePlayers(int count, string type, int? clubId)
-        {
-            var players = new List<Player>();
-            for (int i = 0; i < count; i++)
-            {
-                players.Add(GeneratePlayer(type, clubId));
-            }
-            return players;
-        }
 
         private void GenerateStatsForPosition(Player p)
         {

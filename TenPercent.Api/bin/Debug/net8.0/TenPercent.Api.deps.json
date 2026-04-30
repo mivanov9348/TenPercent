@@ -10,6 +10,7 @@
         "dependencies": {
           "BCrypt.Net-Next": "4.1.0",
           "Bogus": "35.6.5",
+          "CsvHelper": "33.1.0",
           "Microsoft.EntityFrameworkCore.SqlServer": "8.0.10",
           "Microsoft.EntityFrameworkCore.Tools": "8.0.10",
           "Swashbuckle.AspNetCore": "6.6.2",
@@ -58,6 +59,14 @@
           "lib/net6.0/Bogus.dll": {
             "assemblyVersion": "35.6.5.0",
             "fileVersion": "35.6.5.0"
+          }
+        }
+      },
+      "CsvHelper/33.1.0": {
+        "runtime": {
+          "lib/net8.0/CsvHelper.dll": {
+            "assemblyVersion": "33.0.0.0",
+            "fileVersion": "33.1.0.26"
           }
         }
       },
@@ -887,6 +896,13 @@
       "sha512": "sha512-2FGZn+aAVHjmCgClgmGkTDBVZk0zkLvAKGaxEf5JL6b3i9JbHTE4wnuY4vHCuzlCmJdU6VZjgDfHwmYkQF8VAA==",
       "path": "bogus/35.6.5",
       "hashPath": "bogus.35.6.5.nupkg.sha512"
+    },
+    "CsvHelper/33.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kqfTOZGrn7NarNeXgjh86JcpTHUoeQDMB8t9NVa/ZtlSYiV1rxfRnQ49WaJsob4AiGrbK0XDzpyKkBwai4F8eg==",
+      "path": "csvhelper/33.1.0",
+      "hashPath": "csvhelper.33.1.0.nupkg.sha512"
     },
     "Humanizer.Core/2.14.1": {
       "type": "package",

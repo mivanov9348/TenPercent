@@ -1,62 +1,102 @@
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronDown, Loader2 } from 'lucide-react';
 
 export default function Standings() {
-  const [selectedLeague, setSelectedLeague] = useState('English Premier Division');
+  const navigate = useNavigate();
+  const [leaguesData, setLeaguesData] = useState<any[]>([]);
+  const [selectedLeagueId, setSelectedLeagueId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const leagues = ["English Premier Division", "Spanish Elite Liga", "Italian Pro League"];
+  useEffect(() => {
+    const fetchStandings = async () => {
+      try {
+        const response = await fetch('https://localhost:7135/api/leagues/standings');
+        if (response.ok) {
+          const data = await response.json();
+          setLeaguesData(data);
+          
+          if (data.length > 0) {
+            setSelectedLeagueId(data[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch standings:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const leagueTable = [
-    { pos: 1, team: "Manchester Red", p: 14, w: 11, d: 2, l: 1, gd: "+24", pts: 35 },
-    { pos: 2, team: "London Blue", p: 14, w: 10, d: 3, l: 1, gd: "+18", pts: 33 },
-    { pos: 3, team: "London Cannons", p: 14, w: 9, d: 4, l: 1, gd: "+15", pts: 31 },
-    { pos: 4, team: "Liverpool Reds", p: 14, w: 8, d: 4, l: 2, gd: "+12", pts: 28 },
-    { pos: 5, team: "Newcastle Magpies", p: 14, w: 7, d: 5, l: 2, gd: "+5", pts: 26 },
-  ];
+    fetchStandings();
+  }, []);
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-yellow-500" size={40} /></div>;
+  }
+
+  if (leaguesData.length === 0) {
+    return <div className="text-center text-gray-500 mt-10">No leagues available. Please import data.</div>;
+  }
+
+  const activeLeague = leaguesData.find(l => l.id === selectedLeagueId);
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg overflow-hidden">
-      <div className="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800/80">
-        <h2 className="text-lg font-bold text-white">League Table</h2>
+    <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-lg overflow-hidden">
+      
+      {/* Header & Dropdown */}
+      <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-900">
+        <h2 className="text-lg font-bold text-white uppercase tracking-wider">League Table</h2>
         
-        <div className="relative w-64">
+        <div className="relative w-72">
           <select 
-            value={selectedLeague}
-            onChange={(e) => setSelectedLeague(e.target.value)}
-            className="w-full appearance-none bg-gray-900 border border-gray-700 text-white font-bold py-2 pl-4 pr-10 rounded-lg focus:outline-none focus:border-yellow-500 cursor-pointer text-sm"
+            value={selectedLeagueId || ''}
+            onChange={(e) => setSelectedLeagueId(Number(e.target.value))}
+            className="w-full appearance-none bg-gray-800 border border-gray-700 text-white font-bold py-2.5 pl-4 pr-10 rounded-lg focus:outline-none focus:border-yellow-500 cursor-pointer text-sm transition-colors"
           >
-            {leagues.map(l => <option key={l} value={l}>{l}</option>)}
+            {leaguesData.map(l => (
+              <option key={l.id} value={l.id}>{l.name}</option>
+            ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
         </div>
       </div>
       
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gray-900/50 border-b border-gray-700 text-xs uppercase tracking-wider text-gray-400">
-              <th className="p-4 font-medium text-center">#</th>
+            <tr className="bg-gray-800/50 border-b border-gray-800 text-xs uppercase tracking-wider text-gray-500">
+              <th className="p-4 font-medium text-center w-12">#</th>
               <th className="p-4 font-medium">Club</th>
-              <th className="p-4 font-medium text-center">P</th>
-              <th className="p-4 font-medium text-center">W</th>
-              <th className="p-4 font-medium text-center">D</th>
-              <th className="p-4 font-medium text-center">L</th>
-              <th className="p-4 font-medium text-center">GD</th>
-              <th className="p-4 font-black text-center text-white">Pts</th>
+              <th className="p-4 font-medium text-center w-12">P</th>
+              <th className="p-4 font-medium text-center w-12">W</th>
+              <th className="p-4 font-medium text-center w-12">D</th>
+              <th className="p-4 font-medium text-center w-12">L</th>
+              <th className="p-4 font-medium text-center w-16">GD</th>
+              <th className="p-4 font-black text-center text-white w-16">Pts</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-700">
-            {leagueTable.map((row) => (
-              <tr key={row.pos} className="hover:bg-gray-750 transition-colors">
+          <tbody className="divide-y divide-gray-800/50">
+            {activeLeague?.standings.map((row: any) => (
+              // ТУК правим реда кликаем и насочваме към ClubDetails
+              <tr 
+                key={row.clubId} 
+                onClick={() => navigate(`/world/club/${row.clubId}`)}
+                className="hover:bg-gray-800/80 transition-colors cursor-pointer group"
+              >
                 <td className="p-4 text-center">
-                  <span className={`font-bold ${row.pos <= 4 ? 'text-blue-400' : 'text-gray-400'}`}>{row.pos}</span>
+                  <span className={`font-bold ${row.pos <= 4 ? 'text-blue-400' : row.pos >= activeLeague.standings.length - 2 ? 'text-red-400' : 'text-gray-500'}`}>
+                    {row.pos}
+                  </span>
                 </td>
-                <td className="p-4 font-bold text-white">{row.team}</td>
-                <td className="p-4 text-center text-gray-400">{row.p}</td>
-                <td className="p-4 text-center text-gray-400">{row.w}</td>
-                <td className="p-4 text-center text-gray-400">{row.d}</td>
-                <td className="p-4 text-center text-gray-400">{row.l}</td>
-                <td className="p-4 text-center text-gray-400">{row.gd}</td>
+                <td className="p-4 font-bold text-gray-300 group-hover:text-yellow-400 transition-colors">
+                  {row.team}
+                </td>
+                <td className="p-4 text-center text-gray-500">{row.p}</td>
+                <td className="p-4 text-center text-gray-500">{row.w}</td>
+                <td className="p-4 text-center text-gray-500">{row.d}</td>
+                <td className="p-4 text-center text-gray-500">{row.l}</td>
+                <td className="p-4 text-center text-gray-500">{row.gd}</td>
                 <td className="p-4 text-center font-black text-yellow-500">{row.pts}</td>
               </tr>
             ))}

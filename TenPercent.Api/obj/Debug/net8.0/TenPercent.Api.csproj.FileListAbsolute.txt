@@ -149,3 +149,4 @@ D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.genruntime
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\ref\TenPercent.Api.dll
 D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\BCrypt.Net-Next.dll
 D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\Bogus.dll
+D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\CsvHelper.dll

@@ -1,5 +1,67 @@
 [
   {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "GenerateSchedule",
+    "RelativePath": "api/Admin/generate-schedule",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "ImportClubs",
+    "RelativePath": "api/Admin/import-clubs",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "ImportLeagues",
+    "RelativePath": "api/Admin/import-leagues",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "AutoFixSquads",
+    "RelativePath": "api/Admin/squad-autofix",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "GetSquadReport",
+    "RelativePath": "api/Admin/squad-report",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "TenPercent.Api.Controllers.AgencyController",
     "Method": "GetMyAgency",
     "RelativePath": "api/Agency/{userId}",
@@ -59,6 +121,58 @@
         "Name": "dto",
         "Type": "TenPercent.Api.DTOs.RegisterDto",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.ClubsController",
+    "Method": "GetClubDetails",
+    "RelativePath": "api/Clubs/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.LeaguesController",
+    "Method": "GetStandings",
+    "RelativePath": "api/Leagues/standings",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.PlayersController",
+    "Method": "GetFreeAgents",
+    "RelativePath": "api/Players/free-agents",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.PlayersController",
+    "Method": "GenerateWonderkids",
+    "RelativePath": "api/Players/generate-wonderkids",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "count",
+        "Type": "System.Int32",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
