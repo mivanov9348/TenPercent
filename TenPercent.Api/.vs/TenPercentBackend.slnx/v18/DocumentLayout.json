@@ -3,14 +3,23 @@
   "WorkspaceRootPath": "D:\\Projects\\TenPercent\\TenPercent.Api\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\playerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\playerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\clubscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\clubscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\club.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\league.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\services\\playergeneratorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:services\\playergeneratorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\services\\iplayergeneratorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:services\\iplayergeneratorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -20,50 +29,73 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "League.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\League.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\League.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\League.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\League.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Title": "Player.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Player.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Player.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Player.cs",
+              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Player.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAADwvx8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-30T10:48:40.938Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-30T16:45:25.391Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Club.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Club.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Club.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Club.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Club.cs",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAuwBUAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-30T10:48:34.006Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
               "Title": "ClubsController.cs",
               "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\ClubsController.cs",
               "RelativeDocumentMoniker": "Controllers\\ClubsController.cs",
               "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\ClubsController.cs",
               "RelativeToolTip": "Controllers\\ClubsController.cs",
-              "ViewState": "AgIAACsAAAAAAAAAAAAwwD8AAAABAAAAAAAAAA==",
+              "ViewState": "AgIAACIAAAAAAAAAAAAuwD8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-30T10:43:38.193Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-30T17:10:33.78Z"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "IPlayerGeneratorService.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Services\\IPlayerGeneratorService.cs",
+              "RelativeDocumentMoniker": "Services\\IPlayerGeneratorService.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Services\\IPlayerGeneratorService.cs",
+              "RelativeToolTip": "Services\\IPlayerGeneratorService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-30T15:38:35.381Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PlayerGeneratorService.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Services\\PlayerGeneratorService.cs",
+              "RelativeDocumentMoniker": "Services\\PlayerGeneratorService.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Services\\PlayerGeneratorService.cs",
+              "RelativeToolTip": "Services\\PlayerGeneratorService.cs",
+              "ViewState": "AgIAAHgAAAAAAAAAAAAWwIIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-30T13:56:16.307Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PlayersController.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\PlayersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PlayersController.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\PlayersController.cs",
+              "RelativeToolTip": "Controllers\\PlayersController.cs",
+              "ViewState": "AgIAAHgAAAAAAAAAAAAwwIwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-30T13:57:52.767Z",
+              "EditorCaption": ""
             }
           ]
         }

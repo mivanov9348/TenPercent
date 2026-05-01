@@ -56,7 +56,7 @@ export default function ClubDetails() {
             </thead>
             <tbody className="divide-y divide-gray-800/50">
               {players.map((p: any) => (
-                <tr key={p.id} className="hover:bg-gray-800/30 transition-colors group cursor-pointer">
+                <tr key={p.id} onClick={() => navigate(`/world/player/${p.id}`)} className="hover:bg-gray-800/30 transition-colors group cursor-pointer">
                   <td className="py-3 text-white font-medium group-hover:text-yellow-400 transition-colors">
                     {p.name}
                   </td>

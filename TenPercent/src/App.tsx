@@ -6,7 +6,6 @@ import Home from './pages/Home';
 import Agency from './pages/Agency';
 import Players from './pages/Players';
 import Finance from './pages/Finance';
-import Market from './pages/Market';
 
 // Auth Страници
 import Login from './pages/auth/Login';
@@ -18,12 +17,15 @@ import Standings from './pages/world/Standings';
 import Scorers from './pages/world/Scorers';
 import Awards from './pages/world/Awards';
 import Inbox from './pages/Inbox';
+import PlayerDetails from './pages/world/PlayerDetails';
+
 import RequireAuth from './components/layout/RequireAuth';
 import RequireAgency from './components/layout/RequireAgency';
 
 import RequireAdmin from './pages/admin/RequireAdmin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ClubDetails from './pages/world/ClubDetails';
+import ScoutingPool from './pages/ScoutingPool';
 
 function App() {
   // Проверяваме дали вече сме логнати, за да пренасочим от /login към / директно
@@ -56,7 +58,7 @@ function App() {
               <Route path="agency" element={<Agency />} />
               <Route path="players" element={<Players />} />
               <Route path="finance" element={<Finance />} />
-              <Route path="market" element={<Market />} />
+              <Route path="scouting-pool" element={<ScoutingPool />} />
 
               <Route path="world">
                 {/* WorldLayout важи САМО за тези 3 таба */}
@@ -67,8 +69,9 @@ function App() {
                   <Route path="awards" element={<Awards />} />
                 </Route>
 
-                {/* Страницата за Клуба е ИЗВЪН WorldLayout, за да е самостоятелна! */}
                 <Route path="club/:id" element={<ClubDetails />} />
+                {/* НОВ МАРШРУТ ЗА ИГРАЧ: */}
+                <Route path="player/:id" element={<PlayerDetails />} />
               </Route>
             </Route>
           </Route>

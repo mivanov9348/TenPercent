@@ -12,8 +12,8 @@ using TenPercent.Data;
 namespace TenPercent.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260430093023_InitialCleanBuild")]
-    partial class InitialCleanBuild
+    [Migration("20260430171821_addinitial")]
+    partial class addinitial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -225,10 +225,7 @@ namespace TenPercent.Data.Migrations
                     b.Property<int>("ContractYearsLeft")
                         .HasColumnType("int");
 
-                    b.Property<int>("Defending")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Dribbling")
+                    b.Property<int>("CurrentAbility")
                         .HasColumnType("int");
 
                     b.Property<string>("Form")
@@ -247,26 +244,11 @@ namespace TenPercent.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Overall")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Pace")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Passing")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Physical")
-                        .HasColumnType("int");
-
                     b.Property<string>("Position")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Potential")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Shooting")
+                    b.Property<int>("PotentialAbility")
                         .HasColumnType("int");
 
                     b.Property<decimal>("WeeklyWage")
@@ -280,6 +262,73 @@ namespace TenPercent.Data.Migrations
                     b.HasIndex("ClubId");
 
                     b.ToTable("Players");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.PlayerAttributes", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Ambition")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Defending")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Dribbling")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Greed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InjuryProne")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Loyalty")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Pace")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Passing")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Physical")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PotentialDefending")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PotentialDribbling")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PotentialPace")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PotentialPassing")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PotentialPhysical")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PotentialShooting")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Shooting")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerAttributes");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.PlayerPerformance", b =>
@@ -464,6 +513,17 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("Club");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.PlayerAttributes", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.Player", "Player")
+                        .WithOne("Attributes")
+                        .HasForeignKey("TenPercent.Data.Models.PlayerAttributes", "PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.PlayerPerformance", b =>
                 {
                     b.HasOne("TenPercent.Data.Models.Fixture", "Fixture")
@@ -508,6 +568,12 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("Clubs");
 
                     b.Navigation("Fixtures");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Player", b =>
+                {
+                    b.Navigation("Attributes")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.User", b =>

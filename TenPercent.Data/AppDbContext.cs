@@ -9,16 +9,19 @@
         {
         }
 
-        // Всички таблици (DbSets)
         public DbSet<User> Users { get; set; }
         public DbSet<Agent> Agents { get; set; }
         public DbSet<Agency> Agencies { get; set; }
         public DbSet<Player> Players { get; set; }
+
+        // НОВОТО DB SET
+        public DbSet<PlayerAttributes> PlayerAttributes { get; set; }
+
         public DbSet<Club> Clubs { get; set; }
         public DbSet<League> Leagues { get; set; }
         public DbSet<Fixture> Fixtures { get; set; }
         public DbSet<PlayerPerformance> PlayerPerformances { get; set; }
-        public DbSet<WorldState> WorldStates { get; set; } 
+        public DbSet<WorldState> WorldStates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,10 +59,14 @@
                 .HasForeignKey(c => c.LeagueId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // --- СЛОЖНИ ВРЪЗКИ (МАЧОВЕ И ОЦЕНКИ) ---
+            // --- НОВО: ВРЪЗКА ИГРАЧ <-> АТРИБУТИ (One-to-One) ---
+            modelBuilder.Entity<Player>()
+                .HasOne(p => p.Attributes)
+                .WithOne(pa => pa.Player)
+                .HasForeignKey<PlayerAttributes>(pa => pa.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade); // Ако изтрием играч, трием и атрибутите му
 
-            // Мачът има Домакин и Гост. SQL Server мрази, когато два ключа сочат към една таблица (Multiple Cascade Paths).
-            // Затова изрично казваме да НЕ трие каскадно!
+            // --- СЛОЖНИ ВРЪЗКИ (МАЧОВЕ И ОЦЕНКИ) ---
             modelBuilder.Entity<Fixture>()
                 .HasOne(f => f.HomeClub)
                 .WithMany()
@@ -72,7 +79,6 @@
                 .HasForeignKey(f => f.AwayClubId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Връзка Мач -> Оценки на играчите
             modelBuilder.Entity<PlayerPerformance>()
                 .HasOne(pp => pp.Fixture)
                 .WithMany(f => f.Performances)
@@ -84,18 +90,14 @@
                 .WithMany()
                 .HasForeignKey(pp => pp.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
-           
 
-            // --- DECIMAL ПРЕЦИЗНОСТ (За пари и рейтинги) ---
+            // --- DECIMAL ПРЕЦИЗНОСТ ---
             modelBuilder.Entity<Agency>().Property(a => a.Budget).HasPrecision(18, 2);
             modelBuilder.Entity<Club>().Property(c => c.TransferBudget).HasPrecision(18, 2);
             modelBuilder.Entity<Club>().Property(c => c.WageBudget).HasPrecision(18, 2);
             modelBuilder.Entity<Player>().Property(p => p.MarketValue).HasPrecision(18, 2);
             modelBuilder.Entity<Player>().Property(p => p.WeeklyWage).HasPrecision(18, 2);
-
-            modelBuilder.Entity<PlayerPerformance>().Property(pp => pp.MatchRating).HasPrecision(4, 1); // напр. 8.5
-
-            
+            modelBuilder.Entity<PlayerPerformance>().Property(pp => pp.MatchRating).HasPrecision(4, 1);
         }
     }
 }

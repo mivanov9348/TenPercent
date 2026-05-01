@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TenPercent.Api.Services.Interfaces;
-using TenPercent.Data;
-using TenPercent.Data.Models;
-using CsvHelper;
-using CsvHelper.Configuration;
-using System.Globalization;
-using TenPercent.Api.DTOs;
-
-namespace TenPercent.Api.Controllers
+﻿namespace TenPercent.Api.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using TenPercent.Api.Services.Interfaces;
+    using TenPercent.Data;
+    using TenPercent.Data.Models;
+    using CsvHelper;
+    using CsvHelper.Configuration;
+    using System.Globalization;
+    using TenPercent.Api.DTOs;
+
     [Route("api/[controller]")]
     [ApiController]
     public class AdminController : ControllerBase
@@ -281,9 +281,7 @@ namespace TenPercent.Api.Controllers
             return Ok(new { message = "Открити са проблеми в съставите.", issues = report });
         }
 
-        // ==========================================
-        // СТЪПКА 4: Автоматично "Поправяне" на съставите (Auto-Fix)
-        // ==========================================
+
         [HttpPost("squad-autofix")]
         public async Task<IActionResult> AutoFixSquads()
         {
@@ -293,40 +291,51 @@ namespace TenPercent.Api.Controllers
 
             foreach (var club in clubs)
             {
-                bool neededFix = false;
-
-                // 1. Проверяваме и добавяме липсващи титуляри (От тип "Academy/Normal")
-                int gks = club.Players.Count(p => p.Position == "GK");
-                while (gks < 1) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "GK")); gks++; neededFix = true; }
-
-                int defs = club.Players.Count(p => p.Position == "DEF");
-                while (defs < 4) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "DEF")); defs++; neededFix = true; }
-
-                int mids = club.Players.Count(p => p.Position == "MID");
-                while (mids < 4) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "MID")); mids++; neededFix = true; }
-
-                int sts = club.Players.Count(p => p.Position == "ST");
-                while (sts < 2) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "ST")); sts++; neededFix = true; }
-
-                // 2. Проверяваме за обща бройка резерви (до 15)
-                // Генерираме рандом резерви (без да указваме позиция, генераторът сам ще избере)
-                int currentTotal = club.Players.Count + newPlayers.Count(p => p.ClubId == club.Id);
-                while (currentTotal < 15)
+                // Ако отборът е напълно празен (напр. току-що импортиран от CSV)
+                if (club.Players.Count == 0)
                 {
-                    // Резервите ги правим Wonderkids или Младежи, за да е интересно за агентите!
-                    newPlayers.Add(_playerGen.GeneratePlayer("Wonderkid", club.Id, null));
-                    currentTotal++;
-                    neededFix = true;
+                    // Генерираме му перфектния състав от 16 души чрез новия метод
+                    var fullSquad = _playerGen.GenerateFullSquadForClub(club.Id, club.Reputation);
+                    newPlayers.AddRange(fullSquad);
+                    fixedClubsCount++;
                 }
+                else
+                {
+                    // Логика за "закърпване", ако липсват отделни играчи през следващите сезони
+                    bool neededFix = false;
+                    string backupTier = "Backup";
 
-                if (neededFix) fixedClubsCount++;
+                    int gks = club.Players.Count(p => p.Position == "GK");
+                    while (gks < 1) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "GK")); gks++; neededFix = true; }
+
+                    int defs = club.Players.Count(p => p.Position == "DEF");
+                    while (defs < 4) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "DEF")); defs++; neededFix = true; }
+
+                    int mids = club.Players.Count(p => p.Position == "MID");
+                    while (mids < 4) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "MID")); mids++; neededFix = true; }
+
+                    int sts = club.Players.Count(p => p.Position == "ST");
+                    while (sts < 2) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "ST")); sts++; neededFix = true; }
+
+                    int currentTotal = club.Players.Count + newPlayers.Count(p => p.ClubId == club.Id);
+                    while (currentTotal < 16)
+                    {
+                        // Резервите ги правим микс
+                        string randomTier = new Random().NextDouble() > 0.5 ? "Prospect" : backupTier;
+                        newPlayers.Add(_playerGen.GeneratePlayer(randomTier, club.Id, null));
+                        currentTotal++;
+                        neededFix = true;
+                    }
+
+                    if (neededFix) fixedClubsCount++;
+                }
             }
 
             if (newPlayers.Any())
             {
                 _context.Players.AddRange(newPlayers);
                 await _context.SaveChangesAsync();
-                return Ok(new { message = $"Успешно поправени {fixedClubsCount} отбора. Генерирани {newPlayers.Count} нови играчи от академиите." });
+                return Ok(new { message = $"Успешно поправени {fixedClubsCount} отбора. Генерирани {newPlayers.Count} нови играчи." });
             }
 
             return Ok(new { message = "Няма нужда от поправка. Всички отбори са пълни." });

@@ -4,7 +4,10 @@
 
     public interface IPlayerGeneratorService
     {
-        Player GeneratePlayer(string type, int? clubId, string? position = null);
-        List<Player> GenerateMultiplePlayers(int count, string type, int? clubId, string? position = null);
+        Player GeneratePlayer(string tier, int? clubId, string? position = null);
+
+        List<Player> GenerateMultiplePlayers(int count, string tier, int? clubId, string? position = null);
+
+        List<Player> GenerateFullSquadForClub(int clubId, int clubReputation);
     }
 }

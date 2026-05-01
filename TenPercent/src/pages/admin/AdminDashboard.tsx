@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, X } from 'lucide-react';
+import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, X, Users } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -109,6 +109,23 @@ export default function AdminDashboard() {
     }
   };
 
+  // НОВО: Метод за генериране на Свободни Агенти в пула
+  const handleGenerateFreeAgents = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      const response = await fetch('https://localhost:7135/api/players/generate-free-agents?count=50', { method: 'POST' });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.message || "Failed to generate free agents");
+      setMessage({ text: data.message, type: 'success' });
+    } catch (err: any) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 p-8 relative">
       <div className="max-w-6xl mx-auto">
@@ -132,10 +149,10 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
           {/* Action 1: Import Leagues */}
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center">
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-4">
               <Upload size={32} />
             </div>
@@ -159,12 +176,12 @@ export default function AdminDashboard() {
           </div>
 
           {/* Action 2: Import Clubs */}
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center">
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-yellow-500/10 text-yellow-500 rounded-2xl flex items-center justify-center mb-4">
               <Database size={32} />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">2. Import Clubs</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Upload clubs.csv. This will also automatically generate the 15 players per club + Free Agents.</p>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Upload clubs.csv. This maps clubs to leagues but does NOT generate players.</p>
             
             <input 
               type="file" 
@@ -183,7 +200,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Action 3: Generate Schedule */}
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center">
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center mb-4">
               <Calendar size={32} />
             </div>
@@ -192,14 +209,14 @@ export default function AdminDashboard() {
             <button 
               onClick={handleGenerateSchedule}
               disabled={isLoading}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
+              className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto"
             >
               {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE FIXTURES'}
             </button>
           </div>
 
           {/* Action 4: Squad Compliance */}
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center">
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center relative shadow-lg">
             <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mb-4">
               <ShieldAlert size={32} />
             </div>
@@ -209,7 +226,7 @@ export default function AdminDashboard() {
             {/* Изобразяване на бутон за отваряне на модала, ако има репорт */}
             {squadReport && !showReportModal && (
                <button onClick={() => setShowReportModal(true)} className="text-sm text-red-400 hover:text-red-300 underline mb-4">
-                  Виж текущия репорт
+                  View Current Report
                </button>
             )}
 
@@ -231,6 +248,23 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
+
+          {/* Action 5: Generate Free Agents (НОВО) */}
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
+            <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-4">
+              <Users size={32} />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">5. Scouting Pool</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Generates 50 new free agents (mixed tiers: Wonderkid, Prospect, Veteran, Backup) into the global pool.</p>
+            <button 
+              onClick={handleGenerateFreeAgents}
+              disabled={isLoading}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto"
+            >
+              {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE AGENTS'}
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -241,7 +275,7 @@ export default function AdminDashboard() {
             <div className="p-6 border-b border-gray-800 flex justify-between items-center">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
                 <AlertCircle className="text-red-500" />
-                Squad Compliance Issues ({squadReport.length} clubs)
+                Compliance Issues ({squadReport.length} clubs)
               </h3>
               <button onClick={() => setShowReportModal(false)} className="text-gray-400 hover:text-white transition-colors">
                 <X size={24} />

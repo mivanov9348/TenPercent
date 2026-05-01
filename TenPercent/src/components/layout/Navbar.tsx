@@ -45,7 +45,7 @@ export default function Navbar() {
     { name: 'My Agency', path: '/agency', icon: <Building2 size={18} /> },
     { name: 'My Players', path: '/players', icon: <Users size={18} /> },
     { name: 'Finance', path: '/finance', icon: <Wallet size={18} /> },
-    { name: 'Market', path: '/market', icon: <ShoppingCart size={18} /> },
+    { name: 'Scouting Pool', path: '/scouting-pool', icon: <ShoppingCart size={18} /> },
     {name: 'World', path: '/world/standings', icon: <Globe size={18} /> },
   ];
 

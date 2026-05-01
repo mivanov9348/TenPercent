@@ -8,27 +8,25 @@
         public string Position { get; set; } = string.Empty; // ST, MID, DEF, GK
         public string Nationality { get; set; } = string.Empty;
 
-        // Основни Атрибути
-        public int Overall { get; set; }
-        public int Potential { get; set; }
-        public int Pace { get; set; }
-        public int Shooting { get; set; }
-        public int Passing { get; set; }
-        public int Dribbling { get; set; }
-        public int Defending { get; set; }
-        public int Physical { get; set; }
+        // --- ДВИГАТЕЛ НА ИГРАТА (Скрити за всички! Използват се за математиката на играта) ---
+        // Това е реалният Overall, но никой никога не го вижда директно в UI-а.
+        public int CurrentAbility { get; set; }   // CA: 1-100 
+        public int PotentialAbility { get; set; } // PA: 1-100 
 
-        // Финанси и Договори
+        // --- ФИНАНСИ И ДОГОВОРИ ---
         public decimal MarketValue { get; set; }
         public decimal WeeklyWage { get; set; }
         public int ContractYearsLeft { get; set; }
         public string Form { get; set; } = "Good";
 
-        // Връзки (Relations)
-        public int? ClubId { get; set; } // Може да е null (Свободен агент)
+        // --- ВРЪЗКИ (Relations) ---
+        public int? ClubId { get; set; }
         public Club? Club { get; set; }
 
-        public int? AgencyId { get; set; } // Може да е null (Без агент)
+        public int? AgencyId { get; set; }
         public Agency? Agency { get; set; }
+
+        // --- ДЕТАЙЛИ ---
+        public PlayerAttributes Attributes { get; set; } = null!;
     }
 }

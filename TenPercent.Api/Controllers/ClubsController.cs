@@ -25,15 +25,16 @@
 
             if (club == null) return NotFound(new { message = "Club not found." });
 
-            // МАГИЯТА: Мапваме играчите към "чист" обект, за да избегнем Кръговата грешка (Circular Reference)
+            // МАГИЯТА: Използваме CurrentAbility и PotentialAbility от базата, 
+            // но ги кръщаваме Overall и Potential за фронтенда, за да не чупим React таблиците.
             var cleanPlayers = club.Players.Select(p => new
             {
                 p.Id,
                 p.Name,
                 p.Age,
                 p.Position,
-                p.Overall,
-                p.Potential,
+                Overall = p.CurrentAbility,     // ПОПРАВЕНО
+                Potential = p.PotentialAbility, // ПОПРАВЕНО
                 p.MarketValue
             }).ToList();
 
@@ -43,14 +44,13 @@
                 club.Name,
                 club.Country,
                 club.City,
-                LeagueName = club.League?.Name ?? "Unknown", // Защита ако случайно лигата липсва
+                LeagueName = club.League?.Name ?? "Unknown",
                 club.PrimaryColor,
                 club.Reputation,
                 club.TransferBudget,
                 club.WageBudget,
                 Squad = new
                 {
-                    // Ползваме вече изчистените играчи
                     Goalkeepers = cleanPlayers.Where(p => p.Position == "GK").OrderByDescending(p => p.Overall).ToList(),
                     Defenders = cleanPlayers.Where(p => p.Position == "DEF").OrderByDescending(p => p.Overall).ToList(),
                     Midfielders = cleanPlayers.Where(p => p.Position == "MID").OrderByDescending(p => p.Overall).ToList(),

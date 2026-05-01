@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TenPercent.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCleanBuild : Migration
+    public partial class addinitial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -181,14 +181,8 @@ namespace TenPercent.Data.Migrations
                     Age = table.Column<int>(type: "int", nullable: false),
                     Position = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Nationality = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Overall = table.Column<int>(type: "int", nullable: false),
-                    Potential = table.Column<int>(type: "int", nullable: false),
-                    Pace = table.Column<int>(type: "int", nullable: false),
-                    Shooting = table.Column<int>(type: "int", nullable: false),
-                    Passing = table.Column<int>(type: "int", nullable: false),
-                    Dribbling = table.Column<int>(type: "int", nullable: false),
-                    Defending = table.Column<int>(type: "int", nullable: false),
-                    Physical = table.Column<int>(type: "int", nullable: false),
+                    CurrentAbility = table.Column<int>(type: "int", nullable: false),
+                    PotentialAbility = table.Column<int>(type: "int", nullable: false),
                     MarketValue = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     WeeklyWage = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     ContractYearsLeft = table.Column<int>(type: "int", nullable: false),
@@ -211,6 +205,41 @@ namespace TenPercent.Data.Migrations
                         principalTable: "Clubs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayerAttributes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PlayerId = table.Column<int>(type: "int", nullable: false),
+                    Pace = table.Column<int>(type: "int", nullable: false),
+                    Shooting = table.Column<int>(type: "int", nullable: false),
+                    Passing = table.Column<int>(type: "int", nullable: false),
+                    Dribbling = table.Column<int>(type: "int", nullable: false),
+                    Defending = table.Column<int>(type: "int", nullable: false),
+                    Physical = table.Column<int>(type: "int", nullable: false),
+                    PotentialPace = table.Column<int>(type: "int", nullable: false),
+                    PotentialShooting = table.Column<int>(type: "int", nullable: false),
+                    PotentialPassing = table.Column<int>(type: "int", nullable: false),
+                    PotentialDribbling = table.Column<int>(type: "int", nullable: false),
+                    PotentialDefending = table.Column<int>(type: "int", nullable: false),
+                    PotentialPhysical = table.Column<int>(type: "int", nullable: false),
+                    Ambition = table.Column<int>(type: "int", nullable: false),
+                    Greed = table.Column<int>(type: "int", nullable: false),
+                    Loyalty = table.Column<int>(type: "int", nullable: false),
+                    InjuryProne = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerAttributes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlayerAttributes_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -279,6 +308,12 @@ namespace TenPercent.Data.Migrations
                 column: "LeagueId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlayerAttributes_PlayerId",
+                table: "PlayerAttributes",
+                column: "PlayerId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlayerPerformances_FixtureId",
                 table: "PlayerPerformances",
                 column: "FixtureId");
@@ -302,6 +337,9 @@ namespace TenPercent.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "PlayerAttributes");
+
             migrationBuilder.DropTable(
                 name: "PlayerPerformances");
 

@@ -153,24 +153,91 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.PlayersController",
-    "Method": "GetFreeAgents",
-    "RelativePath": "api/Players/free-agents",
+    "Method": "GetPlayerDetails",
+    "RelativePath": "api/Players/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.PlayersController",
-    "Method": "GenerateWonderkids",
-    "RelativePath": "api/Players/generate-wonderkids",
+    "Method": "GenerateFreeAgents",
+    "RelativePath": "api/Players/generate-free-agents",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "count",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.PlayersController",
+    "Method": "GetScoutingPool",
+    "RelativePath": "api/Players/get-pool",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "search",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "position",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "nationality",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "minAge",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "maxAge",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "maxValue",
+        "Type": "System.Nullable\u00601[[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "hasAgency",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "sortBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
         "Type": "System.Int32",
         "IsRequired": false
       }
