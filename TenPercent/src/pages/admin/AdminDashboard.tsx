@@ -1,24 +1,73 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, X, Users } from 'lucide-react';
+import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, X, Users, Globe, FastForward, Play, Power } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isEngineLoading, setIsEngineLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+
+  // Състояние на света
+  const [worldState, setWorldState] = useState<any>(null);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // Състояние за репорта
   const [squadReport, setSquadReport] = useState<any[] | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
 
-  // References to trigger hidden file inputs
   const leagueFileInputRef = useRef<HTMLInputElement>(null);
   const clubFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Зареждане на World State при отваряне на дашборда
+  const fetchWorldState = async () => {
+    setIsEngineLoading(true);
+    try {
+      const response = await fetch('https://localhost:7135/api/admin/world-state');
+      if (response.ok) {
+        const data = await response.json();
+        setWorldState(data);
+        setIsInitialized(true);
+      } else if (response.status === 404) {
+        // Ако върне 404, значи светът е празен
+        setIsInitialized(false);
+        setWorldState(null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch world state:", error);
+    } finally {
+      setIsEngineLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorldState();
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
   };
+
+  // --- МЕТОД ЗА ИНИЦИАЛИЗИРАНЕ НА СВЕТА (GENESIS) ---
+  const handleInitializeWorld = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      const response = await fetch('https://localhost:7135/api/admin/initialize-world', { method: 'POST' });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.message || "Failed to initialize world");
+      setMessage({ text: data.message, type: 'success' });
+      await fetchWorldState(); // Презареждаме дашборда
+    } catch (err: any) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- МЕТОДИ ЗА ИМПОРТ И ПРОВЕРКИ ---
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, endpoint: string) => {
     const file = event.target.files?.[0];
@@ -99,7 +148,6 @@ export default function AdminDashboard() {
       
       if (!response.ok) throw new Error(data.message || "Failed to fix squads");
       setMessage({ text: data.message, type: 'success' });
-      // Изчистваме репорта след успешен fix
       setSquadReport(null);
       setShowReportModal(false);
     } catch (err: any) {
@@ -109,7 +157,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // НОВО: Метод за генериране на Свободни Агенти в пула
   const handleGenerateFreeAgents = async () => {
     setIsLoading(true);
     setMessage(null);
@@ -126,193 +173,214 @@ export default function AdminDashboard() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-950 p-8 relative">
-      <div className="max-w-6xl mx-auto">
+  // --- МЕТОДИ ЗА СЕЗОНА ---
+
+  const handleEndSeason = async () => {
+    if (!window.confirm("Are you sure you want to END the current season? This will lock all standings and delete played fixtures!")) return;
+    
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      const response = await fetch('https://localhost:7135/api/season/end', { method: 'POST' });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.message || "Failed to end season");
+      setMessage({ text: data.message, type: 'success' });
+      fetchWorldState(); 
+    } catch (err: any) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartNewSeason = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      const response = await fetch('https://localhost:7135/api/season/start', { method: 'POST' });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.message || "Failed to start new season");
+      setMessage({ text: data.message, type: 'success' });
+      fetchWorldState(); 
+    } catch (err: any) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- ЕКРАН ПРИ ЗАРЕЖДАНЕ ---
+  if (isEngineLoading) {
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white"><Loader2 className="animate-spin mr-2" /> Booting Engine...</div>;
+  }
+
+  // --- ЕКРАН ПРИ НЕИНИЦИАЛИЗИРАН СВЯТ (САМО ГЛОБАЛНИЯ БУТОН) ---
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-gray-950 to-gray-950"></div>
         
-        <header className="flex justify-between items-center bg-gray-900 p-6 rounded-2xl border border-gray-800 mb-8 shadow-lg">
-          <div>
-            <h1 className="text-3xl font-black text-red-500 uppercase tracking-widest">Admin Control Panel</h1>
-            <p className="text-gray-400 mt-1">Server, database, and game world management</p>
+        <div className="z-10 text-center max-w-lg">
+          <div className="w-24 h-24 bg-blue-500/10 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse border border-blue-500/20">
+            <Power size={48} />
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-2 bg-gray-800 hover:bg-red-500/20 hover:text-red-500 text-gray-300 px-4 py-2 rounded-lg transition-colors">
-            <LogOut size={18} /> Logout
+          <h1 className="text-5xl font-black text-white uppercase tracking-widest mb-4">World Engine Offline</h1>
+          <p className="text-gray-400 mb-12 text-lg">The simulation database is empty. You need to initialize the World Engine before you can import leagues, clubs, or players.</p>
+          
+          <button 
+            onClick={handleInitializeWorld}
+            disabled={isLoading}
+            className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all hover:scale-105 active:scale-95 flex justify-center items-center gap-3 text-lg shadow-[0_0_30px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:hover:scale-100"
+          >
+            {isLoading ? <Loader2 className="animate-spin" size={24} /> : <><Globe size={24} /> INITIALIZE WORLD ENGINE</>}
           </button>
+
+          <button onClick={handleLogout} className="mt-8 text-gray-500 hover:text-white transition-colors text-sm font-bold flex items-center justify-center gap-2 mx-auto">
+            <LogOut size={14} /> Return to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- ОСНОВЕН ДАШБОРД (Отключен) ---
+  return (
+    <div className="min-h-screen bg-gray-950 p-4 md:p-8 relative">
+      <div className="max-w-6xl mx-auto space-y-6">
+        
+        <header className="bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-xl flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
+              <Globe size={28} className="text-blue-500" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-white uppercase tracking-widest leading-tight">World Engine</h1>
+              <div className="flex items-center gap-3 text-sm font-bold mt-1">
+                {worldState && (
+                  <>
+                    <span className="text-yellow-500">Season: {worldState.seasonNumber || '-'}</span>
+                    <span className="text-gray-600">•</span>
+                    <span className="text-blue-400">Gameweek: {worldState.currentGameweek} / {worldState.totalGameweeks}</span>
+                    <span className="text-gray-600">•</span>
+                    <span className={worldState.isSeasonActive ? "text-emerald-400" : "text-red-400"}>
+                      Status: {worldState.isSeasonActive ? "ACTIVE" : "ENDED"}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleEndSeason}
+              disabled={isLoading || !worldState?.isSeasonActive}
+              className="flex items-center gap-2 bg-red-600/10 hover:bg-red-600 border border-red-600/50 hover:border-red-600 text-red-500 hover:text-white px-4 py-2.5 rounded-xl transition-all disabled:opacity-30 disabled:hover:bg-transparent font-bold text-sm"
+            >
+              <FastForward size={16} /> END SEASON
+            </button>
+
+            <button onClick={handleLogout} className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2.5 rounded-xl transition-colors text-sm font-bold">
+              <LogOut size={16} /> LOGOUT
+            </button>
+          </div>
         </header>
 
         {message && (
-          <div className={`mb-8 p-4 rounded-xl flex items-center gap-3 border ${
-            message.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-red-500/10 border-red-500/50 text-red-400'
+          <div className={`p-4 rounded-xl flex items-center gap-3 border shadow-lg ${
+            message.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400'
           }`}>
             {message.type === 'success' ? <CheckCircle2 /> : <AlertCircle />}
-            <p className="font-medium">{message.text}</p>
+            <p className="font-bold">{message.text}</p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Action 1: Import Leagues */}
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-4">
               <Upload size={32} />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">1. Import Leagues</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Upload leagues.csv. Initializes the world state and creates the league structures.</p>
-            
-            <input 
-              type="file" 
-              accept=".csv" 
-              className="hidden" 
-              ref={leagueFileInputRef} 
-              onChange={(e) => handleFileUpload(e, 'import-leagues')} 
-            />
-            <button 
-              onClick={() => leagueFileInputRef.current?.click()}
-              disabled={isLoading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
-            >
+            <p className="text-gray-500 text-sm mb-6 flex-1">Upload leagues.csv. Creates the base league structures.</p>
+            <input type="file" accept=".csv" className="hidden" ref={leagueFileInputRef} onChange={(e) => handleFileUpload(e, 'import-leagues')} />
+            <button onClick={() => leagueFileInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50">
               {isLoading ? <Loader2 className="animate-spin" /> : 'UPLOAD LEAGUES'}
             </button>
           </div>
 
-          {/* Action 2: Import Clubs */}
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-yellow-500/10 text-yellow-500 rounded-2xl flex items-center justify-center mb-4">
               <Database size={32} />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">2. Import Clubs</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Upload clubs.csv. This maps clubs to leagues but does NOT generate players.</p>
-            
-            <input 
-              type="file" 
-              accept=".csv" 
-              className="hidden" 
-              ref={clubFileInputRef} 
-              onChange={(e) => handleFileUpload(e, 'import-clubs')} 
-            />
-            <button 
-              onClick={() => clubFileInputRef.current?.click()}
-              disabled={isLoading}
-              className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
-            >
+            <p className="text-gray-500 text-sm mb-6 flex-1">Upload clubs.csv. Maps clubs to leagues but does NOT generate players.</p>
+            <input type="file" accept=".csv" className="hidden" ref={clubFileInputRef} onChange={(e) => handleFileUpload(e, 'import-clubs')} />
+            <button onClick={() => clubFileInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50">
               {isLoading ? <Loader2 className="animate-spin" /> : 'UPLOAD CLUBS'}
             </button>
           </div>
 
-          {/* Action 3: Generate Schedule */}
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
-            <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center mb-4">
-              <Calendar size={32} />
-            </div>
-            <h2 className="text-xl font-bold text-white mb-2">3. Match Schedule</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Generates the Round-Robin fixtures for all imported teams for Season 1.</p>
-            <button 
-              onClick={handleGenerateSchedule}
-              disabled={isLoading}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto"
-            >
-              {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE FIXTURES'}
-            </button>
-          </div>
-
-          {/* Action 4: Squad Compliance */}
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center relative shadow-lg">
             <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mb-4">
               <ShieldAlert size={32} />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">4. Squad Compliance</h2>
-            <p className="text-gray-500 text-sm mb-4 flex-1">Checks if teams have the required positions (GK, DEF, MID, ST) and fills empty spots.</p>
+            <h2 className="text-xl font-bold text-white mb-2">3. Squad Compliance</h2>
+            <p className="text-gray-500 text-sm mb-4 flex-1">Checks if teams have the required positions and fills empty spots.</p>
             
-            {/* Изобразяване на бутон за отваряне на модала, ако има репорт */}
             {squadReport && !showReportModal && (
-               <button onClick={() => setShowReportModal(true)} className="text-sm text-red-400 hover:text-red-300 underline mb-4">
+               <button onClick={() => setShowReportModal(true)} className="text-sm text-red-400 hover:text-red-300 underline mb-4 font-bold">
                   View Current Report
                </button>
             )}
 
             <div className="flex w-full gap-2 mt-auto">
-              <button 
-                onClick={handleSquadReport}
-                disabled={isLoading}
-                className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center"
-              >
+              <button onClick={handleSquadReport} disabled={isLoading} className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center">
                 {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'REPORT'}
               </button>
-              <button 
-                onClick={handleSquadFix}
-                // Бутонът е активен САМО ако имаме проблемни отбори в репорта
-                disabled={isLoading || !squadReport || squadReport.length === 0}
-                className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center"
-              >
+              <button onClick={handleSquadFix} disabled={isLoading || !squadReport || squadReport.length === 0} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center">
                 {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'AUTO-FIX'}
               </button>
             </div>
           </div>
 
-          {/* Action 5: Generate Free Agents (НОВО) */}
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
+            <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center mb-4">
+              <Calendar size={32} />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">4. Match Schedule</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Generates the Round-Robin fixtures for all imported teams for the active season.</p>
+            <button onClick={handleGenerateSchedule} disabled={isLoading} className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE FIXTURES'}
+            </button>
+          </div>
+
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-4">
               <Users size={32} />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">5. Scouting Pool</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Generates 50 new free agents (mixed tiers: Wonderkid, Prospect, Veteran, Backup) into the global pool.</p>
-            <button 
-              onClick={handleGenerateFreeAgents}
-              disabled={isLoading}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto"
-            >
+            <p className="text-gray-500 text-sm mb-6 flex-1">Generates 50 new free agents (mixed tiers) into the global scouting pool.</p>
+            <button onClick={handleGenerateFreeAgents} disabled={isLoading} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
               {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE AGENTS'}
+            </button>
+          </div>
+
+          <div className="bg-gray-900 border border-emerald-500/30 p-6 rounded-2xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.1)] relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full pointer-events-none" />
+            <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mb-4 z-10">
+              <Play size={32} className="ml-1" />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2 z-10">6. Start New Season</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1 z-10">Initializes the next season. Warning: Only works if there is no currently active season.</p>
+            <button onClick={handleStartNewSeason} disabled={isLoading || worldState?.isSeasonActive} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-30 z-10">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'INITIALIZE SEASON'}
             </button>
           </div>
 
         </div>
       </div>
-
-      {/* Modal for Squad Report */}
-      {showReportModal && squadReport && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-red-500/50 rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
-            <div className="p-6 border-b border-gray-800 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <AlertCircle className="text-red-500" />
-                Compliance Issues ({squadReport.length} clubs)
-              </h3>
-              <button onClick={() => setShowReportModal(false)} className="text-gray-400 hover:text-white transition-colors">
-                <X size={24} />
-              </button>
-            </div>
-            
-            {/* Scrollable content area */}
-            <div className="p-6 overflow-y-auto space-y-4">
-              {squadReport.map((club, index) => (
-                <div key={index} className="bg-gray-800 p-4 rounded-xl border border-gray-700">
-                   <div className="flex justify-between items-center mb-2">
-                     <span className="font-bold text-yellow-500">{club.clubName}</span>
-                     <span className="text-xs text-gray-400">Squad size: {club.currentSquadSize}</span>
-                   </div>
-                   <ul className="list-disc list-inside text-sm text-red-300">
-                     {club.missing.map((issue: string, i: number) => (
-                       <li key={i}>{issue}</li>
-                     ))}
-                   </ul>
-                </div>
-              ))}
-            </div>
-
-            <div className="p-6 border-t border-gray-800 bg-gray-900 rounded-b-2xl flex justify-end">
-               <button 
-                onClick={() => {
-                    setShowReportModal(false);
-                    handleSquadFix();
-                }}
-                className="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2"
-              >
-                FIX ALL ISSUES
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

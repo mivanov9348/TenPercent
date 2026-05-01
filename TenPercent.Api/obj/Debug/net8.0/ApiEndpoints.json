@@ -43,6 +43,16 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "InitializeWorld",
+    "RelativePath": "api/Admin/initialize-world",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
     "Method": "AutoFixSquads",
     "RelativePath": "api/Admin/squad-autofix",
     "HttpMethod": "POST",
@@ -55,6 +65,16 @@
     "ContainingType": "TenPercent.Api.Controllers.AdminController",
     "Method": "GetSquadReport",
     "RelativePath": "api/Admin/squad-report",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "GetWorldState",
+    "RelativePath": "api/Admin/world-state",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -139,6 +159,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.DashboardController",
+    "Method": "GetHomeDashboard",
+    "RelativePath": "api/Dashboard/home",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {
@@ -242,6 +272,26 @@
         "IsRequired": false
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.SeasonController",
+    "Method": "EndSeason",
+    "RelativePath": "api/Season/end",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.SeasonController",
+    "Method": "StartSeason",
+    "RelativePath": "api/Season/start",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   }
 ]

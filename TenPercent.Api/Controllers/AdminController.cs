@@ -1,14 +1,14 @@
 ﻿namespace TenPercent.Api.Controllers
 {
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-    using TenPercent.Api.Services.Interfaces;
-    using TenPercent.Data;
-    using TenPercent.Data.Models;
     using CsvHelper;
     using CsvHelper.Configuration;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
     using System.Globalization;
     using TenPercent.Api.DTOs;
+    using TenPercent.Application.Interfaces;
+    using TenPercent.Data;
+    using TenPercent.Data.Models;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -23,106 +23,122 @@
             _playerGen = playerGen;
         }
 
+        // --- 1. ГЛАВНИЯТ МЕТОД (СЪЗДАВА WORLD STATE) ---
+        [HttpPost("initialize-world")]
+        public async Task<IActionResult> InitializeWorld()
+        {
+            if (await _context.WorldStates.AnyAsync())
+            {
+                return BadRequest(new { message = "World Engine is already initialized!" });
+            }
+
+            // Създаваме Шапката напълно празна (Genesis). Без Сезон 1.
+            var worldState = new WorldState
+            {
+                CurrentSeasonId = null,
+                IsSimulationRunning = false
+            };
+
+            _context.WorldStates.Add(worldState);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "World Engine Initialized Successfully! You can now import leagues and clubs." });
+        }
+
+        // --- 2. ВРЪЩА СЪСТОЯНИЕТО НА СВЕТА КЪМ ФРОНТЕНДА ---
+        [HttpGet("world-state")]
+        public async Task<IActionResult> GetWorldState()
+        {
+            var worldState = await _context.WorldStates.FirstOrDefaultAsync();
+
+            if (worldState == null)
+            {
+                return NotFound(new { message = "World Engine is offline." });
+            }
+
+            // Опитваме се да вземем активния сезон
+            var activeSeason = await _context.Seasons.FirstOrDefaultAsync(s => s.Id == worldState.CurrentSeasonId);
+
+            return Ok(new
+            {
+                CurrentSeasonId = worldState.CurrentSeasonId,
+                SeasonNumber = activeSeason?.SeasonNumber ?? 0,
+                CurrentGameweek = activeSeason?.CurrentGameweek ?? 0,
+                TotalGameweeks = activeSeason?.TotalGameweeks ?? 0,
+                IsSeasonActive = activeSeason != null && activeSeason.IsActive,
+                IsSimulationRunning = worldState.IsSimulationRunning
+            });
+        }
+
+        // --- ОСТАНАЛИТЕ МЕТОДИ ---
+
         [HttpPost("import-leagues")]
         public async Task<IActionResult> ImportLeagues(IFormFile file)
         {
+            if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
             if (file == null || file.Length == 0) return BadRequest("Please upload a valid leagues.csv file.");
 
-            // FIX 1: Автоматично разпознаване на стила (запетая или точка и запетая)
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                HasHeaderRecord = true,
-                DetectDelimiter = true, // <-- МАГИЯТА: Само намира разделителя!
-                ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
-            };
-
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture) { HasHeaderRecord = true, DetectDelimiter = true, ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace) };
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, config);
+            csv.Read(); csv.ReadHeader();
 
-            // FIX 2: Задължително прочитане на заглавния ред преди цикъла!
-            csv.Read();
-            csv.ReadHeader();
-
-            var records = new List<LeagueImportDto>();
+            var leagues = new List<League>();
             while (csv.Read())
             {
                 var name = csv.GetField<string>("Name");
-                if (string.IsNullOrWhiteSpace(name)) continue;
-
-                records.Add(new LeagueImportDto
-                {
-                    Name = name,
-                    Country = csv.GetField<string>("Country") ?? "",
-                    Reputation = csv.GetField<int>("Reputation")
-                });
+                if (!string.IsNullOrWhiteSpace(name))
+                    leagues.Add(new League { Name = name, Country = csv.GetField<string>("Country") ?? "", Reputation = csv.GetField<int>("Reputation") });
             }
-
-            var leagues = records.Select(r => new League
-            {
-                Name = r.Name,
-                Country = r.Country,
-                Reputation = r.Reputation
-            }).ToList();
 
             _context.Leagues.AddRange(leagues);
-
-            if (!await _context.WorldStates.AnyAsync())
-            {
-                _context.WorldStates.Add(new WorldState
-                {
-                    CurrentSeason = 1,
-                    CurrentGameweek = 1,
-                    TotalGameweeks = 18,
-                    NextMatchdayDate = DateTime.UtcNow.AddDays(2),
-                    IsSimulationRunning = false
-                });
-            }
-
             await _context.SaveChangesAsync();
-            return Ok(new { message = $"Successfully imported {leagues.Count} leagues and initialized world state." });
+            return Ok(new { message = $"Successfully imported {leagues.Count} leagues." });
         }
 
         [HttpPost("import-clubs")]
         public async Task<IActionResult> ImportClubs(IFormFile file)
         {
+            if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
             if (file == null || file.Length == 0) return BadRequest("Please upload a valid clubs.csv file.");
 
             var existingLeagues = await _context.Leagues.ToListAsync();
-            if (!existingLeagues.Any())
-                return BadRequest("Please import leagues first!");
+            if (!existingLeagues.Any()) return BadRequest("Please import leagues first!");
 
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                HasHeaderRecord = true,
-                DetectDelimiter = true,
-                ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
-            };
-
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture) { HasHeaderRecord = true, DetectDelimiter = true, ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace) };
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, config);
+            csv.Read(); csv.ReadHeader();
 
-            csv.Read();
-            csv.ReadHeader();
-
-            var records = new List<ClubImportDto>();
+            var clubs = new List<Club>();
             while (csv.Read())
             {
                 var name = csv.GetField<string>("Name");
                 if (string.IsNullOrWhiteSpace(name)) continue;
 
-                // ЧЕТЕМ ГЪВКАВО: Опитваме се да вземем LeagueName, ако го няма - взимаме празен стринг
                 csv.TryGetField<string>("LeagueName", out var leagueName);
-
-                // Опитваме се да вземем LeagueId, ако го няма - слагаме 0
                 csv.TryGetField<int>("LeagueId", out var leagueId);
 
-                records.Add(new ClubImportDto
+                int finalLeagueId = 0;
+                if (leagueId > 0)
+                {
+                    if (!existingLeagues.Any(l => l.Id == leagueId)) return BadRequest($"Error: League with ID {leagueId} does not exist!");
+                    finalLeagueId = leagueId;
+                }
+                else if (!string.IsNullOrWhiteSpace(leagueName))
+                {
+                    var matchedLeague = existingLeagues.FirstOrDefault(l => l.Name.Trim().ToLower() == leagueName.Trim().ToLower());
+                    if (matchedLeague == null) return BadRequest($"Error: League '{leagueName}' not found!");
+                    finalLeagueId = matchedLeague.Id;
+                }
+                else { return BadRequest($"Error: Club '{name}' must have LeagueId or LeagueName."); }
+
+                clubs.Add(new Club
                 {
                     Name = name,
                     Country = csv.GetField<string>("Country") ?? "",
                     City = csv.GetField<string>("City") ?? "",
-                    LeagueName = leagueName ?? "",
-                    LeagueId = leagueId,
+                    LeagueId = finalLeagueId,
                     PrimaryColor = csv.GetField<string>("PrimaryColor") ?? "",
                     Reputation = csv.GetField<int>("Reputation"),
                     Level = csv.GetField<int>("Level"),
@@ -131,67 +147,25 @@
                 });
             }
 
-            var clubs = new List<Club>();
-
-            foreach (var r in records)
-            {
-                int finalLeagueId = 0;
-
-                // 1. Ако в CSV-то има зададено LeagueId (напр. 1, 2, 3), директно ползваме него
-                if (r.LeagueId > 0)
-                {
-                    // Проверяваме дали такова ID наистина съществува в базата
-                    if (!existingLeagues.Any(l => l.Id == r.LeagueId))
-                    {
-                        return BadRequest($"Error: League with ID {r.LeagueId} does not exist in the database!");
-                    }
-                    finalLeagueId = r.LeagueId;
-                }
-                // 2. Ако няма ID, но има Име на лига (напр. "English Premier Division")
-                else if (!string.IsNullOrWhiteSpace(r.LeagueName))
-                {
-                    var matchedLeague = existingLeagues.FirstOrDefault(l =>
-                        l.Name.Trim().ToLower() == r.LeagueName.Trim().ToLower());
-
-                    if (matchedLeague == null)
-                    {
-                        return BadRequest($"Error: League '{r.LeagueName}' not found in the database for club '{r.Name}'.");
-                    }
-                    finalLeagueId = matchedLeague.Id;
-                }
-                else
-                {
-                    return BadRequest($"Error: Club '{r.Name}' must have either LeagueId or LeagueName specified in the CSV.");
-                }
-
-                clubs.Add(new Club
-                {
-                    Name = r.Name,
-                    Country = r.Country,
-                    City = r.City,
-                    LeagueId = finalLeagueId, 
-                    PrimaryColor = r.PrimaryColor,
-                    Reputation = r.Reputation,
-                    Level = r.Level,
-                    TransferBudget = r.TransferBudget,
-                    WageBudget = r.WageBudget
-                });
-            }
-
             _context.Clubs.AddRange(clubs);
             await _context.SaveChangesAsync();
-
             return Ok(new { message = $"Successfully imported {clubs.Count} clubs. Players were NOT generated." });
         }
 
         [HttpPost("generate-schedule")]
         public async Task<IActionResult> GenerateSchedule()
         {
+            var worldState = await _context.WorldStates.FirstOrDefaultAsync();
+            if (worldState == null || worldState.CurrentSeasonId == null) return BadRequest("No active season found to generate schedule for!");
+
             var league = await _context.Leagues.Include(l => l.Clubs).FirstOrDefaultAsync();
             if (league == null) return BadRequest("No league found. Run import first.");
 
-            if (await _context.Fixtures.AnyAsync(f => f.LeagueId == league.Id))
-                return BadRequest("Schedule is already generated.");
+            var activeSeason = await _context.Seasons.FirstOrDefaultAsync(s => s.Id == worldState.CurrentSeasonId);
+            if (activeSeason == null || !activeSeason.IsActive) return BadRequest("No active season found.");
+
+            if (await _context.Fixtures.AnyAsync(f => f.LeagueId == league.Id && f.SeasonId == activeSeason.Id))
+                return BadRequest("Schedule is already generated for the active season.");
 
             var clubs = league.Clubs.ToList();
             var fixtures = new List<Fixture>();
@@ -206,13 +180,12 @@
                 {
                     int home = (round + match) % (numClubs - 1);
                     int away = (numClubs - 1 - match + round) % (numClubs - 1);
-
                     if (match == 0) away = numClubs - 1;
 
                     fixtures.Add(new Fixture
                     {
                         LeagueId = league.Id,
-                        Season = 1,
+                        SeasonId = activeSeason.Id,
                         Gameweek = round + 1,
                         HomeClubId = clubs[home].Id,
                         AwayClubId = clubs[away].Id,
@@ -227,7 +200,7 @@
                 secondHalfFixtures.Add(new Fixture
                 {
                     LeagueId = league.Id,
-                    Season = 1,
+                    SeasonId = activeSeason.Id,
                     Gameweek = fix.Gameweek + numRounds,
                     HomeClubId = fix.AwayClubId,
                     AwayClubId = fix.HomeClubId,
@@ -237,14 +210,20 @@
 
             _context.Fixtures.AddRange(fixtures);
             _context.Fixtures.AddRange(secondHalfFixtures);
+
+            // НОВО: Обновяваме TotalGameweeks директно в Сезона!
+            activeSeason.TotalGameweeks = numRounds * 2;
+            _context.Seasons.Update(activeSeason);
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = $"Successfully generated {fixtures.Count + secondHalfFixtures.Count} fixtures." });
+            return Ok(new { message = $"Successfully generated {fixtures.Count + secondHalfFixtures.Count} fixtures. Season calendar set to {activeSeason.TotalGameweeks} Gameweeks." });
         }
 
         [HttpGet("squad-report")]
         public async Task<IActionResult> GetSquadReport()
         {
+            if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
             var clubs = await _context.Clubs.Include(c => c.Players).ToListAsync();
             var report = new List<object>();
 
@@ -265,43 +244,32 @@
 
                 if (missingPositions.Any())
                 {
-                    report.Add(new
-                    {
-                        ClubId = club.Id,
-                        ClubName = club.Name,
-                        CurrentSquadSize = total,
-                        Missing = missingPositions
-                    });
+                    report.Add(new { ClubId = club.Id, ClubName = club.Name, CurrentSquadSize = total, Missing = missingPositions });
                 }
             }
 
-            if (!report.Any())
-                return Ok(new { message = "Всички отбори са в перфектно състояние и готови за мач!" });
-
+            if (!report.Any()) return Ok(new { message = "Всички отбори са в перфектно състояние и готови за мач!" });
             return Ok(new { message = "Открити са проблеми в съставите.", issues = report });
         }
-
 
         [HttpPost("squad-autofix")]
         public async Task<IActionResult> AutoFixSquads()
         {
+            if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
             var clubs = await _context.Clubs.Include(c => c.Players).ToListAsync();
             var newPlayers = new List<Player>();
             int fixedClubsCount = 0;
 
             foreach (var club in clubs)
             {
-                // Ако отборът е напълно празен (напр. току-що импортиран от CSV)
                 if (club.Players.Count == 0)
                 {
-                    // Генерираме му перфектния състав от 16 души чрез новия метод
                     var fullSquad = _playerGen.GenerateFullSquadForClub(club.Id, club.Reputation);
                     newPlayers.AddRange(fullSquad);
                     fixedClubsCount++;
                 }
                 else
                 {
-                    // Логика за "закърпване", ако липсват отделни играчи през следващите сезони
                     bool neededFix = false;
                     string backupTier = "Backup";
 
@@ -320,7 +288,6 @@
                     int currentTotal = club.Players.Count + newPlayers.Count(p => p.ClubId == club.Id);
                     while (currentTotal < 16)
                     {
-                        // Резервите ги правим микс
                         string randomTier = new Random().NextDouble() > 0.5 ? "Prospect" : backupTier;
                         newPlayers.Add(_playerGen.GeneratePlayer(randomTier, club.Id, null));
                         currentTotal++;

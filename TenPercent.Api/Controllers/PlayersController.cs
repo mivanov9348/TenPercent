@@ -2,9 +2,8 @@
 {
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
-    using TenPercent.Api.Services.Interfaces;
+    using TenPercent.Application.Interfaces;
     using TenPercent.Data;
-    using TenPercent.Data.Models;
 
     [Route("api/[controller]")]
     [ApiController]

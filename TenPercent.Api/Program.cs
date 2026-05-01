@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TenPercent.Api.Services;
-using TenPercent.Api.Services.Interfaces;
+using TenPercent.Application.Interfaces;
+using TenPercent.Application.Services;
+using TenPercent.Application.Services.Interfaces;
 using TenPercent.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IPlayerGeneratorService, PlayerGeneratorService>();
+builder.Services.AddScoped<ISeasonService, SeasonService>();
+
 
 builder.Services.AddCors(options =>
 {

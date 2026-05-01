@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TenPercent.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class addinitial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,6 +24,22 @@ namespace TenPercent.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Leagues", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Seasons",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SeasonNumber = table.Column<int>(type: "int", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Seasons", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -49,7 +65,7 @@ namespace TenPercent.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CurrentSeason = table.Column<int>(type: "int", nullable: false),
+                    CurrentSeasonId = table.Column<int>(type: "int", nullable: false),
                     CurrentGameweek = table.Column<int>(type: "int", nullable: false),
                     TotalGameweeks = table.Column<int>(type: "int", nullable: false),
                     NextMatchdayDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -113,7 +129,7 @@ namespace TenPercent.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Season = table.Column<int>(type: "int", nullable: false),
+                    SeasonId = table.Column<int>(type: "int", nullable: false),
                     Gameweek = table.Column<int>(type: "int", nullable: false),
                     ScheduledDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsPlayed = table.Column<bool>(type: "bit", nullable: false),
@@ -142,6 +158,87 @@ namespace TenPercent.Data.Migrations
                         name: "FK_Fixtures_Leagues_LeagueId",
                         column: x => x.LeagueId,
                         principalTable: "Leagues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Fixtures_Seasons_SeasonId",
+                        column: x => x.SeasonId,
+                        principalTable: "Seasons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LeagueStandings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LeagueId = table.Column<int>(type: "int", nullable: false),
+                    ClubId = table.Column<int>(type: "int", nullable: false),
+                    Played = table.Column<int>(type: "int", nullable: false),
+                    Won = table.Column<int>(type: "int", nullable: false),
+                    Drawn = table.Column<int>(type: "int", nullable: false),
+                    Lost = table.Column<int>(type: "int", nullable: false),
+                    GoalsFor = table.Column<int>(type: "int", nullable: false),
+                    GoalsAgainst = table.Column<int>(type: "int", nullable: false),
+                    Points = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LeagueStandings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LeagueStandings_Clubs_ClubId",
+                        column: x => x.ClubId,
+                        principalTable: "Clubs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_LeagueStandings_Leagues_LeagueId",
+                        column: x => x.LeagueId,
+                        principalTable: "Leagues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SeasonStandings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SeasonId = table.Column<int>(type: "int", nullable: false),
+                    LeagueId = table.Column<int>(type: "int", nullable: false),
+                    ClubId = table.Column<int>(type: "int", nullable: false),
+                    Position = table.Column<int>(type: "int", nullable: false),
+                    Played = table.Column<int>(type: "int", nullable: false),
+                    Won = table.Column<int>(type: "int", nullable: false),
+                    Drawn = table.Column<int>(type: "int", nullable: false),
+                    Lost = table.Column<int>(type: "int", nullable: false),
+                    GoalsFor = table.Column<int>(type: "int", nullable: false),
+                    GoalsAgainst = table.Column<int>(type: "int", nullable: false),
+                    Points = table.Column<int>(type: "int", nullable: false),
+                    IsChampion = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SeasonStandings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SeasonStandings_Clubs_ClubId",
+                        column: x => x.ClubId,
+                        principalTable: "Clubs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SeasonStandings_Leagues_LeagueId",
+                        column: x => x.LeagueId,
+                        principalTable: "Leagues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SeasonStandings_Seasons_SeasonId",
+                        column: x => x.SeasonId,
+                        principalTable: "Seasons",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -243,7 +340,7 @@ namespace TenPercent.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlayerPerformances",
+                name: "PlayerMatchPerformances",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -260,17 +357,56 @@ namespace TenPercent.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlayerPerformances", x => x.Id);
+                    table.PrimaryKey("PK_PlayerMatchPerformances", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlayerPerformances_Fixtures_FixtureId",
+                        name: "FK_PlayerMatchPerformances_Fixtures_FixtureId",
                         column: x => x.FixtureId,
                         principalTable: "Fixtures",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlayerPerformances_Players_PlayerId",
+                        name: "FK_PlayerMatchPerformances_Players_PlayerId",
                         column: x => x.PlayerId,
                         principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayerSeasonStats",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SeasonId = table.Column<int>(type: "int", nullable: false),
+                    PlayerId = table.Column<int>(type: "int", nullable: false),
+                    ClubId = table.Column<int>(type: "int", nullable: true),
+                    Appearances = table.Column<int>(type: "int", nullable: false),
+                    Goals = table.Column<int>(type: "int", nullable: false),
+                    Assists = table.Column<int>(type: "int", nullable: false),
+                    YellowCards = table.Column<int>(type: "int", nullable: false),
+                    RedCards = table.Column<int>(type: "int", nullable: false),
+                    AverageRating = table.Column<decimal>(type: "decimal(4,1)", precision: 4, scale: 1, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerSeasonStats", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlayerSeasonStats_Clubs_ClubId",
+                        column: x => x.ClubId,
+                        principalTable: "Clubs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_PlayerSeasonStats_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlayerSeasonStats_Seasons_SeasonId",
+                        column: x => x.SeasonId,
+                        principalTable: "Seasons",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -308,19 +444,35 @@ namespace TenPercent.Data.Migrations
                 column: "LeagueId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Fixtures_SeasonId",
+                table: "Fixtures",
+                column: "SeasonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LeagueStandings_ClubId",
+                table: "LeagueStandings",
+                column: "ClubId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LeagueStandings_LeagueId",
+                table: "LeagueStandings",
+                column: "LeagueId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlayerAttributes_PlayerId",
                 table: "PlayerAttributes",
                 column: "PlayerId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayerPerformances_FixtureId",
-                table: "PlayerPerformances",
+                name: "IX_PlayerMatchPerformances_FixtureId",
+                table: "PlayerMatchPerformances",
                 column: "FixtureId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayerPerformances_PlayerId",
-                table: "PlayerPerformances",
+                name: "IX_PlayerMatchPerformances_PlayerId",
+                table: "PlayerMatchPerformances",
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
@@ -332,16 +484,55 @@ namespace TenPercent.Data.Migrations
                 name: "IX_Players_ClubId",
                 table: "Players",
                 column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerSeasonStats_ClubId",
+                table: "PlayerSeasonStats",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerSeasonStats_PlayerId",
+                table: "PlayerSeasonStats",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerSeasonStats_SeasonId",
+                table: "PlayerSeasonStats",
+                column: "SeasonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SeasonStandings_ClubId",
+                table: "SeasonStandings",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SeasonStandings_LeagueId",
+                table: "SeasonStandings",
+                column: "LeagueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SeasonStandings_SeasonId",
+                table: "SeasonStandings",
+                column: "SeasonId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "LeagueStandings");
+
+            migrationBuilder.DropTable(
                 name: "PlayerAttributes");
 
             migrationBuilder.DropTable(
-                name: "PlayerPerformances");
+                name: "PlayerMatchPerformances");
+
+            migrationBuilder.DropTable(
+                name: "PlayerSeasonStats");
+
+            migrationBuilder.DropTable(
+                name: "SeasonStandings");
 
             migrationBuilder.DropTable(
                 name: "WorldStates");
@@ -351,6 +542,9 @@ namespace TenPercent.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Players");
+
+            migrationBuilder.DropTable(
+                name: "Seasons");
 
             migrationBuilder.DropTable(
                 name: "Agencies");

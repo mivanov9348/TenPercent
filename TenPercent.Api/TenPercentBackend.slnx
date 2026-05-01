@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="../TenPercent.Application/TenPercent.Application.csproj" Id="e5e72466-bf0c-428a-9cb1-1a05a5315055" />
   <Project Path="../TenPercent.Data/TenPercent.Data.csproj" Id="a3b7997c-f04a-4205-bb10-01268221caea" />
   <Project Path="TenPercent.Api.csproj" />
 </Solution>

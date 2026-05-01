@@ -9,26 +9,35 @@
         {
         }
 
+        // --- ХОРА И АГЕНЦИИ ---
         public DbSet<User> Users { get; set; }
         public DbSet<Agent> Agents { get; set; }
         public DbSet<Agency> Agencies { get; set; }
-        public DbSet<Player> Players { get; set; }
 
-        // НОВОТО DB SET
+        // --- ИГРАЧИ ---
+        public DbSet<Player> Players { get; set; }
         public DbSet<PlayerAttributes> PlayerAttributes { get; set; }
 
+        // --- СВЯТ И ОТБОРИ ---
         public DbSet<Club> Clubs { get; set; }
         public DbSet<League> Leagues { get; set; }
-        public DbSet<Fixture> Fixtures { get; set; }
-        public DbSet<PlayerPerformance> PlayerPerformances { get; set; }
         public DbSet<WorldState> WorldStates { get; set; }
+
+        // --- СЕЗОНИ, МАЧОВЕ И КЛАСИРАНИЯ ---
+        public DbSet<Season> Seasons { get; set; }
+        public DbSet<Fixture> Fixtures { get; set; }
+        public DbSet<LeagueStanding> LeagueStandings { get; set; } // Живо класиране
+        public DbSet<SeasonStanding> SeasonStandings { get; set; } // Архив класиране
+
+        // --- СТАТИСТИКИ ---
+        public DbSet<PlayerMatchPerformance> PlayerMatchPerformances { get; set; } // Текущ мач
+        public DbSet<PlayerSeasonPerformance> PlayerSeasonStats { get; set; } // Архив сезон
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // --- ОСНОВНИ ВРЪЗКИ ---
-
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Agent)
                 .WithOne(a => a.User)
@@ -59,14 +68,20 @@
                 .HasForeignKey(c => c.LeagueId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // --- НОВО: ВРЪЗКА ИГРАЧ <-> АТРИБУТИ (One-to-One) ---
+            // --- ВРЪЗКА ИГРАЧ <-> АТРИБУТИ ---
             modelBuilder.Entity<Player>()
                 .HasOne(p => p.Attributes)
                 .WithOne(pa => pa.Player)
                 .HasForeignKey<PlayerAttributes>(pa => pa.PlayerId)
-                .OnDelete(DeleteBehavior.Cascade); // Ако изтрием играч, трием и атрибутите му
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // --- СЛОЖНИ ВРЪЗКИ (МАЧОВЕ И ОЦЕНКИ) ---
+            // --- ВРЪЗКИ: МАЧОВЕ И СЕЗОНИ ---
+            modelBuilder.Entity<Fixture>()
+                .HasOne(f => f.Season)
+                .WithMany(s => s.Fixtures)
+                .HasForeignKey(f => f.SeasonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Fixture>()
                 .HasOne(f => f.HomeClub)
                 .WithMany()
@@ -79,17 +94,68 @@
                 .HasForeignKey(f => f.AwayClubId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<PlayerPerformance>()
-                .HasOne(pp => pp.Fixture)
+            // --- ВРЪЗКИ: ПРЕДСТАВЯНЕ В МАЧ (MATCH PERFORMANCE) ---
+            modelBuilder.Entity<PlayerMatchPerformance>()
+                .HasOne(pmp => pmp.Fixture)
                 .WithMany(f => f.Performances)
-                .HasForeignKey(pp => pp.FixtureId)
+                .HasForeignKey(pmp => pmp.FixtureId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<PlayerPerformance>()
-                .HasOne(pp => pp.Player)
+            modelBuilder.Entity<PlayerMatchPerformance>()
+                .HasOne(pmp => pmp.Player)
                 .WithMany()
-                .HasForeignKey(pp => pp.PlayerId)
+                .HasForeignKey(pmp => pmp.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // --- ЖИВО КЛАСИРАНЕ (LeagueStanding) ---
+            modelBuilder.Entity<LeagueStanding>()
+                .HasOne(ls => ls.League)
+                .WithMany(l => l.LiveStandings)
+                .HasForeignKey(ls => ls.LeagueId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LeagueStanding>()
+                .HasOne(ls => ls.Club)
+                .WithOne(c => c.CurrentStanding)
+                .HasForeignKey<LeagueStanding>(ls => ls.ClubId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- ИСТОРИЧЕСКИ ВРЪЗКИ (SeasonStanding и Архив Статистики) ---
+            modelBuilder.Entity<SeasonStanding>()
+                .HasOne(ss => ss.Season)
+                .WithMany(s => s.Standings)
+                .HasForeignKey(ss => ss.SeasonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SeasonStanding>()
+                .HasOne(ss => ss.League)
+                .WithMany()
+                .HasForeignKey(ss => ss.LeagueId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SeasonStanding>()
+                .HasOne(ss => ss.Club)
+                .WithMany()
+                .HasForeignKey(ss => ss.ClubId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlayerSeasonPerformance>()
+                .HasOne(pss => pss.Season)
+                .WithMany(s => s.PlayerStats)
+                .HasForeignKey(pss => pss.SeasonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PlayerSeasonPerformance>()
+                .HasOne(pss => pss.Player)
+                .WithMany()
+                .HasForeignKey(pss => pss.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PlayerSeasonPerformance>()
+                .HasOne(pss => pss.Club)
+                .WithMany()
+                .HasForeignKey(pss => pss.ClubId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // --- DECIMAL ПРЕЦИЗНОСТ ---
             modelBuilder.Entity<Agency>().Property(a => a.Budget).HasPrecision(18, 2);
@@ -97,7 +163,8 @@
             modelBuilder.Entity<Club>().Property(c => c.WageBudget).HasPrecision(18, 2);
             modelBuilder.Entity<Player>().Property(p => p.MarketValue).HasPrecision(18, 2);
             modelBuilder.Entity<Player>().Property(p => p.WeeklyWage).HasPrecision(18, 2);
-            modelBuilder.Entity<PlayerPerformance>().Property(pp => pp.MatchRating).HasPrecision(4, 1);
+            modelBuilder.Entity<PlayerMatchPerformance>().Property(pmp => pmp.MatchRating).HasPrecision(4, 1);
+            modelBuilder.Entity<PlayerSeasonPerformance>().Property(pss => pss.AverageRating).HasPrecision(4, 1);
         }
     }
 }

@@ -15,8 +15,8 @@
         public int Level { get; set; } 
 
         public decimal TransferBudget { get; set; }
-        public decimal WageBudget { get; set; } 
-
+        public decimal WageBudget { get; set; }
+        public LeagueStanding? CurrentStanding { get; set; }
         public ICollection<Player> Players { get; set; } = new List<Player>();
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace TenPercent.Api.Services.Interfaces
+﻿namespace TenPercent.Application.Interfaces
 {
     using TenPercent.Data.Models;
 

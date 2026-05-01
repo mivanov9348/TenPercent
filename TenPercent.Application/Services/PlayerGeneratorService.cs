@@ -1,10 +1,10 @@
 ﻿namespace TenPercent.Api.Services
 {
     using Bogus;
-    using TenPercent.Api.Services.Interfaces;
     using TenPercent.Data.Models;
     using System.Collections.Generic;
     using System;
+    using TenPercent.Application.Interfaces;
 
     public class PlayerGeneratorService : IPlayerGeneratorService
     {

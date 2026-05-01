@@ -3,9 +3,12 @@
     public class Fixture
     {
         public int Id { get; set; }
-        public int Season { get; set; }
+
+        public int SeasonId { get; set; }
+        public Season Season { get; set; } = null!;
+
         public int Gameweek { get; set; }
-        public DateTime ScheduledDate { get; set; } 
+        public DateTime ScheduledDate { get; set; }
 
         public bool IsPlayed { get; set; } = false;
 
@@ -21,6 +24,6 @@
         public int AwayClubId { get; set; }
         public Club AwayClub { get; set; } = null!;
 
-        public ICollection<PlayerPerformance> Performances { get; set; } = new List<PlayerPerformance>();
+        public ICollection<PlayerMatchPerformance> Performances { get; set; } = new List<PlayerMatchPerformance>();
     }
 }

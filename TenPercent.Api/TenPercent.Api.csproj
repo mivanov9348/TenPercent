@@ -19,6 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\TenPercent.Application\TenPercent.Application.csproj" />
 		<ProjectReference Include="..\TenPercent.Data\TenPercent.Data.csproj" />
 	</ItemGroup>
 

@@ -9,5 +9,6 @@
 
         public ICollection<Club> Clubs { get; set; } = new List<Club>();
         public ICollection<Fixture> Fixtures { get; set; } = new List<Fixture>();
+        public ICollection<LeagueStanding> LiveStandings { get; set; } = new List<LeagueStanding>();
     }
 }
