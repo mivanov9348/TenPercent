@@ -21,12 +21,10 @@
         public int PotentialDefending { get; set; }
         public int PotentialPhysical { get; set; }
 
-        // --- ПЕРСОНАЛНОСТ (Скрити - определят поведението и събитията) ---
         public int Ambition { get; set; } // Иска трансфери в топ клубове
         public int Greed { get; set; }    // Иска огромни заплати и бонуси
         public int Loyalty { get; set; }  // Трудно си сменя агента/клуба
 
-        // Опционално за бъдещето:
         public int InjuryProne { get; set; } // Предразположеност към контузии (1-100)
     }
 }

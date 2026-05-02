@@ -18,7 +18,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IPlayerGeneratorService, PlayerGeneratorService>();
 builder.Services.AddScoped<ISeasonService, SeasonService>();
-
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<ILeagueService, LeagueService>();
+builder.Services.AddScoped<IFixtureService, FixtureService>();
 
 builder.Services.AddCors(options =>
 {

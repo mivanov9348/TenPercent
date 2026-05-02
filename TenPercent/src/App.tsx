@@ -14,6 +14,7 @@ import CreateAgency from './pages/auth/CreateAgency';
 
 import WorldLayout from './pages/world/WorldLayout';
 import Standings from './pages/world/Standings';
+import Fixtures from './pages/world/Fixtures';
 import Scorers from './pages/world/Scorers';
 import Awards from './pages/world/Awards';
 import Inbox from './pages/Inbox';
@@ -65,6 +66,7 @@ function App() {
                 <Route element={<WorldLayout />}>
                   <Route index element={<Navigate to="standings" replace />} />
                   <Route path="standings" element={<Standings />} />
+                  <Route path="fixtures" element={<Fixtures />} /> {/* НОВИЯТ ТАБ */}
                   <Route path="scorers" element={<Scorers />} />
                   <Route path="awards" element={<Awards />} />
                 </Route>

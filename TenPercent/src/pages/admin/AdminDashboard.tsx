@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, X, Users, Globe, FastForward, Play, Power } from 'lucide-react';
+import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, X, TrendingUp, Users, Globe, FastForward, Play, Power } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -211,6 +211,22 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleInitializeStandings = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      const response = await fetch('https://localhost:7135/api/admin/initialize-standings', { method: 'POST' });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.message || "Failed to initialize standings");
+      setMessage({ text: data.message, type: 'success' });
+    } catch (err: any) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // --- ЕКРАН ПРИ ЗАРЕЖДАНЕ ---
   if (isEngineLoading) {
     return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white"><Loader2 className="animate-spin mr-2" /> Booting Engine...</div>;
@@ -345,13 +361,26 @@ export default function AdminDashboard() {
             </div>
           </div>
 
+          {/* Action: Initialize Standings (НОВО) */}
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
+            <div className="w-16 h-16 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center mb-4">
+              <TrendingUp size={32} />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">7. Initialize Standings</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Creates the starting live standings (0 points) for all clubs. Required before generating fixtures.</p>
+            <button onClick={handleInitializeStandings} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'CREATE STANDINGS'}
+            </button>
+          </div>
+
+          {/* Action: Generate Schedule (Променено на номер 8) */}
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center mb-4">
               <Calendar size={32} />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">4. Match Schedule</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Generates the Round-Robin fixtures for all imported teams for the active season.</p>
-            <button onClick={handleGenerateSchedule} disabled={isLoading} className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
+            <h2 className="text-xl font-bold text-white mb-2">8. Match Schedule</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Generates the Round-Robin fixtures based on the active standings table.</p>
+            <button onClick={handleGenerateSchedule} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
               {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE FIXTURES'}
             </button>
           </div>

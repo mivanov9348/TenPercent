@@ -93,6 +93,18 @@
         }
       }
     },
+    "/api/Admin/initialize-standings": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Admin/generate-schedule": {
       "post": {
         "tags": [
@@ -130,6 +142,29 @@
       }
     },
     "/api/Agency/{userId}": {
+      "get": {
+        "tags": [
+          "Agency"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Agency/{userId}/players": {
       "get": {
         "tags": [
           "Agency"
@@ -272,6 +307,18 @@
       "get": {
         "tags": [
           "Dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Fixtures/all": {
+      "get": {
+        "tags": [
+          "Fixtures"
         ],
         "responses": {
           "200": {

@@ -7,6 +7,7 @@
     using System.Globalization;
     using TenPercent.Api.DTOs;
     using TenPercent.Application.Interfaces;
+    using TenPercent.Application.Services.Interfaces;
     using TenPercent.Data;
     using TenPercent.Data.Models;
 
@@ -16,23 +17,23 @@
     {
         private readonly AppDbContext _context;
         private readonly IPlayerGeneratorService _playerGen;
+        private readonly IScheduleService _scheduleService;
 
-        public AdminController(AppDbContext context, IPlayerGeneratorService playerGen)
+        public AdminController(AppDbContext context, IPlayerGeneratorService playerGen, IScheduleService scheduleService)
         {
             _context = context;
             _playerGen = playerGen;
+            _scheduleService = scheduleService;
         }
 
-        // --- 1. ГЛАВНИЯТ МЕТОД (СЪЗДАВА WORLD STATE) ---
         [HttpPost("initialize-world")]
         public async Task<IActionResult> InitializeWorld()
         {
             if (await _context.WorldStates.AnyAsync())
             {
-                return BadRequest(new { message = "World Engine is already initialized!" });
+                return Ok(new { message = "World Engine is already initialized and running." }); // Променено на Ok
             }
 
-            // Създаваме Шапката напълно празна (Genesis). Без Сезон 1.
             var worldState = new WorldState
             {
                 CurrentSeasonId = null,
@@ -45,7 +46,6 @@
             return Ok(new { message = "World Engine Initialized Successfully! You can now import leagues and clubs." });
         }
 
-        // --- 2. ВРЪЩА СЪСТОЯНИЕТО НА СВЕТА КЪМ ФРОНТЕНДА ---
         [HttpGet("world-state")]
         public async Task<IActionResult> GetWorldState()
         {
@@ -56,7 +56,6 @@
                 return NotFound(new { message = "World Engine is offline." });
             }
 
-            // Опитваме се да вземем активния сезон
             var activeSeason = await _context.Seasons.FirstOrDefaultAsync(s => s.Id == worldState.CurrentSeasonId);
 
             return Ok(new
@@ -66,11 +65,9 @@
                 CurrentGameweek = activeSeason?.CurrentGameweek ?? 0,
                 TotalGameweeks = activeSeason?.TotalGameweeks ?? 0,
                 IsSeasonActive = activeSeason != null && activeSeason.IsActive,
-                IsSimulationRunning = worldState.IsSimulationRunning
+                IsSimulationRunning = worldState.IsSimulationRunning,
             });
         }
-
-        // --- ОСТАНАЛИТЕ МЕТОДИ ---
 
         [HttpPost("import-leagues")]
         public async Task<IActionResult> ImportLeagues(IFormFile file)
@@ -152,72 +149,100 @@
             return Ok(new { message = $"Successfully imported {clubs.Count} clubs. Players were NOT generated." });
         }
 
+        [HttpPost("initialize-standings")]
+        public async Task<IActionResult> InitializeStandings()
+        {
+            var worldState = await _context.WorldStates.FirstOrDefaultAsync();
+            if (worldState == null || worldState.CurrentSeasonId == null)
+                return BadRequest("World Engine is not running an active season.");
+
+            // ПРОМЯНА: Ако вече има класирания, връщаме ОК със съобщение, че вече са създадени.
+            if (await _context.LeagueStandings.AnyAsync())
+                return Ok(new { message = "Standings are already initialized for the current season. Ready for fixtures!" });
+
+            var clubs = await _context.Clubs.ToListAsync();
+            if (!clubs.Any())
+                return BadRequest("No clubs found. Import clubs first.");
+
+            var newStandings = new List<LeagueStanding>();
+            foreach (var club in clubs)
+            {
+                newStandings.Add(new LeagueStanding
+                {
+                    LeagueId = club.LeagueId,
+                    ClubId = club.Id,
+                    Played = 0,
+                    Won = 0,
+                    Drawn = 0,
+                    Lost = 0,
+                    GoalsFor = 0,
+                    GoalsAgainst = 0,
+                    Points = 0
+                });
+            }
+
+            _context.LeagueStandings.AddRange(newStandings);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = $"Successfully initialized standings for {newStandings.Count} clubs. Ready to generate schedule." });
+        }
+
         [HttpPost("generate-schedule")]
         public async Task<IActionResult> GenerateSchedule()
         {
             var worldState = await _context.WorldStates.FirstOrDefaultAsync();
-            if (worldState == null || worldState.CurrentSeasonId == null) return BadRequest("No active season found to generate schedule for!");
-
-            var league = await _context.Leagues.Include(l => l.Clubs).FirstOrDefaultAsync();
-            if (league == null) return BadRequest("No league found. Run import first.");
+            if (worldState == null || worldState.CurrentSeasonId == null)
+                return BadRequest("No active season found to generate schedule for!");
 
             var activeSeason = await _context.Seasons.FirstOrDefaultAsync(s => s.Id == worldState.CurrentSeasonId);
-            if (activeSeason == null || !activeSeason.IsActive) return BadRequest("No active season found.");
+            if (activeSeason == null || !activeSeason.IsActive)
+                return BadRequest("No active season found.");
 
-            if (await _context.Fixtures.AnyAsync(f => f.LeagueId == league.Id && f.SeasonId == activeSeason.Id))
-                return BadRequest("Schedule is already generated for the active season.");
+            if (!await _context.LeagueStandings.AnyAsync())
+                return BadRequest("Standings are missing! Please Initialize Standings before generating fixtures.");
 
-            var clubs = league.Clubs.ToList();
-            var fixtures = new List<Fixture>();
+            // ПРОМЯНА: Ако вече има мачове, връщаме ОК.
+            if (await _context.Fixtures.AnyAsync(f => f.SeasonId == activeSeason.Id))
+                return Ok(new { message = "Match Schedule is already generated for the active season. The simulation is ready!" });
 
-            int numClubs = clubs.Count;
-            int numRounds = numClubs - 1;
-            int matchesPerRound = numClubs / 2;
+            var allLeagues = await _context.Leagues.ToListAsync();
+            if (!allLeagues.Any())
+                return BadRequest("No leagues found. Run import first.");
 
-            for (int round = 0; round < numRounds; round++)
+            int totalFixturesGenerated = 0;
+            var results = new List<string>();
+
+            foreach (var league in allLeagues)
             {
-                for (int match = 0; match < matchesPerRound; match++)
-                {
-                    int home = (round + match) % (numClubs - 1);
-                    int away = (numClubs - 1 - match + round) % (numClubs - 1);
-                    if (match == 0) away = numClubs - 1;
+                var result = await _scheduleService.GenerateLeagueScheduleAsync(league.Id, activeSeason.Id);
 
-                    fixtures.Add(new Fixture
-                    {
-                        LeagueId = league.Id,
-                        SeasonId = activeSeason.Id,
-                        Gameweek = round + 1,
-                        HomeClubId = clubs[home].Id,
-                        AwayClubId = clubs[away].Id,
-                        ScheduledDate = DateTime.UtcNow.AddDays((round + 1) * 3)
-                    });
+                if (result.Success)
+                {
+                    totalFixturesGenerated += result.Fixtures.Count;
+                    results.Add(result.Message);
+                }
+                else
+                {
+                    results.Add($"Failed for {league.Name}: {result.Message}");
                 }
             }
 
-            var secondHalfFixtures = new List<Fixture>();
-            foreach (var fix in fixtures)
+            var maxGameweek = await _context.Fixtures
+                .Where(f => f.SeasonId == activeSeason.Id)
+                .MaxAsync(f => (int?)f.Gameweek) ?? 0;
+
+            if (maxGameweek > 0)
             {
-                secondHalfFixtures.Add(new Fixture
-                {
-                    LeagueId = league.Id,
-                    SeasonId = activeSeason.Id,
-                    Gameweek = fix.Gameweek + numRounds,
-                    HomeClubId = fix.AwayClubId,
-                    AwayClubId = fix.HomeClubId,
-                    ScheduledDate = DateTime.UtcNow.AddDays((fix.Gameweek + numRounds) * 3)
-                });
+                activeSeason.TotalGameweeks = maxGameweek;
+                _context.Seasons.Update(activeSeason);
+                await _context.SaveChangesAsync();
             }
 
-            _context.Fixtures.AddRange(fixtures);
-            _context.Fixtures.AddRange(secondHalfFixtures);
-
-            // НОВО: Обновяваме TotalGameweeks директно в Сезона!
-            activeSeason.TotalGameweeks = numRounds * 2;
-            _context.Seasons.Update(activeSeason);
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = $"Successfully generated {fixtures.Count + secondHalfFixtures.Count} fixtures. Season calendar set to {activeSeason.TotalGameweeks} Gameweeks." });
+            return Ok(new
+            {
+                message = $"Successfully generated {totalFixturesGenerated} fixtures across all leagues. Season set to {maxGameweek} Gameweeks.",
+                details = results
+            });
         }
 
         [HttpGet("squad-report")]

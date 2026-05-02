@@ -43,6 +43,16 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "InitializeStandings",
+    "RelativePath": "api/Admin/initialize-standings",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
     "Method": "InitializeWorld",
     "RelativePath": "api/Admin/initialize-world",
     "HttpMethod": "POST",
@@ -85,6 +95,22 @@
     "ContainingType": "TenPercent.Api.Controllers.AgencyController",
     "Method": "GetMyAgency",
     "RelativePath": "api/Agency/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AgencyController",
+    "Method": "GetAgencyPlayers",
+    "RelativePath": "api/Agency/{userId}/players",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -165,6 +191,16 @@
     "ContainingType": "TenPercent.Api.Controllers.DashboardController",
     "Method": "GetHomeDashboard",
     "RelativePath": "api/Dashboard/home",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.FixturesController",
+    "Method": "GetAllFixtures",
+    "RelativePath": "api/Fixtures/all",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

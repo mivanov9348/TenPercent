@@ -20,10 +20,9 @@
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetMyAgency(int userId)
         {
-            // Намираме агента и неговата агенция чрез UserId
             var agent = await _context.Agents
                 .Include(a => a.Agency)
-                .ThenInclude(ag => ag.Players) // Включваме играчите, за да ги преброим
+                .ThenInclude(ag => ag.Players)
                 .FirstOrDefaultAsync(a => a.UserId == userId);
 
             if (agent == null || agent.Agency == null)
@@ -31,21 +30,52 @@
                 return NotFound("Agency not found for this user.");
             }
 
-            // Мапваме към DTO
             var agencyDto = new AgencyDto
             {
                 Id = agent.Agency.Id,
                 Name = agent.Agency.Name,
-                AgentName = agent.Name, // Взимаме името от Агента
+                AgentName = agent.Name,
                 LogoId = agent.Agency.LogoId,
                 Budget = agent.Agency.Budget,
                 Reputation = agent.Agency.Reputation,
                 Level = agent.Agency.Level,
                 EstablishedAt = agent.Agency.EstablishedAt,
-                TotalPlayersCount = agent.Agency.Players.Count // Брой играчи
+                TotalPlayersCount = agent.Agency.Players.Count
             };
 
             return Ok(agencyDto);
+        }
+
+        // --- НОВ МЕТОД: Взима играчите на Агенцията ---
+        // GET: api/agency/{userId}/players
+        [HttpGet("{userId}/players")]
+        public async Task<IActionResult> GetAgencyPlayers(int userId)
+        {
+            var agent = await _context.Agents
+                .Include(a => a.Agency)
+                .FirstOrDefaultAsync(a => a.UserId == userId);
+
+            if (agent == null || agent.Agency == null)
+                return NotFound("Agency not found.");
+
+            var players = await _context.Players
+                .Where(p => p.AgencyId == agent.Agency.Id)
+                .Select(p => new
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Pos = p.Position,
+                    Age = p.Age,
+                    Skill = p.CurrentAbility,
+                    Potential = p.PotentialAbility,
+                    Value = p.MarketValue,
+                    Wage = p.WeeklyWage,
+                    Contract = p.ContractYearsLeft,
+                    Form = p.Form ?? "Average" // Защита, ако Form е null
+                })
+                .ToListAsync();
+
+            return Ok(players);
         }
     }
 }

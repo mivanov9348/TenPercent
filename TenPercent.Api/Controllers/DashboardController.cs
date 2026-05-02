@@ -27,7 +27,7 @@
 
             var activeSeason = await _context.Seasons.FirstOrDefaultAsync(s => s.Id == worldState.CurrentSeasonId);
 
-            // 1. Предстоящи мачове (Взимаме 5 мача от текущия кръг)
+            // 1. Предстоящи мачове (Взимаме ВСИЧКИ мачове от ТЕКУЩИЯ кръг/ден)
             var upcomingFixtures = new List<object>();
             if (activeSeason != null)
             {
@@ -35,9 +35,11 @@
                     .Include(f => f.HomeClub)
                     .Include(f => f.AwayClub)
                     .Include(f => f.League)
-                    .Where(f => f.SeasonId == activeSeason.Id && !f.IsPlayed && f.Gameweek >= activeSeason.CurrentGameweek)
-                    .OrderBy(f => f.ScheduledDate)
-                    .Take(5)
+                    // Търсим мачовете точно за този Gameweek
+                    .Where(f => f.SeasonId == activeSeason.Id && f.Gameweek == activeSeason.CurrentGameweek)
+                    // Сортираме по Лига, за да са подредени красиво, после по Домакин
+                    .OrderBy(f => f.League.Name)
+                    .ThenBy(f => f.HomeClub.Name)
                     .Select(f => new
                     {
                         Id = f.Id,
@@ -50,11 +52,11 @@
                     .ToListAsync();
             }
 
-            // 2. Топ играчи (Взимаме ги по CurrentAbility засега, по-късно ще е по MatchRating)
+            // 2. Топ играчи 
             var topPlayers = await _context.Players
                 .Include(p => p.Club)
                 .OrderByDescending(p => p.CurrentAbility)
-                .Take(5)
+                .Take(5) // Тук оставяме 5, защото искаме само топ 5 играча в света
                 .Select(p => new
                 {
                     Id = p.Id,
@@ -74,12 +76,10 @@
                     SeasonNumber = activeSeason?.SeasonNumber ?? 0,
                     CurrentGameweek = activeSeason?.CurrentGameweek ?? 0,
                     TotalGameweeks = activeSeason?.TotalGameweeks ?? 0,
-                    IsSeasonActive = activeSeason != null && activeSeason.IsActive,
-                    //NextMatchdayDate = worldState.NextMatchdayDate
+                    IsSeasonActive = activeSeason != null && activeSeason.IsActive
                 },
                 UpcomingMatches = upcomingFixtures,
                 TopPlayers = topPlayers,
-                // Засега връщаме празни масиви за клиентските специфики, докато не направим логиката за Агенцията
                 ClientMatches = new List<object>(),
                 ClientReports = new List<object>()
             });

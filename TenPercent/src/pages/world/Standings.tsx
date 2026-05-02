@@ -78,7 +78,6 @@ export default function Standings() {
           </thead>
           <tbody className="divide-y divide-gray-800/50">
             {activeLeague?.standings.map((row: any) => (
-              // ТУК правим реда кликаем и насочваме към ClubDetails
               <tr 
                 key={row.clubId} 
                 onClick={() => navigate(`/world/club/${row.clubId}`)}

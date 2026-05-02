@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Trophy, Target, Medal, Globe } from 'lucide-react';
+import { Trophy, Target, Medal, Globe, CalendarDays } from 'lucide-react';
 
 export default function WorldLayout() {
   const tabs = [
     { name: 'Standings', path: '/world/standings', icon: <Trophy size={18} /> },
+    { name: 'Fixtures', path: '/world/fixtures', icon: <CalendarDays size={18} /> }, // НОВИЯТ ТАБ
     { name: 'Top Scorers', path: '/world/scorers', icon: <Target size={18} /> },
     { name: 'Season Awards', path: '/world/awards', icon: <Medal size={18} /> },
   ];
@@ -18,18 +19,18 @@ export default function WorldLayout() {
           </div>
           <div>
             <h1 className="text-2xl font-black text-white uppercase tracking-wider">World Database</h1>
-            <p className="text-gray-400 text-sm">Explore global leagues, rankings, and awards.</p>
+            <p className="text-gray-400 text-sm">Explore global leagues, fixtures, rankings, and awards.</p>
           </div>
         </div>
 
         {/* Inner Navigation (Tabs) */}
-        <nav className="flex gap-2 border-b border-gray-700 pb-0 px-2">
+        <nav className="flex gap-2 border-b border-gray-700 pb-0 px-2 overflow-x-auto custom-scrollbar">
           {tabs.map((tab) => (
             <NavLink
               key={tab.path}
               to={tab.path}
               className={({ isActive }) =>
-                `flex items-center gap-2 px-4 py-3 border-b-2 font-bold text-sm transition-colors ${
+                `flex items-center gap-2 px-4 py-3 border-b-2 font-bold text-sm transition-colors whitespace-nowrap ${
                   isActive 
                     ? 'border-yellow-500 text-yellow-500 bg-gray-900/50 rounded-t-lg' 
                     : 'border-transparent text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-t-lg'
@@ -43,7 +44,7 @@ export default function WorldLayout() {
         </nav>
       </div>
 
-      {/* Dynamic Content (Loads Standings, Scorers, or Awards here) */}
+      {/* Dynamic Content */}
       <div className="animate-in fade-in duration-300">
         <Outlet />
       </div>

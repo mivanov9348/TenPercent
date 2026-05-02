@@ -8,7 +8,6 @@ export default function Home() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 1. Дърпане на агрегираните данни от новия DashboardController
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -57,7 +56,6 @@ export default function Home() {
       return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-yellow-500" size={32} /></div>;
   }
 
-  // Ако базата е празна (Genesis не е пуснат)
   if (dashboardData && !dashboardData.isInitialized) {
       return (
         <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
@@ -136,18 +134,18 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* КАРЕ 1: Предстоящи мачове на КЛИЕНТИ (Агенцията) */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col min-h-[300px]">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
             <Calendar className="text-blue-400" />
             My Client Matches
           </h2>
-          <div className="space-y-3 flex-1 flex flex-col">
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {clientMatches.length > 0 ? (
                 clientMatches.map((match: any) => (
                     <div key={match.id}>{/* ... */}</div>
                 ))
             ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
                     <Calendar size={48} className="mb-3 opacity-50" />
                     <p className="font-bold">No upcoming client matches.</p>
                     <p className="text-xs mt-1">Sign players to see them here.</p>
@@ -157,18 +155,18 @@ export default function Home() {
         </div>
 
         {/* КАРЕ 2: Доклади от миналия кръг (За Клиенти) */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col min-h-[300px]">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
             <TrendingUp className="text-emerald-400" />
             Client Reports (Last Round)
           </h2>
-          <div className="space-y-3 flex-1 flex flex-col">
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {clientReports.length > 0 ? (
                 clientReports.map((report: any) => (
                     <div key={report.id}>{/* ... */}</div>
                 ))
             ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
                     <TrendingUp size={48} className="mb-3 opacity-50" />
                     <p className="font-bold">No reports available.</p>
                 </div>
@@ -176,13 +174,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* НОВО КАРЕ 3: Общо предстоящи мачове в света */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col min-h-[300px]">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        {/* НОВО КАРЕ 3: Общо предстоящи мачове в света - СЪС СКРОЛ */}
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
             <Swords className="text-purple-400" />
             Global Matchday
           </h2>
-          <div className="space-y-3 flex-1 flex flex-col">
+          {/* НОВО: Добавено overflow-y-auto за скролване */}
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {upcomingMatches.length > 0 ? (
                 upcomingMatches.map((match: any) => (
                 <div key={match.id} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex flex-col justify-center hover:border-gray-600 transition-colors">
@@ -194,13 +193,14 @@ export default function Home() {
                     <div className="flex justify-between items-center mt-2">
                         <span className="text-[10px] text-gray-500 uppercase tracking-wider">{match.league}</span>
                         <span className="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded font-bold">
-                            {new Date(match.date).toLocaleDateString()}
+                            {/* Форматиране на датата и часа */}
+                            {new Date(match.date).toLocaleDateString()} {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                     </div>
                 </div>
                 ))
             ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
                     <CalendarDays size={48} className="mb-3 opacity-50" />
                     <p className="font-bold">No global matches scheduled.</p>
                 </div>
@@ -208,13 +208,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* НОВО КАРЕ 4: Топ Играчи в Света */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col min-h-[300px]">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        {/* НОВО КАРЕ 4: Топ Играчи в Света - СЪС СКРОЛ */}
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
             <Trophy className="text-yellow-500" />
             World Top Performers
           </h2>
-          <div className="space-y-3 flex-1 flex flex-col">
+          {/* НОВО: Добавено overflow-y-auto за скролване */}
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {topPlayers.length > 0 ? (
                 topPlayers.map((player: any, index: number) => (
                 <div 
@@ -223,15 +224,15 @@ export default function Home() {
                     onClick={() => navigate(`/world/player/${player.id}`)}
                 >
                     <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${index === 0 ? 'bg-yellow-500 text-black' : index === 1 ? 'bg-gray-300 text-black' : index === 2 ? 'bg-orange-700 text-white' : 'bg-gray-800 text-gray-500'}`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${index === 0 ? 'bg-yellow-500 text-black' : index === 1 ? 'bg-gray-300 text-black' : index === 2 ? 'bg-orange-700 text-white' : 'bg-gray-800 text-gray-500'}`}>
                             {index + 1}
                         </div>
-                        <div>
-                            <p className="font-bold text-white group-hover:text-yellow-500 transition-colors">{player.name}</p>
-                            <p className="text-[10px] text-gray-400">{player.club} • {player.position}</p>
+                        <div className="min-w-0">
+                            <p className="font-bold text-white group-hover:text-yellow-500 transition-colors truncate">{player.name}</p>
+                            <p className="text-[10px] text-gray-400 truncate">{player.club} • {player.position}</p>
                         </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                         <span className="bg-gray-800 text-white px-2 py-1 rounded font-black text-sm">
                             {player.ovr}
                         </span>
@@ -239,7 +240,7 @@ export default function Home() {
                 </div>
                 ))
             ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
                     <User size={48} className="mb-3 opacity-50" />
                     <p className="font-bold">No players found.</p>
                 </div>
