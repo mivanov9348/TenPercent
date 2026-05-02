@@ -72,24 +72,50 @@
         [HttpPost("import-leagues")]
         public async Task<IActionResult> ImportLeagues(IFormFile file)
         {
-            if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
-            if (file == null || file.Length == 0) return BadRequest("Please upload a valid leagues.csv file.");
+            if (!await _context.WorldStates.AnyAsync())
+                return BadRequest("World Engine must be initialized first!");
 
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture) { HasHeaderRecord = true, DetectDelimiter = true, ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace) };
+            if (file == null || file.Length == 0)
+                return BadRequest("Please upload a valid leagues.csv file.");
+
+            // Обновяваме конфигурацията за по-добра съвместимост
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                Delimiter = ";", // Изрично указваме точка и запетая
+                PrepareHeaderForMatch = args => args.Header.Trim().ToLower(), // Игнорираме малки/главни букви и интервали
+                MissingFieldFound = null, // Предотвратява краш, ако някоя колона напълно липсва
+                ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
+            };
+
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, config);
-            csv.Read(); csv.ReadHeader();
+
+            csv.Read();
+            csv.ReadHeader();
 
             var leagues = new List<League>();
             while (csv.Read())
             {
-                var name = csv.GetField<string>("Name");
+                // Използваме TryGetField, за да не гърми програмата, ако колоната липсва във файла
+                csv.TryGetField<string>("name", out var name);
+                csv.TryGetField<string>("country", out var country);
+                csv.TryGetField<int>("reputation", out var reputation);
+
                 if (!string.IsNullOrWhiteSpace(name))
-                    leagues.Add(new League { Name = name, Country = csv.GetField<string>("Country") ?? "", Reputation = csv.GetField<int>("Reputation") });
+                {
+                    leagues.Add(new League
+                    {
+                        Name = name,
+                        Country = country ?? "",
+                        Reputation = reputation // Ако колоната липсва, ще бъде по подразбиране 0
+                    });
+                }
             }
 
             _context.Leagues.AddRange(leagues);
             await _context.SaveChangesAsync();
+
             return Ok(new { message = $"Successfully imported {leagues.Count} leagues." });
         }
 

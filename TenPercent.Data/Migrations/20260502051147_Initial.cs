@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TenPercent.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -33,6 +33,8 @@ namespace TenPercent.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SeasonNumber = table.Column<int>(type: "int", nullable: false),
+                    CurrentGameweek = table.Column<int>(type: "int", nullable: false),
+                    TotalGameweeks = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
@@ -65,11 +67,9 @@ namespace TenPercent.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CurrentSeasonId = table.Column<int>(type: "int", nullable: false),
-                    CurrentGameweek = table.Column<int>(type: "int", nullable: false),
-                    TotalGameweeks = table.Column<int>(type: "int", nullable: false),
-                    NextMatchdayDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsSimulationRunning = table.Column<bool>(type: "bit", nullable: false)
+                    CurrentSeasonId = table.Column<int>(type: "int", nullable: true),
+                    IsSimulationRunning = table.Column<bool>(type: "bit", nullable: false),
+                    NextMatchdayDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Star, AlertTriangle, TrendingUp, Clock, CalendarDays, Loader2, Info, Trophy, Swords, User } from 'lucide-react';
+import { Calendar, Star, AlertTriangle, TrendingUp, Clock, CalendarDays, Loader2, Info, Trophy, Swords, User, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
@@ -46,7 +46,6 @@ export default function Home() {
         clearInterval(interval);
       }
     }, 1000);
-
     return () => clearInterval(interval);
   };
 
@@ -68,21 +67,20 @@ export default function Home() {
       );
   }
 
-  const { worldState, upcomingMatches, topPlayers, clientMatches, clientReports } = dashboardData;
+  const { worldState, upcomingMatches, previousMatches, topPlayers, clientMatches, clientReports } = dashboardData;
 
   return (
     <div className="space-y-6 pb-12">
       
       {/* 1. Хедър и Отброяване */}
       <div className="bg-gray-800 border border-gray-700 p-6 rounded-2xl flex flex-col xl:flex-row justify-between items-center shadow-lg gap-6 relative overflow-hidden">
-        
-        {!worldState?.isSeasonActive ? (
+        {!worldState?.isSeasonActive && (
             <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-10">
                 <p className="text-yellow-500 font-bold tracking-widest uppercase flex items-center gap-2">
                     <Info size={18} /> No Active Season
                 </p>
             </div>
-        ) : null}
+        )}
 
         <div className="flex items-center gap-4 w-full xl:w-auto z-0">
           <div className="w-16 h-16 bg-gray-900 border border-gray-700 rounded-xl flex flex-col items-center justify-center shadow-inner">
@@ -104,83 +102,47 @@ export default function Home() {
             <Clock size={16} className="text-yellow-500" />
             Next Matchday:
           </div>
-          
           <div className="flex items-center gap-3">
-            <div className="flex flex-col items-center min-w-[50px]">
-              <span className="text-3xl font-mono font-black text-white">{formatTime(timeLeft.days)}</span>
-              <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Days</span>
-            </div>
+            <div className="flex flex-col items-center min-w-[50px]"><span className="text-3xl font-mono font-black text-white">{formatTime(timeLeft.days)}</span><span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Days</span></div>
             <span className="text-2xl text-gray-700 pb-4 animate-pulse">:</span>
-            <div className="flex flex-col items-center min-w-[50px]">
-              <span className="text-3xl font-mono font-black text-white">{formatTime(timeLeft.hours)}</span>
-              <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Hrs</span>
-            </div>
+            <div className="flex flex-col items-center min-w-[50px]"><span className="text-3xl font-mono font-black text-white">{formatTime(timeLeft.hours)}</span><span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Hrs</span></div>
             <span className="text-2xl text-gray-700 pb-4 animate-pulse">:</span>
-            <div className="flex flex-col items-center min-w-[50px]">
-              <span className="text-3xl font-mono font-black text-white">{formatTime(timeLeft.minutes)}</span>
-              <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Min</span>
-            </div>
+            <div className="flex flex-col items-center min-w-[50px]"><span className="text-3xl font-mono font-black text-white">{formatTime(timeLeft.minutes)}</span><span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Min</span></div>
             <span className="text-2xl text-gray-700 pb-4 animate-pulse">:</span>
-            <div className="flex flex-col items-center min-w-[50px]">
-              <span className="text-3xl font-mono font-black text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]">
-                {formatTime(timeLeft.seconds)}
-              </span>
-              <span className="text-[10px] text-yellow-500/70 uppercase font-bold tracking-widest mt-1">Sec</span>
-            </div>
+            <div className="flex flex-col items-center min-w-[50px]"><span className="text-3xl font-mono font-black text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]">{formatTime(timeLeft.seconds)}</span><span className="text-[10px] text-yellow-500/70 uppercase font-bold tracking-widest mt-1">Sec</span></div>
           </div>
         </div>
       </div>
 
+      {/* Грид за Агенцията */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0"><Calendar className="text-blue-400" /> My Client Matches</h2>
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {clientMatches.length > 0 ? clientMatches.map((match: any) => (<div key={match.id}></div>)) : (
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed"><Calendar size={48} className="mb-3 opacity-50" /><p className="font-bold">No upcoming client matches.</p></div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0"><TrendingUp className="text-emerald-400" /> Client Reports (Last Round)</h2>
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {clientReports.length > 0 ? clientReports.map((report: any) => (<div key={report.id}></div>)) : (
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed"><TrendingUp size={48} className="mb-3 opacity-50" /><p className="font-bold">No reports available.</p></div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Грид за Глобалния Свят (3 колони на големи екрани) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* КАРЕ 1: Предстоящи мачове на КЛИЕНТИ (Агенцията) */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
+        {/* Предстоящи мачове */}
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[400px]">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
-            <Calendar className="text-blue-400" />
-            My Client Matches
+            <Swords className="text-purple-400" /> Global Matchday {worldState?.currentGameweek}
           </h2>
-          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {clientMatches.length > 0 ? (
-                clientMatches.map((match: any) => (
-                    <div key={match.id}>{/* ... */}</div>
-                ))
-            ) : (
-                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
-                    <Calendar size={48} className="mb-3 opacity-50" />
-                    <p className="font-bold">No upcoming client matches.</p>
-                    <p className="text-xs mt-1">Sign players to see them here.</p>
-                </div>
-            )}
-          </div>
-        </div>
-
-        {/* КАРЕ 2: Доклади от миналия кръг (За Клиенти) */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
-            <TrendingUp className="text-emerald-400" />
-            Client Reports (Last Round)
-          </h2>
-          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {clientReports.length > 0 ? (
-                clientReports.map((report: any) => (
-                    <div key={report.id}>{/* ... */}</div>
-                ))
-            ) : (
-                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
-                    <TrendingUp size={48} className="mb-3 opacity-50" />
-                    <p className="font-bold">No reports available.</p>
-                </div>
-            )}
-          </div>
-        </div>
-
-        {/* НОВО КАРЕ 3: Общо предстоящи мачове в света - СЪС СКРОЛ */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
-            <Swords className="text-purple-400" />
-            Global Matchday
-          </h2>
-          {/* НОВО: Добавено overflow-y-auto за скролване */}
           <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {upcomingMatches.length > 0 ? (
                 upcomingMatches.map((match: any) => (
@@ -188,13 +150,12 @@ export default function Home() {
                     <div className="flex justify-between items-center text-white font-bold text-sm">
                         <span className="truncate">{match.homeTeam}</span>
                         <span className="text-gray-600 mx-2 text-xs">VS</span>
-                        <span className="truncate">{match.awayTeam}</span>
+                        <span className="truncate flex-1 text-right">{match.awayTeam}</span>
                     </div>
                     <div className="flex justify-between items-center mt-2">
                         <span className="text-[10px] text-gray-500 uppercase tracking-wider">{match.league}</span>
                         <span className="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded font-bold">
-                            {/* Форматиране на датата и часа */}
-                            {new Date(match.date).toLocaleDateString()} {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(match.date).toLocaleDateString()}
                         </span>
                     </div>
                 </div>
@@ -208,21 +169,48 @@ export default function Home() {
           </div>
         </div>
 
-        {/* НОВО КАРЕ 4: Топ Играчи в Света - СЪС СКРОЛ */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
+        {/* НОВО: Минали мачове */}
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[400px]">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
-            <Trophy className="text-yellow-500" />
-            World Top Performers
+            <CheckCircle2 className="text-emerald-500" /> Last Matchday Results
           </h2>
-          {/* НОВО: Добавено overflow-y-auto за скролване */}
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {previousMatches && previousMatches.length > 0 ? (
+                previousMatches.map((match: any) => (
+                <div key={match.id} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex flex-col justify-center hover:border-gray-600 transition-colors">
+                    <div className="flex justify-between items-center text-white font-bold text-sm">
+                        <span className="truncate">{match.homeTeam}</span>
+                        <span className="text-yellow-500 mx-2 bg-gray-800 px-2 rounded border border-gray-700">
+                          {match.homeGoals} - {match.awayGoals}
+                        </span>
+                        <span className="truncate flex-1 text-right">{match.awayTeam}</span>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">{match.league}</span>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold">
+                            FT
+                        </span>
+                    </div>
+                </div>
+                ))
+            ) : (
+                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed">
+                    <AlertTriangle size={48} className="mb-3 opacity-50" />
+                    <p className="font-bold">No previous results.</p>
+                </div>
+            )}
+          </div>
+        </div>
+
+        {/* Топ Играчи */}
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[400px]">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
+            <Trophy className="text-yellow-500" /> World Top Performers
+          </h2>
           <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {topPlayers.length > 0 ? (
                 topPlayers.map((player: any, index: number) => (
-                <div 
-                    key={player.id} 
-                    className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex items-center justify-between hover:border-gray-600 transition-colors cursor-pointer group"
-                    onClick={() => navigate(`/world/player/${player.id}`)}
-                >
+                <div key={player.id} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex items-center justify-between hover:border-gray-600 transition-colors cursor-pointer group" onClick={() => navigate(`/world/player/${player.id}`)}>
                     <div className="flex items-center gap-3">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${index === 0 ? 'bg-yellow-500 text-black' : index === 1 ? 'bg-gray-300 text-black' : index === 2 ? 'bg-orange-700 text-white' : 'bg-gray-800 text-gray-500'}`}>
                             {index + 1}
@@ -233,9 +221,7 @@ export default function Home() {
                         </div>
                     </div>
                     <div className="text-right shrink-0">
-                        <span className="bg-gray-800 text-white px-2 py-1 rounded font-black text-sm">
-                            {player.ovr}
-                        </span>
+                        <span className="bg-gray-800 text-white px-2 py-1 rounded font-black text-sm">{player.ovr}</span>
                     </div>
                 </div>
                 ))

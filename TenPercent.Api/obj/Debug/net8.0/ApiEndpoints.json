@@ -198,6 +198,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "TenPercent.Api.Controllers.DashboardController",
+    "Method": "GetTopScorers",
+    "RelativePath": "api/Dashboard/top-scorers",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "TenPercent.Api.Controllers.FixturesController",
     "Method": "GetAllFixtures",
     "RelativePath": "api/Fixtures/all",
@@ -324,6 +334,16 @@
     "ContainingType": "TenPercent.Api.Controllers.SeasonController",
     "Method": "StartSeason",
     "RelativePath": "api/Season/start",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.SimulationController",
+    "Method": "PlayNextGameweek",
+    "RelativePath": "api/Simulation/play-gameweek",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,

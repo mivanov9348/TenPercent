@@ -315,6 +315,18 @@
         }
       }
     },
+    "/api/Dashboard/top-scorers": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Fixtures/all": {
       "get": {
         "tags": [
@@ -493,6 +505,18 @@
       "post": {
         "tags": [
           "Season"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Simulation/play-gameweek": {
+      "post": {
+        "tags": [
+          "Simulation"
         ],
         "responses": {
           "200": {

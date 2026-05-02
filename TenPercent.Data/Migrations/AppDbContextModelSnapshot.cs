@@ -599,6 +599,9 @@ namespace TenPercent.Data.Migrations
                     b.Property<bool>("IsSimulationRunning")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("NextMatchdayDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.ToTable("WorldStates");

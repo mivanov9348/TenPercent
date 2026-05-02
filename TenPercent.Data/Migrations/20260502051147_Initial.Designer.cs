@@ -12,8 +12,8 @@ using TenPercent.Data;
 namespace TenPercent.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260501073332_initial")]
-    partial class initial
+    [Migration("20260502051147_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -478,6 +478,9 @@ namespace TenPercent.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CurrentGameweek")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
@@ -489,6 +492,9 @@ namespace TenPercent.Data.Migrations
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalGameweeks")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -590,20 +596,14 @@ namespace TenPercent.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CurrentGameweek")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentSeasonId")
+                    b.Property<int?>("CurrentSeasonId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsSimulationRunning")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("NextMatchdayDate")
+                    b.Property<DateTime?>("NextMatchdayDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("TotalGameweeks")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

@@ -21,6 +21,8 @@ builder.Services.AddScoped<ISeasonService, SeasonService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<ILeagueService, LeagueService>();
 builder.Services.AddScoped<IFixtureService, FixtureService>();
+builder.Services.AddScoped<IMatchEngineService, MatchEngineService>();
+builder.Services.AddScoped<ISimulationService, SimulationService>();
 
 builder.Services.AddCors(options =>
 {
