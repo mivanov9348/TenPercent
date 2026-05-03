@@ -29,6 +29,38 @@
         }
       }
     },
+    "/api/Admin/import-positions": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Admin/import-leagues": {
       "post": {
         "tags": [
@@ -517,6 +549,18 @@
       "post": {
         "tags": [
           "Simulation"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Stats/season": {
+      "get": {
+        "tags": [
+          "Stats"
         ],
         "responses": {
           "200": {

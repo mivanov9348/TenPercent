@@ -1,12 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Trophy, Target, Medal, Globe, CalendarDays } from 'lucide-react';
+import { Trophy, Globe, CalendarDays, BarChart2 } from 'lucide-react';
 
 export default function WorldLayout() {
   const tabs = [
     { name: 'Standings', path: '/world/standings', icon: <Trophy size={18} /> },
-    { name: 'Fixtures', path: '/world/fixtures', icon: <CalendarDays size={18} /> }, // НОВИЯТ ТАБ
-    { name: 'Top Scorers', path: '/world/scorers', icon: <Target size={18} /> },
-    { name: 'Season Awards', path: '/world/awards', icon: <Medal size={18} /> },
+    { name: 'Fixtures', path: '/world/fixtures', icon: <CalendarDays size={18} /> }, 
+    { name: 'Season Stats', path: '/world/stats', icon: <BarChart2 size={18} /> },
   ];
 
   return (
@@ -19,7 +18,7 @@ export default function WorldLayout() {
           </div>
           <div>
             <h1 className="text-2xl font-black text-white uppercase tracking-wider">World Database</h1>
-            <p className="text-gray-400 text-sm">Explore global leagues, fixtures, rankings, and awards.</p>
+            <p className="text-gray-400 text-sm">Explore global leagues, fixtures, rankings, and stats.</p>
           </div>
         </div>
 

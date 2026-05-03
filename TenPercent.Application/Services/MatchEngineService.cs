@@ -81,12 +81,11 @@
                 });
             }
         }
-
         private double CalculateAttackPower(List<PlayerMatchPerformance> activePerformances, List<Player> roster)
         {
             if (!activePerformances.Any()) return 10;
             var activePlayers = roster.Where(p => activePerformances.Any(ap => ap.PlayerId == p.Id)).ToList();
-            var attackers = activePlayers.Where(p => p.Position == "ST" || p.Position == "MID").ToList();
+            var attackers = activePlayers.Where(p => p.Position.Abbreviation == "ST" || p.Position.Abbreviation == "MID").ToList();
             if (!attackers.Any()) return 30;
 
             return attackers.Average(p => p.Attributes.Shooting * 0.5 + p.Attributes.Passing * 0.3 + p.Attributes.Pace * 0.2);
@@ -96,7 +95,7 @@
         {
             if (!activePerformances.Any()) return 10;
             var activePlayers = roster.Where(p => activePerformances.Any(ap => ap.PlayerId == p.Id)).ToList();
-            var defenders = activePlayers.Where(p => p.Position == "DEF" || p.Position == "GK" || p.Position == "MID").ToList();
+            var defenders = activePlayers.Where(p => p.Position.Abbreviation == "DEF" || p.Position.Abbreviation == "GK" || p.Position.Abbreviation == "MID").ToList();
             if (!defenders.Any()) return 30;
 
             return defenders.Average(p => p.Attributes.Defending * 0.6 + p.Attributes.Physical * 0.4);
@@ -108,7 +107,7 @@
 
             var scorerProb = activePerformances.Select(perf => {
                 var p = roster.First(r => r.Id == perf.PlayerId);
-                int weight = p.Position == "ST" ? p.Attributes.Shooting * 3 : (p.Position == "MID" ? p.Attributes.Shooting : 10);
+                int weight = p.Position.Abbreviation == "ST" ? p.Attributes.Shooting * 3 : (p.Position.Abbreviation == "MID" ? p.Attributes.Shooting : 10);
                 return new { Perf = perf, Weight = weight };
             }).ToList();
 
@@ -120,7 +119,7 @@
             {
                 var assistProb = activePerformances.Where(p => p.PlayerId != scorerData.Perf.PlayerId).Select(perf => {
                     var p = roster.First(r => r.Id == perf.PlayerId);
-                    int weight = p.Position == "MID" ? p.Attributes.Passing * 3 : p.Attributes.Passing;
+                    int weight = p.Position.Abbreviation == "MID" ? p.Attributes.Passing * 3 : p.Attributes.Passing;
                     return new { Perf = perf, Weight = weight };
                 }).ToList();
 
@@ -185,7 +184,7 @@
                 if (perf.YellowCards > 0) rating -= 0.5m;
                 if (perf.RedCards > 0) rating -= 1.5m;
 
-                if (p.Position == "DEF" || p.Position == "GK")
+                if (p.Position.Abbreviation == "DEF" || p.Position.Abbreviation == "GK")
                 {
                     if (isCleanSheet && perf.MinutesPlayed > 60) rating += 1.0m;
                     else rating -= (opponentGoals * 0.3m);
@@ -195,7 +194,6 @@
             }
         }
 
-        // РЕШЕНИЕТО НА ГРЕШКАТА: Generic метод
         private T GetWeightedRandom<T>(List<T> items, Func<T, int> weightSelector)
         {
             int totalWeight = items.Sum(weightSelector);

@@ -32,7 +32,6 @@
 
             if (activeSeason != null)
             {
-                // 1. Предстоящи мачове (Current Gameweek)
                 upcomingFixtures = await _context.Fixtures
                     .Include(f => f.HomeClub)
                     .Include(f => f.AwayClub)
@@ -50,7 +49,6 @@
                     .Cast<object>()
                     .ToListAsync();
 
-                // 2. Минали мачове (Current Gameweek - 1)
                 if (activeSeason.CurrentGameweek > 1)
                 {
                     previousFixtures = await _context.Fixtures
@@ -74,8 +72,10 @@
                 }
             }
 
+            // CRITICAL FIX: Ensure Position is selected as a string (Abbreviation)
             var topPlayers = await _context.Players
                 .Include(p => p.Club)
+                .Include(p => p.Position) // Ensure Position is included
                 .OrderByDescending(p => p.CurrentAbility)
                 .Take(5)
                 .Select(p => new
@@ -84,7 +84,7 @@
                     Name = p.Name,
                     Club = p.Club != null ? p.Club.Name : "Free Agent",
                     OVR = p.CurrentAbility,
-                    Position = p.Position
+                    Position = p.Position != null ? p.Position.Abbreviation : "UNK" // Changed this line
                 })
                 .ToListAsync();
 
@@ -98,24 +98,22 @@
                     CurrentGameweek = activeSeason?.CurrentGameweek ?? 0,
                     TotalGameweeks = activeSeason?.TotalGameweeks ?? 0,
                     IsSeasonActive = activeSeason != null && activeSeason.IsActive,
-                    NextMatchdayDate = worldState.NextMatchdayDate // <-- Оправено!
+                    NextMatchdayDate = worldState.NextMatchdayDate
                 },
                 UpcomingMatches = upcomingFixtures,
-                PreviousMatches = previousFixtures, // <-- Оправено!
+                PreviousMatches = previousFixtures,
                 TopPlayers = topPlayers,
                 ClientMatches = new List<object>(),
                 ClientReports = new List<object>()
             });
         }
 
-        // --- НОВ ЕНДПОЙНТ: ТОП РЕАЛИЗАТОРИ В СВЕТА ---
         [HttpGet("top-scorers")]
         public async Task<IActionResult> GetTopScorers()
         {
             var activeSeason = await _context.Seasons.FirstOrDefaultAsync(s => s.IsActive);
             if (activeSeason == null) return Ok(new List<object>());
 
-            // Агрегираме головете от всички мачове през текущия сезон
             var topScorers = await _context.PlayerMatchPerformances
                 .Include(pmp => pmp.Player)
                 .ThenInclude(p => p.Club)
@@ -127,10 +125,10 @@
                     Name = g.Key.Name,
                     Team = g.Key.ClubName,
                     Goals = g.Sum(x => x.Goals),
-                    Matches = g.Count() // В колко мача е участвал
+                    Matches = g.Count()
                 })
                 .OrderByDescending(g => g.Goals)
-                .ThenBy(g => g.Matches) // При равни голове, този с по-малко мачове е по-напред
+                .ThenBy(g => g.Matches)
                 .Take(50)
                 .ToListAsync();
 

@@ -5,8 +5,10 @@
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int Age { get; set; }
-        public string Position { get; set; } = string.Empty; // ST, MID, DEF, GK
         public string Nationality { get; set; } = string.Empty;
+
+        public int PositionId { get; set; }
+        public Position Position { get; set; } = null!;
 
         public int CurrentAbility { get; set; }   // CA: 1-100 
         public int PotentialAbility { get; set; } // PA: 1-100 

@@ -15,8 +15,7 @@ import CreateAgency from './pages/auth/CreateAgency';
 import WorldLayout from './pages/world/WorldLayout';
 import Standings from './pages/world/Standings';
 import Fixtures from './pages/world/Fixtures';
-import Scorers from './pages/world/Scorers';
-import Awards from './pages/world/Awards';
+import SeasonStats from './pages/world/SeasonStats';
 import Inbox from './pages/Inbox';
 import PlayerDetails from './pages/world/PlayerDetails';
 
@@ -29,15 +28,13 @@ import ClubDetails from './pages/world/ClubDetails';
 import ScoutingPool from './pages/ScoutingPool';
 
 function App() {
-  // Проверяваме дали вече сме логнати, за да пренасочим от /login към / директно
-  const isLoggedIn = !!localStorage.getItem('userId');
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Публични страници */}
-        <Route path="/login" element={isLoggedIn ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/register" element={isLoggedIn ? <Navigate to="/" replace /> : <Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         <Route path="/admin" element={
           <RequireAdmin>
@@ -45,13 +42,11 @@ function App() {
           </RequireAdmin>
         } />
 
-        {/* Защитени страници - ПЪРВО ниво (Трябва да си логнат) */}
+        {/* Защитени страници - ПЪРВО ниво */}
         <Route element={<RequireAuth />}>
-
-          {/* Стъпката за създаване на агенция (изисква само логин) */}
           <Route path="/create-agency" element={<CreateAgency />} />
 
-          {/* Защитени страници - ВТОРО ниво (Трябва да имаш Агенция) */}
+          {/* Защитени страници - ВТОРО ниво */}
           <Route element={<RequireAgency />}>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
@@ -62,22 +57,18 @@ function App() {
               <Route path="scouting-pool" element={<ScoutingPool />} />
 
               <Route path="world">
-                {/* WorldLayout важи САМО за тези 3 таба */}
                 <Route element={<WorldLayout />}>
                   <Route index element={<Navigate to="standings" replace />} />
                   <Route path="standings" element={<Standings />} />
-                  <Route path="fixtures" element={<Fixtures />} /> {/* НОВИЯТ ТАБ */}
-                  <Route path="scorers" element={<Scorers />} />
-                  <Route path="awards" element={<Awards />} />
+                  <Route path="fixtures" element={<Fixtures />} />
+                  <Route path="stats" element={<SeasonStats />} /> {/* ПРОМЕНЕНО */}
                 </Route>
 
                 <Route path="club/:id" element={<ClubDetails />} />
-                {/* НОВ МАРШРУТ ЗА ИГРАЧ: */}
                 <Route path="player/:id" element={<PlayerDetails />} />
               </Route>
             </Route>
           </Route>
-
         </Route>
       </Routes>
     </BrowserRouter>

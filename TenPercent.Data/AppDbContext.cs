@@ -18,6 +18,7 @@
         // --- ИГРАЧИ ---
         public DbSet<Player> Players { get; set; }
         public DbSet<PlayerAttributes> PlayerAttributes { get; set; }
+        public DbSet<Position> Positions { get; set; } 
 
         // --- СВЯТ И ОТБОРИ ---
         public DbSet<Club> Clubs { get; set; }

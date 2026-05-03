@@ -288,9 +288,8 @@ namespace TenPercent.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Position")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PositionId")
+                        .HasColumnType("int");
 
                     b.Property<int>("PotentialAbility")
                         .HasColumnType("int");
@@ -304,6 +303,8 @@ namespace TenPercent.Data.Migrations
                     b.HasIndex("AgencyId");
 
                     b.HasIndex("ClubId");
+
+                    b.HasIndex("PositionId");
 
                     b.ToTable("Players");
                 });
@@ -465,6 +466,29 @@ namespace TenPercent.Data.Migrations
                     b.HasIndex("SeasonId");
 
                     b.ToTable("PlayerSeasonStats");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Position", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Abbreviation")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Positions");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Season", b =>
@@ -706,9 +730,17 @@ namespace TenPercent.Data.Migrations
                         .HasForeignKey("ClubId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("TenPercent.Data.Models.Position", "Position")
+                        .WithMany("Players")
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Agency");
 
                     b.Navigation("Club");
+
+                    b.Navigation("Position");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.PlayerAttributes", b =>
@@ -829,6 +861,11 @@ namespace TenPercent.Data.Migrations
                 {
                     b.Navigation("Attributes")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Position", b =>
+                {
+                    b.Navigation("Players");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Season", b =>

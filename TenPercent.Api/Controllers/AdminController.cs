@@ -5,7 +5,10 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using System.Globalization;
-    using TenPercent.Api.DTOs;
+    using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Collections.Generic;
     using TenPercent.Application.Interfaces;
     using TenPercent.Application.Services.Interfaces;
     using TenPercent.Data;
@@ -31,7 +34,7 @@
         {
             if (await _context.WorldStates.AnyAsync())
             {
-                return Ok(new { message = "World Engine is already initialized and running." }); // Променено на Ok
+                return Ok(new { message = "World Engine is already initialized and running." });
             }
 
             var worldState = new WorldState
@@ -43,7 +46,7 @@
             _context.WorldStates.Add(worldState);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "World Engine Initialized Successfully! You can now import leagues and clubs." });
+            return Ok(new { message = "World Engine Initialized Successfully! You can now import data." });
         }
 
         [HttpGet("world-state")]
@@ -66,7 +69,50 @@
                 TotalGameweeks = activeSeason?.TotalGameweeks ?? 0,
                 IsSeasonActive = activeSeason != null && activeSeason.IsActive,
                 IsSimulationRunning = worldState.IsSimulationRunning,
+                NextMatchdayDate = worldState.NextMatchdayDate // Уверих се, че и тук се връща!
             });
+        }
+
+        [HttpPost("import-positions")]
+        public async Task<IActionResult> ImportPositions(IFormFile file)
+        {
+            if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
+            if (file == null || file.Length == 0) return BadRequest("Please upload a valid positions.csv file.");
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                DetectDelimiter = true,
+                ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
+            };
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, config);
+            csv.Read(); csv.ReadHeader();
+
+            var positions = new List<Position>();
+            while (csv.Read())
+            {
+                var name = csv.GetField<string>("Name");
+                var abbr = csv.GetField<string>("Abbreviation");
+
+                if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(abbr))
+                {
+                    // Проверка дали вече не съществува, за да не дублираме
+                    if (!await _context.Positions.AnyAsync(p => p.Abbreviation == abbr))
+                    {
+                        positions.Add(new Position { Name = name, Abbreviation = abbr });
+                    }
+                }
+            }
+
+            if (positions.Any())
+            {
+                _context.Positions.AddRange(positions);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = $"Successfully imported {positions.Count} positions." });
+            }
+
+            return Ok(new { message = "No new positions imported. They might already exist." });
         }
 
         [HttpPost("import-leagues")]
@@ -78,13 +124,12 @@
             if (file == null || file.Length == 0)
                 return BadRequest("Please upload a valid leagues.csv file.");
 
-            // Обновяваме конфигурацията за по-добра съвместимост
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = true,
-                Delimiter = ";", // Изрично указваме точка и запетая
-                PrepareHeaderForMatch = args => args.Header.Trim().ToLower(), // Игнорираме малки/главни букви и интервали
-                MissingFieldFound = null, // Предотвратява краш, ако някоя колона напълно липсва
+                Delimiter = ";",
+                PrepareHeaderForMatch = args => args.Header.Trim().ToLower(),
+                MissingFieldFound = null,
                 ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
             };
 
@@ -97,7 +142,6 @@
             var leagues = new List<League>();
             while (csv.Read())
             {
-                // Използваме TryGetField, за да не гърми програмата, ако колоната липсва във файла
                 csv.TryGetField<string>("name", out var name);
                 csv.TryGetField<string>("country", out var country);
                 csv.TryGetField<int>("reputation", out var reputation);
@@ -108,7 +152,7 @@
                     {
                         Name = name,
                         Country = country ?? "",
-                        Reputation = reputation // Ако колоната липсва, ще бъде по подразбиране 0
+                        Reputation = reputation
                     });
                 }
             }
@@ -182,7 +226,6 @@
             if (worldState == null || worldState.CurrentSeasonId == null)
                 return BadRequest("World Engine is not running an active season.");
 
-            // ПРОМЯНА: Ако вече има класирания, връщаме ОК със съобщение, че вече са създадени.
             if (await _context.LeagueStandings.AnyAsync())
                 return Ok(new { message = "Standings are already initialized for the current season. Ready for fixtures!" });
 
@@ -227,7 +270,6 @@
             if (!await _context.LeagueStandings.AnyAsync())
                 return BadRequest("Standings are missing! Please Initialize Standings before generating fixtures.");
 
-            // ПРОМЯНА: Ако вече има мачове, връщаме ОК.
             if (await _context.Fixtures.AnyAsync(f => f.SeasonId == activeSeason.Id))
                 return Ok(new { message = "Match Schedule is already generated for the active season. The simulation is ready!" });
 
@@ -275,21 +317,26 @@
         public async Task<IActionResult> GetSquadReport()
         {
             if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
-            var clubs = await _context.Clubs.Include(c => c.Players).ToListAsync();
+
+            var clubs = await _context.Clubs
+                .Include(c => c.Players)
+                .ThenInclude(p => p.Position)
+                .ToListAsync();
+
             var report = new List<object>();
 
             foreach (var club in clubs)
             {
-                var gks = club.Players.Count(p => p.Position == "GK");
-                var defs = club.Players.Count(p => p.Position == "DEF");
-                var mids = club.Players.Count(p => p.Position == "MID");
-                var sts = club.Players.Count(p => p.Position == "ST");
+                var gks = club.Players.Count(p => p.Position?.Abbreviation == "GK");
+                var defs = club.Players.Count(p => p.Position?.Abbreviation == "DEF");
+                var mids = club.Players.Count(p => p.Position?.Abbreviation == "MID");
+                var sts = club.Players.Count(p => p.Position?.Abbreviation == "ST");
                 var total = club.Players.Count;
 
                 var missingPositions = new List<string>();
                 if (gks < 1) missingPositions.Add("GK");
-                if (defs < 4) missingPositions.Add("DEF (Needs " + (4 - defs) + ")");
-                if (mids < 4) missingPositions.Add("MID (Needs " + (4 - mids) + ")");
+                if (defs < 4) missingPositions.Add("CB (Needs " + (4 - defs) + ")");
+                if (mids < 4) missingPositions.Add("CM (Needs " + (4 - mids) + ")");
                 if (sts < 2) missingPositions.Add("ST (Needs " + (2 - sts) + ")");
                 if (total < 16) missingPositions.Add($"Total Depth (Needs {16 - total} more)");
 
@@ -303,11 +350,25 @@
             return Ok(new { message = "Открити са проблеми в съставите.", issues = report });
         }
 
+
         [HttpPost("squad-autofix")]
         public async Task<IActionResult> AutoFixSquads()
         {
             if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
-            var clubs = await _context.Clubs.Include(c => c.Players).ToListAsync();
+
+            // Взимаме всички позиции от базата
+            var allPositions = await _context.Positions.ToListAsync();
+            var posGk = allPositions.FirstOrDefault(p => p.Abbreviation == "GK");
+            var posCb = allPositions.FirstOrDefault(p => p.Abbreviation == "DEF");
+            var posCm = allPositions.FirstOrDefault(p => p.Abbreviation == "MID");
+            var posSt = allPositions.FirstOrDefault(p => p.Abbreviation == "ST");
+
+            if (posGk == null || posCb == null || posCm == null || posSt == null)
+            {
+                return BadRequest("Моля, първо импортирайте позициите (GK, DEF, MID, ST) чрез Import Positions бутона!");
+            }
+
+            var clubs = await _context.Clubs.Include(c => c.Players).ThenInclude(p => p.Position).ToListAsync();
             var newPlayers = new List<Player>();
             int fixedClubsCount = 0;
 
@@ -315,32 +376,32 @@
             {
                 if (club.Players.Count == 0)
                 {
-                    var fullSquad = _playerGen.GenerateFullSquadForClub(club.Id, club.Reputation);
+                    // Подаваме позициите на генератора
+                    var fullSquad = _playerGen.GenerateFullSquadForClub(club.Id, club.Reputation, allPositions);
                     newPlayers.AddRange(fullSquad);
                     fixedClubsCount++;
                 }
                 else
                 {
                     bool neededFix = false;
-                    string backupTier = "Backup";
 
-                    int gks = club.Players.Count(p => p.Position == "GK");
-                    while (gks < 1) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "GK")); gks++; neededFix = true; }
+                    int gks = club.Players.Count(p => p.PositionId == posGk.Id);
+                    while (gks < 1) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, posGk)); gks++; neededFix = true; }
 
-                    int defs = club.Players.Count(p => p.Position == "DEF");
-                    while (defs < 4) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "DEF")); defs++; neededFix = true; }
+                    int defs = club.Players.Count(p => p.PositionId == posCb.Id);
+                    while (defs < 4) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, posCb)); defs++; neededFix = true; }
 
-                    int mids = club.Players.Count(p => p.Position == "MID");
-                    while (mids < 4) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "MID")); mids++; neededFix = true; }
+                    int mids = club.Players.Count(p => p.PositionId == posCm.Id);
+                    while (mids < 4) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, posCm)); mids++; neededFix = true; }
 
-                    int sts = club.Players.Count(p => p.Position == "ST");
-                    while (sts < 2) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, "ST")); sts++; neededFix = true; }
+                    int sts = club.Players.Count(p => p.PositionId == posSt.Id);
+                    while (sts < 2) { newPlayers.Add(_playerGen.GeneratePlayer("Normal", club.Id, posSt)); sts++; neededFix = true; }
 
                     int currentTotal = club.Players.Count + newPlayers.Count(p => p.ClubId == club.Id);
                     while (currentTotal < 16)
                     {
-                        string randomTier = new Random().NextDouble() > 0.5 ? "Prospect" : backupTier;
-                        newPlayers.Add(_playerGen.GeneratePlayer(randomTier, club.Id, null));
+                        string randomTier = new System.Random().NextDouble() > 0.5 ? "Prospect" : "Backup";
+                        newPlayers.Add(_playerGen.GeneratePlayer(randomTier, club.Id, posCm)); // Пълним дупките с CM
                         currentTotal++;
                         neededFix = true;
                     }

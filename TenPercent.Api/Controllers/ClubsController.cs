@@ -51,10 +51,10 @@
                 club.WageBudget,
                 Squad = new
                 {
-                    Goalkeepers = cleanPlayers.Where(p => p.Position == "GK").OrderByDescending(p => p.Overall).ToList(),
-                    Defenders = cleanPlayers.Where(p => p.Position == "DEF").OrderByDescending(p => p.Overall).ToList(),
-                    Midfielders = cleanPlayers.Where(p => p.Position == "MID").OrderByDescending(p => p.Overall).ToList(),
-                    Strikers = cleanPlayers.Where(p => p.Position == "ST").OrderByDescending(p => p.Overall).ToList(),
+                    Goalkeepers = cleanPlayers.Where(p => p.Position.Abbreviation == "GK").OrderByDescending(p => p.Overall).ToList(),
+                    Defenders = cleanPlayers.Where(p => p.Position.Abbreviation == "DEF").OrderByDescending(p => p.Overall).ToList(),
+                    Midfielders = cleanPlayers.Where(p => p.Position.Abbreviation == "MID").OrderByDescending(p => p.Overall).ToList(),
+                    Strikers = cleanPlayers.Where(p => p.Position.Abbreviation == "ST").OrderByDescending(p => p.Overall).ToList(),
                 }
             };
 

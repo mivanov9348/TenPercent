@@ -43,6 +43,22 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "ImportPositions",
+    "RelativePath": "api/Admin/import-positions",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
     "Method": "InitializeStandings",
     "RelativePath": "api/Admin/initialize-standings",
     "HttpMethod": "POST",
@@ -345,6 +361,16 @@
     "Method": "PlayNextGameweek",
     "RelativePath": "api/Simulation/play-gameweek",
     "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.StatsController",
+    "Method": "GetSeasonStats",
+    "RelativePath": "api/Stats/season",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],

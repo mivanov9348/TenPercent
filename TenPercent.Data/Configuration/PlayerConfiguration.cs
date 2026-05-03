@@ -18,6 +18,11 @@
                 .WithOne(pa => pa.Player)
                 .HasForeignKey<PlayerAttributes>(pa => pa.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(p => p.Position)
+                .WithMany(pos => pos.Players)
+                .HasForeignKey(p => p.PositionId)
+                .OnDelete(DeleteBehavior.Restrict); 
         }
     }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, XIcon, TrendingUp, Users, Globe, FastForward, Play, Power, PlayCircle, Trophy } from 'lucide-react';
+import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, TrendingUp, Users, Globe, FastForward, Play, Power, PlayCircle, Trophy, Calendar1Icon, Info, Clock } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -8,17 +8,16 @@ export default function AdminDashboard() {
   const [isEngineLoading, setIsEngineLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
-  // Състояние на света
   const [worldState, setWorldState] = useState<any>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
-  // Състояние за репорта
   const [squadReport, setSquadReport] = useState<any[] | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
   
-  // Състояние за резултата от симулацията
   const [simulationResultModal, setSimulationResultModal] = useState<{ show: boolean, message: string }>({ show: false, message: '' });
 
+  // РЕФОВЕ ЗА ФАЙЛОВЕТЕ
+  const positionFileInputRef = useRef<HTMLInputElement>(null); // НОВО
   const leagueFileInputRef = useRef<HTMLInputElement>(null);
   const clubFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -160,7 +159,7 @@ export default function AdminDashboard() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || data || "Failed to generate schedule");
       setMessage({ text: data.message, type: 'success' });
-      fetchWorldState(); // Обновяваме, за да вземем тоталните кръгове
+      fetchWorldState(); 
     } catch (err: any) {
       setMessage({ text: err.message, type: 'error' });
     } finally {
@@ -216,20 +215,17 @@ export default function AdminDashboard() {
     }
   };
 
-  // --- НОВО: МЕТОД ЗА СИМУЛАЦИЯ НА ДЕНЯ ---
   const handleSimulateMatchday = async () => {
     setIsLoading(true);
     setMessage(null);
     try {
-      // Викаме SimulationController-а
       const response = await fetch('https://localhost:7135/api/simulation/play-gameweek', { method: 'POST' });
       const data = await response.json();
       
       if (!response.ok) throw new Error(data.message || "Failed to simulate gameweek");
       
-      // Показваме модала с резултатите
       setSimulationResultModal({ show: true, message: data.message });
-      fetchWorldState(); // Обновяваме, за да се вдигне Gameweek-а и датата
+      fetchWorldState(); 
     } catch (err: any) {
       setMessage({ text: err.message, type: 'error' });
     } finally {
@@ -280,7 +276,6 @@ export default function AdminDashboard() {
                     <span className="text-gray-600">•</span>
                     <span className="text-blue-400">Gameweek: {worldState.currentGameweek} / {worldState.totalGameweeks}</span>
                     <span className="text-gray-600">•</span>
-                    {/* НОВО: Показваме датата */}
                     {worldState.nextMatchdayDate && (
                       <>
                         <span className="text-purple-400">Date: {new Date(worldState.nextMatchdayDate).toLocaleDateString()}</span>
@@ -314,70 +309,49 @@ export default function AdminDashboard() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* НОВО КАРЕ: IMPORT POSITIONS */}
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
+            <div className="w-16 h-16 bg-cyan-500/10 text-cyan-500 rounded-2xl flex items-center justify-center mb-4"><Upload size={32} /></div>
+            <h2 className="text-xl font-bold text-white mb-2">1. Import Positions</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Upload positions.csv. Defines tactical roles (GK, CB, CM, ST).</p>
+            <input type="file" accept=".csv" className="hidden" ref={positionFileInputRef} onChange={(e) => handleFileUpload(e, 'import-positions')} />
+            <button onClick={() => positionFileInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'UPLOAD POSITIONS'}
+            </button>
+          </div>
+
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-4"><Upload size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">1. Import Leagues</h2>
+            <h2 className="text-xl font-bold text-white mb-2">2. Import Leagues</h2>
             <p className="text-gray-500 text-sm mb-6 flex-1">Upload leagues.csv. Creates the base league structures.</p>
             <input type="file" accept=".csv" className="hidden" ref={leagueFileInputRef} onChange={(e) => handleFileUpload(e, 'import-leagues')} />
-            <button onClick={() => leagueFileInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50">
+            <button onClick={() => leagueFileInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
               {isLoading ? <Loader2 className="animate-spin" /> : 'UPLOAD LEAGUES'}
             </button>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-yellow-500/10 text-yellow-500 rounded-2xl flex items-center justify-center mb-4"><Database size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">2. Import Clubs</h2>
+            <h2 className="text-xl font-bold text-white mb-2">3. Import Clubs</h2>
             <p className="text-gray-500 text-sm mb-6 flex-1">Upload clubs.csv. Maps clubs to leagues but does NOT generate players.</p>
             <input type="file" accept=".csv" className="hidden" ref={clubFileInputRef} onChange={(e) => handleFileUpload(e, 'import-clubs')} />
-            <button onClick={() => clubFileInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50">
+            <button onClick={() => clubFileInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
               {isLoading ? <Loader2 className="animate-spin" /> : 'UPLOAD CLUBS'}
             </button>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center relative shadow-lg">
             <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mb-4"><ShieldAlert size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">3. Squad Compliance</h2>
+            <h2 className="text-xl font-bold text-white mb-2">4. Squad Compliance</h2>
             <p className="text-gray-500 text-sm mb-4 flex-1">Checks if teams have the required positions and fills empty spots.</p>
             {squadReport && !showReportModal && (
                <button onClick={() => setShowReportModal(true)} className="text-sm text-red-400 hover:text-red-300 underline mb-4 font-bold">View Current Report</button>
             )}
             <div className="flex w-full gap-2 mt-auto">
               <button onClick={handleSquadReport} disabled={isLoading} className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center">{isLoading ? <Loader2 className="animate-spin" size={20} /> : 'REPORT'}</button>
-              <button onClick={handleSquadFix} disabled={isLoading || !squadReport || squadReport.length === 0} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center">{isLoading ? <Loader2 className="animate-spin" size={20} /> : 'AUTO-FIX'}</button>
+              <button onClick={handleSquadFix} disabled={isLoading} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center">{isLoading ? <Loader2 className="animate-spin" size={20} /> : 'AUTO-FIX'}</button>
             </div>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
-            <div className="w-16 h-16 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center mb-4"><TrendingUp size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">7. Initialize Standings</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Creates the starting live standings (0 points) for all clubs. Required before generating fixtures.</p>
-            <button onClick={handleInitializeStandings} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
-              {isLoading ? <Loader2 className="animate-spin" /> : 'CREATE STANDINGS'}
-            </button>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
-            <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center mb-4"><Calendar size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">8. Match Schedule</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Generates the Round-Robin fixtures based on the active standings table.</p>
-            <button onClick={handleGenerateSchedule} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
-              {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE FIXTURES'}
-            </button>
-          </div>
-
-          {/* НОВО КАРЕ: СИМУЛАЦИЯ НА ДЕНЯ */}
-          <div className="bg-gray-900 border border-indigo-500/30 p-6 rounded-2xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(99,102,241,0.1)] relative overflow-hidden">
-            <div className="w-16 h-16 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mb-4 z-10"><PlayCircle size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2 z-10">9. Simulate Matchday</h2>
-            <p className="text-gray-500 text-sm mb-2 flex-1 z-10">Runs the match engine for all global fixtures scheduled for the current gameweek.</p>
-            {worldState?.nextMatchdayDate && (
-                <p className="text-xs font-bold text-indigo-400 mb-4 bg-indigo-500/10 px-3 py-1 rounded z-10">
-                  Target Date: {new Date(worldState.nextMatchdayDate).toLocaleDateString()}
-                </p>
-            )}
-            <button onClick={handleSimulateMatchday} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-30 z-10 mt-auto">
-              {isLoading ? <Loader2 className="animate-spin" /> : 'PLAY MATCHES'}
-            </button>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
@@ -399,10 +373,41 @@ export default function AdminDashboard() {
             </button>
           </div>
 
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
+            <div className="w-16 h-16 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center mb-4"><TrendingUp size={32} /></div>
+            <h2 className="text-xl font-bold text-white mb-2">7. Initialize Standings</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Creates the starting live standings (0 points) for all clubs. Required before generating fixtures.</p>
+            <button onClick={handleInitializeStandings} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'CREATE STANDINGS'}
+            </button>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
+            <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center mb-4"><Calendar size={32} /></div>
+            <h2 className="text-xl font-bold text-white mb-2">8. Match Schedule</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Generates the Round-Robin fixtures based on the active standings table.</p>
+            <button onClick={handleGenerateSchedule} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE FIXTURES'}
+            </button>
+          </div>
+
+          <div className="bg-gray-900 border border-indigo-500/30 p-6 rounded-2xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(99,102,241,0.1)] relative overflow-hidden">
+            <div className="w-16 h-16 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mb-4 z-10"><PlayCircle size={32} /></div>
+            <h2 className="text-xl font-bold text-white mb-2 z-10">9. Simulate Matchday</h2>
+            <p className="text-gray-500 text-sm mb-2 flex-1 z-10">Runs the match engine for all global fixtures scheduled for the current gameweek.</p>
+            {worldState?.nextMatchdayDate && (
+                <p className="text-xs font-bold text-indigo-400 mb-4 bg-indigo-500/10 px-3 py-1 rounded z-10">
+                  Target Date: {new Date(worldState.nextMatchdayDate).toLocaleDateString()}
+                </p>
+            )}
+            <button onClick={handleSimulateMatchday} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-30 z-10 mt-auto">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'PLAY MATCHES'}
+            </button>
+          </div>
+
         </div>
       </div>
 
-      {/* НОВ МОДАЛ: РЕЗУЛТАТ ОТ СИМУЛАЦИЯТА */}
       {simulationResultModal.show && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in">
           <div className="bg-gray-900 border border-indigo-500/50 rounded-2xl max-w-md w-full flex flex-col shadow-2xl overflow-hidden">

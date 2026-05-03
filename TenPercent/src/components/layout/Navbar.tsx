@@ -33,8 +33,7 @@ export default function Navbar() {
   // Логика за излизане от профила
   const handleLogout = () => {
     // 1. Изчистваме запазените данни
-    localStorage.removeItem('userId');
-    localStorage.removeItem('hasAgency');
+    localStorage.clear();
     
     // 2. Връщаме потребителя на екрана за вход
     navigate('/login');
