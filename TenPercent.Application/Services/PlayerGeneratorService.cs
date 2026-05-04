@@ -56,10 +56,8 @@
             decimal youthPremium = player.Age < 23 ? 1.5m : (player.Age > 30 ? 0.5m : 1.0m);
 
             player.MarketValue = (valueBase + potBonus) * youthPremium;
-            player.ContractYearsLeft = clubId.HasValue ? _rand.Next(1, 6) : 0;
 
             decimal greedFactor = 1.0m + (player.Attributes.Greed - 50m) / 100m;
-            player.WeeklyWage = clubId.HasValue ? (player.CurrentAbility * 1000m) * greedFactor : 0;
 
             return player;
         }
@@ -92,7 +90,6 @@
 
                 p.Attributes = GenerateAttributes(p);
                 p.MarketValue = (p.CurrentAbility * 150000m);
-                p.WeeklyWage = (p.CurrentAbility * 1000m);
             }
 
             return squad;

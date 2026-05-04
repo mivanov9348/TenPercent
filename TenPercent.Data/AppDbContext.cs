@@ -3,6 +3,7 @@
     using System.Reflection;
     using Microsoft.EntityFrameworkCore;
     using TenPercent.Data.Models;
+    using TenPercent.Data.Models.Finance;
 
     public class AppDbContext : DbContext
     {
@@ -33,6 +34,14 @@
 
         public DbSet<PlayerMatchPerformance> PlayerMatchPerformances { get; set; } // Текущ мач
         public DbSet<PlayerSeasonPerformance> PlayerSeasonStats { get; set; } // Архив сезон
+
+        public DbSet<ClubContract> ClubContracts { get; set; }
+        public DbSet<RepresentationContract> RepresentationContracts { get; set; }
+
+        public DbSet<Bank> Banks { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+
+        public DbSet<EconomySettings> EconomySettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

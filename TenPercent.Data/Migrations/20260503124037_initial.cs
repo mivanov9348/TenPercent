@@ -12,6 +12,38 @@ namespace TenPercent.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Banks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReserveBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Banks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EconomySettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AgencyStartupGrant = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AgencyIncomeTaxRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    InitialBankReserve = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ClubBaseGrant = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ClubReputationMultiplier = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ClubWageBudgetPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EconomySettings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Leagues",
                 columns: table => new
                 {
@@ -56,6 +88,26 @@ namespace TenPercent.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Seasons", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SenderType = table.Column<int>(type: "int", nullable: false),
+                    SenderId = table.Column<int>(type: "int", nullable: true),
+                    ReceiverType = table.Column<int>(type: "int", nullable: false),
+                    ReceiverId = table.Column<int>(type: "int", nullable: true),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transactions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -295,8 +347,6 @@ namespace TenPercent.Data.Migrations
                     CurrentAbility = table.Column<int>(type: "int", nullable: false),
                     PotentialAbility = table.Column<int>(type: "int", nullable: false),
                     MarketValue = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    WeeklyWage = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    ContractYearsLeft = table.Column<int>(type: "int", nullable: false),
                     Form = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClubId = table.Column<int>(type: "int", nullable: true),
                     AgencyId = table.Column<int>(type: "int", nullable: true)
@@ -322,6 +372,41 @@ namespace TenPercent.Data.Migrations
                         principalTable: "Positions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClubContracts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PlayerId = table.Column<int>(type: "int", nullable: false),
+                    ClubId = table.Column<int>(type: "int", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    WeeklyWage = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    SigningBonus = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    AppearanceBonus = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    GoalBonus = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    CleanSheetBonus = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    ReleaseClause = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClubContracts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClubContracts_Clubs_ClubId",
+                        column: x => x.ClubId,
+                        principalTable: "Clubs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ClubContracts_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -431,6 +516,39 @@ namespace TenPercent.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RepresentationContracts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PlayerId = table.Column<int>(type: "int", nullable: false),
+                    AgencyId = table.Column<int>(type: "int", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    WageCommissionPercentage = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    TransferCommissionPercentage = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    SigningBonusPaid = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    AgencyReleaseClause = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RepresentationContracts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RepresentationContracts_Agencies_AgencyId",
+                        column: x => x.AgencyId,
+                        principalTable: "Agencies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RepresentationContracts_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Agencies_AgentId",
                 table: "Agencies",
@@ -442,6 +560,16 @@ namespace TenPercent.Data.Migrations
                 table: "Agents",
                 column: "UserId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClubContracts_ClubId",
+                table: "ClubContracts",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClubContracts_PlayerId",
+                table: "ClubContracts",
+                column: "PlayerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Clubs_LeagueId",
@@ -526,6 +654,16 @@ namespace TenPercent.Data.Migrations
                 column: "SeasonId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RepresentationContracts_AgencyId",
+                table: "RepresentationContracts",
+                column: "AgencyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RepresentationContracts_PlayerId",
+                table: "RepresentationContracts",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SeasonStandings_ClubId",
                 table: "SeasonStandings",
                 column: "ClubId");
@@ -545,6 +683,15 @@ namespace TenPercent.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Banks");
+
+            migrationBuilder.DropTable(
+                name: "ClubContracts");
+
+            migrationBuilder.DropTable(
+                name: "EconomySettings");
+
+            migrationBuilder.DropTable(
                 name: "LeagueStandings");
 
             migrationBuilder.DropTable(
@@ -557,7 +704,13 @@ namespace TenPercent.Data.Migrations
                 name: "PlayerSeasonStats");
 
             migrationBuilder.DropTable(
+                name: "RepresentationContracts");
+
+            migrationBuilder.DropTable(
                 name: "SeasonStandings");
+
+            migrationBuilder.DropTable(
+                name: "Transactions");
 
             migrationBuilder.DropTable(
                 name: "WorldStates");

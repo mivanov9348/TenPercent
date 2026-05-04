@@ -1,21 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TenPercent.Api.DTOs;
-using TenPercent.Data;
-using TenPercent.Data.Models;
-using BCrypt.Net;
-
-namespace TenPercent.Api.Controllers
+﻿namespace TenPercent.Api.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using TenPercent.Api.DTOs;
+    using TenPercent.Application.Services.Interfaces;
+    using TenPercent.Data;
+    using TenPercent.Data.Models;
+
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IAgencyService _agencyService; 
 
-        public AuthController(AppDbContext context)
+        public AuthController(AppDbContext context, IAgencyService agencyService)
         {
             _context = context;
+            _agencyService = agencyService;
         }
 
         // POST: api/auth/register
@@ -67,36 +69,17 @@ namespace TenPercent.Api.Controllers
             });
         }
 
-        // POST: api/auth/create-agency
         [HttpPost("create-agency")]
         public async Task<IActionResult> CreateAgency(CreateAgencyDto dto)
         {
-            // 1. Намираме потребителя
-            var user = await _context.Users.Include(u => u.Agent).FirstOrDefaultAsync(u => u.Id == dto.UserId);
-            if (user == null) return NotFound("User not found.");
+            var result = await _agencyService.CreateAgencyAsync(dto);
 
-            if (user.Agent != null) return BadRequest("This user already has an agency.");
-
-            // 2. Създаваме Агента
-            var agent = new Agent
+            if (!result.Success)
             {
-                Name = dto.AgentName,
-                UserId = user.Id
-            };
+                return BadRequest(new { message = result.Message });
+            }
 
-            // 3. Създаваме Агенцията и я връзваме с Агента
-            var agency = new Agency
-            {
-                Name = dto.AgencyName,
-                LogoId = dto.LogoId,
-                Agent = agent // EF Core автоматично ще свърже ID-тата!
-            };
-
-            _context.Agents.Add(agent);
-            _context.Agencies.Add(agency);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Agency created successfully! Welcome to the game." });
+            return Ok(new { message = result.Message });
         }
     }
 }

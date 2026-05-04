@@ -1,12 +1,17 @@
 ﻿namespace TenPercent.Data.Models
 {
+    using System;
+    using System.Collections.Generic;
+
     public class Agency
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int LogoId { get; set; }
-        public decimal Budget { get; set; } = 10000000m;
-        public int Reputation { get; set; } = 0; 
+
+        public decimal Budget { get; set; } = 0m;
+
+        public int Reputation { get; set; } = 0;
         public int Level { get; set; } = 1;
         public DateTime EstablishedAt { get; set; } = DateTime.UtcNow;
 

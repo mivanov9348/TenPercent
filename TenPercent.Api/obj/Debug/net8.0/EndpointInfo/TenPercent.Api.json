@@ -219,6 +219,48 @@
         }
       }
     },
+    "/api/Agency/{userId}/offer-contract": {
+      "post": {
+        "tags": [
+          "Agency"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferRepresentationDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferRepresentationDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferRepresentationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Auth/register": {
       "post": {
         "tags": [
@@ -351,6 +393,29 @@
       "get": {
         "tags": [
           "Dashboard"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Finance/initialize": {
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "parameters": [
+          {
+            "name": "bankBudget",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "default": 100000000000
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -604,6 +669,36 @@
           "password": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OfferRepresentationDto": {
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "durationYears": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wageCommissionPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "transferCommissionPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "signingBonusPaid": {
+            "type": "number",
+            "format": "double"
+          },
+          "agencyReleaseClause": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false

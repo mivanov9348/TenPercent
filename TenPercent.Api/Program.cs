@@ -23,6 +23,11 @@ builder.Services.AddScoped<ILeagueService, LeagueService>();
 builder.Services.AddScoped<IFixtureService, FixtureService>();
 builder.Services.AddScoped<IMatchEngineService, MatchEngineService>();
 builder.Services.AddScoped<ISimulationService, SimulationService>();
+builder.Services.AddScoped<IAgencyService, AgencyService>();
+builder.Services.AddScoped<IFinanceService, FinanceService>();
+builder.Services.AddScoped<IPlayerContractService, PlayerContractService>();
+builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<IClubService, ClubService>();
 
 builder.Services.AddCors(options =>
 {

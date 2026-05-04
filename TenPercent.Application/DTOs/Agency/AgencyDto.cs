@@ -1,4 +1,4 @@
-﻿namespace TenPercent.Api.DTOs
+﻿namespace TenPercent.Application.DTOs
 {
     public class AgencyDto
     {

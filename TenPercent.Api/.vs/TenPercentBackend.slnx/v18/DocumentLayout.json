@@ -1,18 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Projects\\TenPercent\\TenPercent.Api\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\agencycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\agencycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\agency.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\agent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -20,50 +9,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AgencyController.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\AgencyController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AgencyController.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\AgencyController.cs",
-              "RelativeToolTip": "Controllers\\AgencyController.cs",
-              "ViewState": "AgIAADwAAAAAAAAAAAAuwFAAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-02T18:37:37.268Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Agency.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Agency.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Agency.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Agency.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Agency.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAA/wBIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-02T18:37:30.113Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Agent.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Agent.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Agent.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Agent.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Agent.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-02T18:37:26.114Z",
-              "EditorCaption": ""
             }
           ]
         }

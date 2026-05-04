@@ -125,6 +125,27 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.AgencyController",
+    "Method": "OfferRepresentation",
+    "RelativePath": "api/Agency/{userId}/offer-contract",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "TenPercent.Api.DTOs.OfferRepresentationDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AgencyController",
     "Method": "GetAgencyPlayers",
     "RelativePath": "api/Agency/{userId}/players",
     "HttpMethod": "GET",
@@ -221,6 +242,22 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.FinanceController",
+    "Method": "InitializeEconomy",
+    "RelativePath": "api/Finance/initialize",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bankBudget",
+        "Type": "System.Decimal",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {

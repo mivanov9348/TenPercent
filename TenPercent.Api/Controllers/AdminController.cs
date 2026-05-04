@@ -21,12 +21,15 @@
         private readonly AppDbContext _context;
         private readonly IPlayerGeneratorService _playerGen;
         private readonly IScheduleService _scheduleService;
+        private readonly IPlayerContractService _contractService;
 
-        public AdminController(AppDbContext context, IPlayerGeneratorService playerGen, IScheduleService scheduleService)
+        public AdminController(AppDbContext context, IPlayerGeneratorService playerGen, IScheduleService scheduleService, IPlayerContractService _contractService)
         {
             _context = context;
             _playerGen = playerGen;
             _scheduleService = scheduleService;
+                this._contractService = _contractService;
+                this._contractService = _contractService;
         }
 
         [HttpPost("initialize-world")]
@@ -356,7 +359,6 @@
         {
             if (!await _context.WorldStates.AnyAsync()) return BadRequest("World Engine must be initialized first!");
 
-            // Взимаме всички позиции от базата
             var allPositions = await _context.Positions.ToListAsync();
             var posGk = allPositions.FirstOrDefault(p => p.Abbreviation == "GK");
             var posCb = allPositions.FirstOrDefault(p => p.Abbreviation == "DEF");
@@ -376,7 +378,6 @@
             {
                 if (club.Players.Count == 0)
                 {
-                    // Подаваме позициите на генератора
                     var fullSquad = _playerGen.GenerateFullSquadForClub(club.Id, club.Reputation, allPositions);
                     newPlayers.AddRange(fullSquad);
                     fixedClubsCount++;
@@ -401,7 +402,7 @@
                     while (currentTotal < 16)
                     {
                         string randomTier = new System.Random().NextDouble() > 0.5 ? "Prospect" : "Backup";
-                        newPlayers.Add(_playerGen.GeneratePlayer(randomTier, club.Id, posCm)); // Пълним дупките с CM
+                        newPlayers.Add(_playerGen.GeneratePlayer(randomTier, club.Id, posCm));
                         currentTotal++;
                         neededFix = true;
                     }
@@ -414,10 +415,17 @@
             {
                 _context.Players.AddRange(newPlayers);
                 await _context.SaveChangesAsync();
-                return Ok(new { message = $"Успешно поправени {fixedClubsCount} отбора. Генерирани {newPlayers.Count} нови играчи." });
+
+                // НОВО: След като играчите са записани в базата, им генерираме договорите!
+                await _contractService.GenerateInitialContractsAsync();
+
+                return Ok(new { message = $"Успешно поправени {fixedClubsCount} отбора. Генерирани {newPlayers.Count} нови играчи с договори." });
             }
 
-            return Ok(new { message = "Няма нужда от поправка. Всички отбори са пълни." });
+            // Дори да няма нови играчи, проверяваме дали старите нямат нужда от договори
+            await _contractService.GenerateInitialContractsAsync();
+
+            return Ok(new { message = "Отборите са пълни. Договорите са актуализирани." });
         }
     }
 }

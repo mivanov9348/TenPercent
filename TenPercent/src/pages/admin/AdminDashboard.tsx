@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, TrendingUp, Users, Globe, FastForward, Play, Power, PlayCircle, Trophy, Calendar1Icon, Info, Clock } from 'lucide-react';
+import { Database, Calendar, LogOut, Loader2, CheckCircle2, AlertCircle, Upload, ShieldAlert, TrendingUp, Users, Globe, FastForward, Play, Power, PlayCircle, Trophy, CalendarDays, Info, Clock, Landmark } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   const [simulationResultModal, setSimulationResultModal] = useState<{ show: boolean, message: string }>({ show: false, message: '' });
 
   // РЕФОВЕ ЗА ФАЙЛОВЕТЕ
-  const positionFileInputRef = useRef<HTMLInputElement>(null); // НОВО
+  const positionFileInputRef = useRef<HTMLInputElement>(null);
   const leagueFileInputRef = useRef<HTMLInputElement>(null);
   const clubFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,6 +91,36 @@ export default function AdminDashboard() {
     } finally {
       setIsLoading(false);
       if(event.target) event.target.value = ''; 
+    }
+  };
+
+  // --- НОВО: Метод за инициализиране на икономиката ---
+  const handleInitializeEconomy = async () => {
+    // Изскачащо прозорче за сумата
+    const amountStr = window.prompt("Enter the starting budget for the World Central Bank:", "100000000000");
+    
+    // Ако потребителят натисне Cancel
+    if (amountStr === null) return; 
+
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount <= 0) {
+      setMessage({ text: "Invalid budget amount entered.", type: 'error' });
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      // Пращаме заявка към новия бекенд контролер (който ще направим след малко)
+      const response = await fetch(`https://localhost:7135/api/finance/initialize?bankBudget=${amount}`, { method: 'POST' });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.message || "Failed to initialize economy");
+      setMessage({ text: data.message, type: 'success' });
+    } catch (err: any) {
+      setMessage({ text: err.message, type: 'error' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -310,7 +340,6 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* НОВО КАРЕ: IMPORT POSITIONS */}
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-cyan-500/10 text-cyan-500 rounded-2xl flex items-center justify-center mb-4"><Upload size={32} /></div>
             <h2 className="text-xl font-bold text-white mb-2">1. Import Positions</h2>
@@ -341,10 +370,20 @@ export default function AdminDashboard() {
             </button>
           </div>
 
+          {/* НОВО КАРЕ: INITIALIZE ECONOMY */}
+          <div className="bg-gray-900 border border-green-500/30 p-6 rounded-2xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(34,197,94,0.1)] relative overflow-hidden">
+            <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-2xl flex items-center justify-center mb-4 z-10"><Landmark size={32} /></div>
+            <h2 className="text-xl font-bold text-white mb-2 z-10">4. Global Economy</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1 z-10">Creates the Central Bank and distributes initial transfer & wage budgets to all imported clubs.</p>
+            <button onClick={handleInitializeEconomy} disabled={isLoading} className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-30 z-10 mt-auto">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'INITIALIZE ECONOMY'}
+            </button>
+          </div>
+
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center relative shadow-lg">
             <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mb-4"><ShieldAlert size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">4. Squad Compliance</h2>
-            <p className="text-gray-500 text-sm mb-4 flex-1">Checks if teams have the required positions and fills empty spots.</p>
+            <h2 className="text-xl font-bold text-white mb-2">5. Squad Compliance</h2>
+            <p className="text-gray-500 text-sm mb-4 flex-1">Generates players for all clubs and signs them using the newly allocated club budgets.</p>
             {squadReport && !showReportModal && (
                <button onClick={() => setShowReportModal(true)} className="text-sm text-red-400 hover:text-red-300 underline mb-4 font-bold">View Current Report</button>
             )}
@@ -356,8 +395,8 @@ export default function AdminDashboard() {
 
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-4"><Users size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">5. Scouting Pool</h2>
-            <p className="text-gray-500 text-sm mb-6 flex-1">Generates 50 new free agents (mixed tiers) into the global scouting pool.</p>
+            <h2 className="text-xl font-bold text-white mb-2">6. Scouting Pool</h2>
+            <p className="text-gray-500 text-sm mb-6 flex-1">Generates new free agents into the global pool.</p>
             <button onClick={handleGenerateFreeAgents} disabled={isLoading} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
               {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE AGENTS'}
             </button>
@@ -366,7 +405,7 @@ export default function AdminDashboard() {
           <div className="bg-gray-900 border border-emerald-500/30 p-6 rounded-2xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.1)] relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] rounded-full pointer-events-none" />
             <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mb-4 z-10"><Play size={32} className="ml-1" /></div>
-            <h2 className="text-xl font-bold text-white mb-2 z-10">6. Start New Season</h2>
+            <h2 className="text-xl font-bold text-white mb-2 z-10">7. Start New Season</h2>
             <p className="text-gray-500 text-sm mb-6 flex-1 z-10">Initializes the next season. Warning: Only works if there is no currently active season.</p>
             <button onClick={handleStartNewSeason} disabled={isLoading || worldState?.isSeasonActive} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-30 z-10 mt-auto">
               {isLoading ? <Loader2 className="animate-spin" /> : 'INITIALIZE SEASON'}
@@ -375,7 +414,7 @@ export default function AdminDashboard() {
 
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center mb-4"><TrendingUp size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">7. Initialize Standings</h2>
+            <h2 className="text-xl font-bold text-white mb-2">8. Initialize Standings</h2>
             <p className="text-gray-500 text-sm mb-6 flex-1">Creates the starting live standings (0 points) for all clubs. Required before generating fixtures.</p>
             <button onClick={handleInitializeStandings} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
               {isLoading ? <Loader2 className="animate-spin" /> : 'CREATE STANDINGS'}
@@ -384,30 +423,29 @@ export default function AdminDashboard() {
 
           <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
             <div className="w-16 h-16 bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center mb-4"><Calendar size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2">8. Match Schedule</h2>
+            <h2 className="text-xl font-bold text-white mb-2">9. Match Schedule</h2>
             <p className="text-gray-500 text-sm mb-6 flex-1">Generates the Round-Robin fixtures based on the active standings table.</p>
             <button onClick={handleGenerateSchedule} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
               {isLoading ? <Loader2 className="animate-spin" /> : 'GENERATE FIXTURES'}
             </button>
           </div>
 
-          <div className="bg-gray-900 border border-indigo-500/30 p-6 rounded-2xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(99,102,241,0.1)] relative overflow-hidden">
+          <div className="bg-gray-900 border border-indigo-500/30 p-6 rounded-2xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(99,102,241,0.1)] relative overflow-hidden md:col-span-2 lg:col-span-3">
             <div className="w-16 h-16 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mb-4 z-10"><PlayCircle size={32} /></div>
-            <h2 className="text-xl font-bold text-white mb-2 z-10">9. Simulate Matchday</h2>
-            <p className="text-gray-500 text-sm mb-2 flex-1 z-10">Runs the match engine for all global fixtures scheduled for the current gameweek.</p>
+            <h2 className="text-xl font-bold text-white mb-2 z-10">10. Simulate Matchday</h2>
+            <p className="text-gray-500 text-sm mb-2 flex-1 z-10">Runs the match engine and processes all weekly financial transactions (wages, commissions).</p>
             {worldState?.nextMatchdayDate && (
                 <p className="text-xs font-bold text-indigo-400 mb-4 bg-indigo-500/10 px-3 py-1 rounded z-10">
                   Target Date: {new Date(worldState.nextMatchdayDate).toLocaleDateString()}
                 </p>
             )}
-            <button onClick={handleSimulateMatchday} disabled={isLoading || !worldState?.isSeasonActive} className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-30 z-10 mt-auto">
-              {isLoading ? <Loader2 className="animate-spin" /> : 'PLAY MATCHES'}
+            <button onClick={handleSimulateMatchday} disabled={isLoading || !worldState?.isSeasonActive} className="w-full md:w-1/2 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-30 z-10 mx-auto">
+              {isLoading ? <Loader2 className="animate-spin" /> : 'PLAY MATCHES & PAY WAGES'}
             </button>
           </div>
 
         </div>
       </div>
-
       {simulationResultModal.show && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in">
           <div className="bg-gray-900 border border-indigo-500/50 rounded-2xl max-w-md w-full flex flex-col shadow-2xl overflow-hidden">

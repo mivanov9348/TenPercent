@@ -12,7 +12,7 @@ using TenPercent.Data;
 namespace TenPercent.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260502113750_initial")]
+    [Migration("20260503124037_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -133,6 +133,151 @@ namespace TenPercent.Data.Migrations
                     b.HasIndex("LeagueId");
 
                     b.ToTable("Clubs");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.ClubContract", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AppearanceBonus")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CleanSheetBonus")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ClubId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("GoalBonus")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ReleaseClause")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SigningBonus")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("WeeklyWage")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("ClubContracts");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.EconomySettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AgencyIncomeTaxRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("AgencyStartupGrant")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ClubBaseGrant")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ClubReputationMultiplier")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ClubWageBudgetPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("InitialBankReserve")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EconomySettings");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Finance.Bank", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("ReserveBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Banks");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Finance.Transaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReceiverType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Fixture", b =>
@@ -269,9 +414,6 @@ namespace TenPercent.Data.Migrations
                     b.Property<int?>("ClubId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ContractYearsLeft")
-                        .HasColumnType("int");
-
                     b.Property<int>("CurrentAbility")
                         .HasColumnType("int");
 
@@ -296,10 +438,6 @@ namespace TenPercent.Data.Migrations
 
                     b.Property<int>("PotentialAbility")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("WeeklyWage")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -494,6 +632,54 @@ namespace TenPercent.Data.Migrations
                     b.ToTable("Positions");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.RepresentationContract", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AgencyId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("AgencyReleaseClause")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SigningBonusPaid")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("TransferCommissionPercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("WageCommissionPercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgencyId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("RepresentationContracts");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Season", b =>
                 {
                     b.Property<int>("Id")
@@ -667,6 +853,25 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("League");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.ClubContract", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.Club", "Club")
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TenPercent.Data.Models.Player", "Player")
+                        .WithMany("ClubContracts")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Club");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Fixture", b =>
                 {
                     b.HasOne("TenPercent.Data.Models.Club", "AwayClub")
@@ -802,6 +1007,25 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("Season");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.RepresentationContract", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.Agency", "Agency")
+                        .WithMany()
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TenPercent.Data.Models.Player", "Player")
+                        .WithMany("RepresentationContracts")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agency");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.SeasonStanding", b =>
                 {
                     b.HasOne("TenPercent.Data.Models.Club", "Club")
@@ -864,6 +1088,10 @@ namespace TenPercent.Data.Migrations
                 {
                     b.Navigation("Attributes")
                         .IsRequired();
+
+                    b.Navigation("ClubContracts");
+
+                    b.Navigation("RepresentationContracts");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Position", b =>

@@ -8,11 +8,8 @@
     {
         public void Configure(EntityTypeBuilder<Player> builder)
         {
-            builder.Property(p => p.MarketValue)
-                .HasPrecision(18, 2);
+            builder.Property(p => p.MarketValue).HasPrecision(18, 2);
 
-            builder.Property(p => p.WeeklyWage)
-                .HasPrecision(18, 2);
 
             builder.HasOne(p => p.Attributes)
                 .WithOne(pa => pa.Player)
@@ -22,7 +19,7 @@
             builder.HasOne(p => p.Position)
                 .WithMany(pos => pos.Players)
                 .HasForeignKey(p => p.PositionId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

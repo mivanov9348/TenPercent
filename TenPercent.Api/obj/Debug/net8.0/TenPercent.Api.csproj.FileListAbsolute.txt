@@ -128,7 +128,6 @@ D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.GeneratedM
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.AssemblyInfoInputs.cache
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.AssemblyInfo.cs
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.csproj.CoreCompileInputs.cache
-D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.MvcApplicationPartsAssemblyInfo.cs
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.MvcApplicationPartsAssemblyInfo.cache
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.sourcelink.json
 D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\rjimswa.dswa.cache.json

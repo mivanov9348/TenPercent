@@ -10,12 +10,10 @@
         public int PositionId { get; set; }
         public Position Position { get; set; } = null!;
 
-        public int CurrentAbility { get; set; }   // CA: 1-100 
-        public int PotentialAbility { get; set; } // PA: 1-100 
+        public int CurrentAbility { get; set; }
+        public int PotentialAbility { get; set; }
 
         public decimal MarketValue { get; set; }
-        public decimal WeeklyWage { get; set; }
-        public int ContractYearsLeft { get; set; }
         public string Form { get; set; } = "Good";
 
         public int? ClubId { get; set; }
@@ -25,5 +23,9 @@
         public Agency? Agency { get; set; }
 
         public PlayerAttributes Attributes { get; set; } = null!;
+
+        // --- НОВО: История на договорите ---
+        public ICollection<ClubContract> ClubContracts { get; set; } = new List<ClubContract>();
+        public ICollection<RepresentationContract> RepresentationContracts { get; set; } = new List<RepresentationContract>();
     }
 }
