@@ -36,8 +36,7 @@
               "RelativeToolTip": "..\\TenPercent.Application\\DTOs\\Agency\\AddToShortlistDto.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-04T18:24:57.21Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-04T18:24:57.21Z"
             },
             {
               "$type": "Document",
@@ -47,7 +46,7 @@
               "RelativeDocumentMoniker": "Controllers\\PlayersController.cs",
               "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\PlayersController.cs",
               "RelativeToolTip": "Controllers\\PlayersController.cs",
-              "ViewState": "AgIAAF8AAAAAAAAAAAAYwKQAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAFAAAAAAAAAAAAAYwKQAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-04T18:21:56.081Z",
               "EditorCaption": ""
@@ -62,8 +61,7 @@
               "RelativeToolTip": "..\\TenPercent.Data\\Models\\AgencyDomain\\AgencyShortlist.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-04T18:21:39.404Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-04T18:21:39.404Z"
             }
           ]
         }

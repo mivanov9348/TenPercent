@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, UserPlus, Loader2, ChevronLeft, ChevronRight, Users, UserMinus, SlidersHorizontal, ArrowUpDown, Star, Flame, Briefcase, LayoutTemplate, BookmarkPlus } from 'lucide-react';
+import OfferRepresentationModal from './world/OfferRepresentationModal';
 
 export default function ScoutingPool() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function ScoutingPool() {
   const [maxAge, setMaxAge] = useState(40);
   const [sortBy, setSortBy] = useState('Value');
   const [hasAgency, setHasAgency] = useState<string>('all');
+  const [pitchPlayer, setPitchPlayer] = useState<any>(null);
 
   // НОВО: Добавени са полетата за статистика тук
   const [visibleColumns, setVisibleColumns] = useState({
@@ -43,6 +45,12 @@ export default function ScoutingPool() {
     Assists: false,
     Rating: false,
   });
+
+  const handlePitchSuccess = (message: string) => {
+    setPitchPlayer(null);
+    alert("🎉 " + message);
+    fetchPool(pagination.page); // Презареждаме таблицата, за да му се смени статуса на Rep'd!
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -151,6 +159,8 @@ export default function ScoutingPool() {
       alert("You must be logged in to use the shortlist.");
       return;
     }
+
+
 
     try {
       const response = await fetch(`https://localhost:7135/api/players/${playerId}/shortlist`, {
@@ -458,12 +468,12 @@ export default function ScoutingPool() {
                               <BookmarkPlus size={14} />
                             </button>
 
-                            {/* БУТОН ЗА ОФЕРТА (Показва се само ако нямат агент) */}
+                            {/* ПРОМЕНЕН БУТОН ЗА ОФЕРТА */}
                             {!p.hasAgency && (
                               <button
-                                onClick={(e) => { e.stopPropagation(); navigate(`/world/player/${p.id}`); }}
+                                onClick={(e) => { e.stopPropagation(); setPitchPlayer(p); }} // ТУК Е ПРОМЯНАТА
                                 className="p-1.5 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-black rounded-lg transition-all"
-                                title="View & Pitch"
+                                title="Pitch Player"
                               >
                                 <UserPlus size={14} />
                               </button>
@@ -503,6 +513,13 @@ export default function ScoutingPool() {
           </button>
         </div>
       )}
+      {/* НОВО: МОДАЛЪТ */}
+      <OfferRepresentationModal
+        player={pitchPlayer || {}}
+        isOpen={!!pitchPlayer}
+        onClose={() => setPitchPlayer(null)}
+        onSuccess={handlePitchSuccess}
+      />
     </div>
   );
 }

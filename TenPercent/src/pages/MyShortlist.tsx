@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, BookmarkMinus, Search, Calendar, UserPlus } from 'lucide-react';
+import OfferRepresentationModal from './world/OfferRepresentationModal';
+
+const [pitchPlayer, setPitchPlayer] = useState<any>(null);
 
 interface ShortlistedPlayer {
   playerId: number;
@@ -68,6 +71,13 @@ export default function MyShortlist() {
     }
   };
 
+  const handlePitchSuccess = (message: string) => {
+    setPitchPlayer(null);
+    alert("🎉 " + message);
+    // Можеш да го махнеш от шортлиста или просто да презаредиш
+    fetchShortlist();
+  };
+
   return (
     <div className="space-y-6 pb-12">
       <div>
@@ -97,9 +107,9 @@ export default function MyShortlist() {
               <tbody className="divide-y divide-gray-800/50">
                 {players.length > 0 ? (
                   players.map((p) => (
-                    <tr 
-                      key={p.playerId} 
-                      className="hover:bg-gray-800/50 transition-colors group cursor-pointer" 
+                    <tr
+                      key={p.playerId}
+                      className="hover:bg-gray-800/50 transition-colors group cursor-pointer"
                       onClick={() => navigate(`/world/player/${p.playerId}`)}
                     >
                       <td className="px-4 py-3">
@@ -128,11 +138,11 @@ export default function MyShortlist() {
                             <UserPlus size={14} />
                           </button>
                           <button
-                            onClick={(e) => handleRemove(e, p.playerId)}
-                            className="p-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all"
-                            title="Remove from Shortlist"
+                            onClick={(e) => { e.stopPropagation(); setPitchPlayer(p); }}
+                            className="p-1.5 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-black rounded-lg transition-all"
+                            title="Pitch Player"
                           >
-                            <BookmarkMinus size={14} />
+                            <UserPlus size={14} />
                           </button>
                         </div>
                       </td>
@@ -144,7 +154,7 @@ export default function MyShortlist() {
                       <div className="flex flex-col items-center justify-center gap-3">
                         <Search size={32} className="text-gray-700" />
                         <p>Your shortlist is empty. Go scout some talent!</p>
-                        <button 
+                        <button
                           onClick={() => navigate('/world/scouting')}
                           className="mt-2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700"
                         >
@@ -159,6 +169,13 @@ export default function MyShortlist() {
           </div>
         )}
       </div>
+      <OfferRepresentationModal
+        player={pitchPlayer || {}}
+        isOpen={!!pitchPlayer}
+        onClose={() => setPitchPlayer(null)}
+        onSuccess={handlePitchSuccess}
+      />
     </div>
+
   );
 }
