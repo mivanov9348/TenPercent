@@ -26,6 +26,7 @@ import RequireAdmin from './pages/admin/RequireAdmin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ClubDetails from './pages/world/ClubDetails';
 import ScoutingPool from './pages/ScoutingPool';
+import MyShortlist from './pages/MyShortlist';
 
 function App() {
 
@@ -55,6 +56,8 @@ function App() {
               <Route path="players" element={<Players />} />
               <Route path="finance" element={<Finance />} />
               <Route path="scouting-pool" element={<ScoutingPool />} />
+
+              <Route path="my-shortlist" element={<MyShortlist />} />
 
               <Route path="world">
                 <Route element={<WorldLayout />}>

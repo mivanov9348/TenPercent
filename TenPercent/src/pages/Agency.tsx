@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Building, Users, Wallet, TrendingUp, Target, Trophy, Shield, Crown, Star, Loader2, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom'
+import { Building, Users, Wallet, TrendingUp, Target, Trophy, Shield, Crown, Star, Loader2, AlertCircle, Bookmark } from 'lucide-react';
 
 // Дефинираме как изглеждат данните, които очакваме от C#
 interface AgencyData {
@@ -80,7 +81,7 @@ export default function Agency() {
   return (
     <div className="space-y-8">
       
-      {/* 1. Хедър на агенцията (Вече с реални данни) */}
+      {/* 1. Хедър на агенцията */}
       <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 flex items-center justify-between shadow-lg relative overflow-hidden">
         <div className="absolute -right-10 -top-10 text-gray-700/20">
           <Building size={200} />
@@ -107,6 +108,17 @@ export default function Agency() {
               <span className="text-yellow-500 font-bold">{agency.reputation}/100</span>
             </div>
           </div>
+        </div>
+
+        {/* НОВО: БУТОН ЗА ШОРТЛИСТА ГОРИ ВДЯСНО */}
+        <div className="relative z-10">
+          <Link 
+            to="/my-shortlist" 
+            className="flex items-center gap-2 bg-gray-900 border border-gray-700 hover:border-yellow-500 text-white px-5 py-3 rounded-xl font-bold transition-all hover:shadow-[0_0_15px_rgba(234,179,8,0.2)] group"
+          >
+            <Bookmark className="text-yellow-500 group-hover:fill-yellow-500 transition-all" size={20} />
+            My Shortlist
+          </Link>
         </div>
       </div>
 

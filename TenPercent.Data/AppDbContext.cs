@@ -4,15 +4,16 @@
     using Microsoft.EntityFrameworkCore;
     using TenPercent.Data.Models;
     using TenPercent.Data.Models.Finance;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
         // --- ХОРА И АГЕНЦИИ ---
-        public DbSet<User> Users { get; set; }
+        public DbSet<User> GameUsers { get; set; }
         public DbSet<Agent> Agents { get; set; }
         public DbSet<Agency> Agencies { get; set; }
 
@@ -43,11 +44,21 @@
 
         public DbSet<EconomySettings> EconomySettings { get; set; }
 
+        public DbSet<AgencyShortlist> AgencyShortlists { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        }
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            base.ConfigureConventions(configurationBuilder);
+
+
+            configurationBuilder.Properties<decimal>().HavePrecision(18, 4);
         }
     }
 }

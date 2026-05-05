@@ -19,5 +19,6 @@
         public Agent Agent { get; set; } = null!;
 
         public ICollection<Player> Players { get; set; } = new List<Player>();
+        public ICollection<AgencyShortlist> Shortlist { get; set; } = new List<AgencyShortlist>();
     }
 }

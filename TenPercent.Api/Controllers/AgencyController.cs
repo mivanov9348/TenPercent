@@ -63,5 +63,17 @@
 
             return Ok(new { accepted = true, message = result.Message });
         }
+
+        // GET: api/agency/{userId}/finance
+        [HttpGet("{userId}/finance")]
+        public async Task<IActionResult> GetAgencyFinance(int userId)
+        {
+            var financeData = await _agencyService.GetAgencyFinanceAsync(userId);
+
+            if (financeData == null)
+                return NotFound("Agency not found for this user.");
+
+            return Ok(financeData);
+        }
     }
 }

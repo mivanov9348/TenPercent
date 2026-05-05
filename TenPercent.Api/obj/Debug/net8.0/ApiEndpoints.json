@@ -125,6 +125,22 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.AgencyController",
+    "Method": "GetAgencyFinance",
+    "RelativePath": "api/Agency/{userId}/finance",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AgencyController",
     "Method": "OfferRepresentation",
     "RelativePath": "api/Agency/{userId}/offer-contract",
     "HttpMethod": "POST",
@@ -138,7 +154,7 @@
       },
       {
         "Name": "dto",
-        "Type": "TenPercent.Api.DTOs.OfferRepresentationDto",
+        "Type": "TenPercent.Application.DTOs.OfferRepresentationDto",
         "IsRequired": true
       }
     ],
@@ -298,6 +314,48 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.PlayersController",
+    "Method": "AddToShortlist",
+    "RelativePath": "api/Players/{playerId}/shortlist",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "playerId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "TenPercent.Application.DTOs.AddToShortlistDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.PlayersController",
+    "Method": "RemoveFromShortlist",
+    "RelativePath": "api/Players/{playerId}/shortlist/{userId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "playerId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.PlayersController",
     "Method": "GenerateFreeAgents",
     "RelativePath": "api/Players/generate-free-agents",
     "HttpMethod": "POST",
@@ -369,6 +427,22 @@
         "Name": "pageSize",
         "Type": "System.Int32",
         "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.PlayersController",
+    "Method": "GetMyShortlist",
+    "RelativePath": "api/Players/shortlist/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

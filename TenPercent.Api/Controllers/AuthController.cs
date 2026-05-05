@@ -2,6 +2,7 @@
 {
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.AspNetCore.Identity; // ДОБАВЕНО ЗА UserManager
     using TenPercent.Api.DTOs;
     using TenPercent.Application.Services.Interfaces;
     using TenPercent.Data;
@@ -12,25 +13,25 @@
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IAgencyService _agencyService; 
+        private readonly IAgencyService _agencyService;
+        private readonly UserManager<IdentityUser> _userManager; // ДОБАВЕНО
 
-        public AuthController(AppDbContext context, IAgencyService agencyService)
+        public AuthController(AppDbContext context, IAgencyService agencyService, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _agencyService = agencyService;
+            _userManager = userManager; // ДОБАВЕНО
         }
 
         // POST: api/auth/register
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            // 1. Проверка дали потребителят съществува
-            if (await _context.Users.AnyAsync(u => u.Email == dto.Email || u.Username == dto.Username))
+            if (await _context.GameUsers.AnyAsync(u => u.Email == dto.Email || u.Username == dto.Username))
             {
-                return BadRequest("User with this email or username already exists.");
+                return BadRequest(new { message = "Потребител с този имейл или име вече съществува." });
             }
 
-            // 2. Създаване на нов User и хеширане на паролата
             var user = new User
             {
                 Username = dto.Username,
@@ -38,10 +39,9 @@
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
 
-            _context.Users.Add(user);
+            _context.GameUsers.Add(user);
             await _context.SaveChangesAsync();
 
-            // Връщаме ID-то, за да може фронтендът да продължи към създаване на агенция
             return Ok(new { userId = user.Id, message = "Registration successful!" });
         }
 
@@ -49,24 +49,48 @@
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var user = await _context.Users
+            // 1. ПЪРВО ПРОВЕРЯВАМЕ ДАЛИ Е НОРМАЛЕН ИГРАЧ (в GameUsers)
+            var playerUser = await _context.GameUsers
                 .Include(u => u.Agent)
                 .FirstOrDefaultAsync(u => u.Email == dto.Email);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+            if (playerUser != null)
             {
-                return Unauthorized("Invalid email or password.");
+                if (!BCrypt.Net.BCrypt.Verify(dto.Password, playerUser.PasswordHash))
+                    return Unauthorized(new { message = "Грешна парола." });
+
+                return Ok(new
+                {
+                    userId = playerUser.Id.ToString(), // Връщаме като string
+                    hasAgency = playerUser.Agent != null,
+                    role = playerUser.Role,
+                    message = "Login successful!"
+                });
             }
 
-            bool hasAgency = user.Agent != null;
+            // 2. АКО НЕ Е ИГРАЧ, ПРОВЕРЯВАМЕ ДАЛИ Е АДМИН (в Identity)
+            var adminUser = await _userManager.FindByEmailAsync(dto.Email);
 
-            return Ok(new
+            if (adminUser != null)
             {
-                userId = user.Id,
-                hasAgency = hasAgency,
-                role = user.Role, 
-                message = "Login successful!"
-            });
+                // Identity има собствен начин за проверка на пароли (не ползва нашия BCrypt)
+                if (!await _userManager.CheckPasswordAsync(adminUser, dto.Password))
+                    return Unauthorized(new { message = "Грешна парола." });
+
+                var roles = await _userManager.GetRolesAsync(adminUser);
+                string role = roles.FirstOrDefault() ?? "Admin";
+
+                return Ok(new
+                {
+                    userId = adminUser.Id, // Identity връща GUID (string)
+                    hasAgency = false, // Админът няма агенция
+                    role = role,
+                    message = "Admin login successful!"
+                });
+            }
+
+            // 3. АКО ГО НЯМА НИКЪДЕ:
+            return Unauthorized(new { message = "Грешен имейл или парола." });
         }
 
         [HttpPost("create-agency")]

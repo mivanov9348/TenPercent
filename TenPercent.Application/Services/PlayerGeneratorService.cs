@@ -6,10 +6,35 @@
     using System;
     using TenPercent.Application.Interfaces;
     using System.Linq;
+    using System.Threading.Tasks;
+    using TenPercent.Data;
+    using Microsoft.EntityFrameworkCore;
 
     public class PlayerGeneratorService : IPlayerGeneratorService
     {
+        private readonly AppDbContext _context;
         private readonly Random _rand = new Random();
+
+        public PlayerGeneratorService(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<(bool Success, string Message)> GenerateFreeAgentsAsync(int count)
+        {
+            var positions = await _context.Positions.ToListAsync();
+            if (!positions.Any())
+            {
+                return (false, "Positions not imported. Please import positions first.");
+            }
+
+            var newPlayers = GenerateMultiplePlayers(count, "", null, positions);
+
+            _context.Players.AddRange(newPlayers);
+            await _context.SaveChangesAsync();
+
+            return (true, $"Successfully generated {count} organic free agents into the world database.");
+        }
 
         public List<Player> GenerateMultiplePlayers(int count, string tier, int? clubId, List<Position> availablePositions, Position? specificPosition = null)
         {
@@ -30,8 +55,8 @@
             {
                 Name = $"{faker.Name.FirstName(Bogus.DataSets.Name.Gender.Male)} {faker.Name.LastName()}",
                 Nationality = faker.Address.Country(),
-                PositionId = position.Id, // Записваме ID-то за базата
-                Position = position,      // Записваме обекта, за да го ползваме в GenerateAttributes
+                PositionId = position.Id,
+                Position = position, // Required for GenerateAttributes to read the abbreviation
                 ClubId = clubId,
                 Form = "Good"
             };
@@ -39,11 +64,13 @@
             player.Age = GetRandomAge();
             player.PotentialAbility = GetRandomAbility(70, 15);
 
+            // Calculation: Older players are closer to their potential
             double ageFactor = Math.Clamp((player.Age - 15.0) / (28.0 - 15.0), 0.0, 1.0);
             int currentAbilityBase = (int)(40 + (player.PotentialAbility - 40) * ageFactor);
 
             player.CurrentAbility = Math.Clamp(currentAbilityBase + _rand.Next(-5, 5), 1, player.PotentialAbility);
 
+            // Apply age regression for players over 32
             if (player.Age > 32)
             {
                 player.CurrentAbility = Math.Clamp(player.CurrentAbility - _rand.Next(1, (player.Age - 30) * 2), 1, 100);
@@ -51,13 +78,12 @@
 
             player.Attributes = GenerateAttributes(player);
 
+            // Market Value calculation formula
             decimal valueBase = player.CurrentAbility * 100000m;
             decimal potBonus = (player.PotentialAbility - player.CurrentAbility) * 50000m;
             decimal youthPremium = player.Age < 23 ? 1.5m : (player.Age > 30 ? 0.5m : 1.0m);
 
             player.MarketValue = (valueBase + potBonus) * youthPremium;
-
-            decimal greedFactor = 1.0m + (player.Attributes.Greed - 50m) / 100m;
 
             return player;
         }
@@ -71,17 +97,20 @@
             var posCm = availablePositions.First(p => p.Abbreviation == "MID");
             var posSt = availablePositions.First(p => p.Abbreviation == "ST");
 
+            // Build starting XI
             squad.Add(GeneratePlayer("", clubId, posGk));
             for (int i = 0; i < 4; i++) squad.Add(GeneratePlayer("", clubId, posCb));
             for (int i = 0; i < 4; i++) squad.Add(GeneratePlayer("", clubId, posCm));
             for (int i = 0; i < 2; i++) squad.Add(GeneratePlayer("", clubId, posSt));
 
+            // Build bench
             squad.Add(GeneratePlayer("", clubId, posGk));
             squad.Add(GeneratePlayer("", clubId, posCb));
             squad.Add(GeneratePlayer("", clubId, posCm));
             squad.Add(GeneratePlayer("", clubId, posCm));
             squad.Add(GeneratePlayer("", clubId, posSt));
 
+            // Adjust abilities based on club reputation
             foreach (var p in squad)
             {
                 int targetCA = Math.Clamp(clubReputation + _rand.Next(-10, 5), 40, 95);
@@ -104,9 +133,10 @@
                 Loyalty = _rand.Next(1, 101)
             };
 
+            // Local helper function to generate stats around a base ability
             int GenStat(int baseAbility) => Math.Clamp(baseAbility + _rand.Next(-10, 11), 1, 100);
 
-            // ТУК Е ВАЖНАТА ПРОМЯНА: Сравняваме с Abbreviation (ST, CM, CB, GK)
+            // Shape attributes based on positional roles
             if (p.Position.Abbreviation == "ST")
             {
                 attr.Pace = GenStat(p.CurrentAbility + 5);
@@ -144,7 +174,7 @@
                 attr.Physical = GenStat(p.CurrentAbility + 10);
             }
 
-            // Потенциалите
+            // Cap potential attributes ensuring they are at least equal to current attributes
             attr.PotentialPace = Math.Max(attr.Pace, GenStat(p.PotentialAbility));
             attr.PotentialShooting = Math.Max(attr.Shooting, GenStat(p.PotentialAbility));
             attr.PotentialPassing = Math.Max(attr.Passing, GenStat(p.PotentialAbility));
@@ -157,10 +187,11 @@
 
         private int GetRandomAge()
         {
+            // Box-Muller transform for normal distribution
             double u1 = 1.0 - _rand.NextDouble();
             double u2 = 1.0 - _rand.NextDouble();
             double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
-            double randNormal = 24 + 4 * randStdNormal;
+            double randNormal = 24 + 4 * randStdNormal; // Mean 24, StdDev 4
             return Math.Clamp((int)Math.Round(randNormal), 15, 38);
         }
 

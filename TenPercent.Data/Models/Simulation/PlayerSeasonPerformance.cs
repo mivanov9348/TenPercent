@@ -1,4 +1,6 @@
-﻿namespace TenPercent.Data.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TenPercent.Data.Models
 {
     public class PlayerSeasonPerformance
     {

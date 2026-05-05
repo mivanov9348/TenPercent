@@ -1,4 +1,4 @@
-﻿namespace TenPercent.Api.DTOs
+﻿namespace TenPercent.Application.DTOs
 {
     using System.Collections.Generic;
 
@@ -28,6 +28,20 @@
         public int? ClubId { get; set; }
         public string ClubName { get; set; }
         public string AgencyName { get; set; }
+
+        public decimal WeeklyWage { get; set; }
+        public int ContractYearsLeft { get; set; }
+        public bool HasAgent { get; set; }
+
+        public int SeasonAppearances { get; set; }
+        public int SeasonGoals { get; set; }
+        public int SeasonAssists { get; set; }
+        public decimal SeasonAverageRating { get; set; }
+        public int SeasonYellowCards { get; set; }
+        public int SeasonRedCards { get; set; }
+
+        // --- ИСТОРИЯ НА МАЧОВЕТЕ (Последните 5-10 мача) ---
+        public List<PlayerMatchDto> RecentMatches { get; set; } = new List<PlayerMatchDto>();
     }
     
 }

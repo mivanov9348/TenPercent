@@ -1,27 +1,75 @@
-import { Wallet, TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight, CreditCard } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Wallet, TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight, CreditCard, Loader2, AlertCircle } from 'lucide-react';
+
+// Дефинираме типовете, които очакваме от бекенда
+interface Transaction {
+  id: number;
+  type: 'income' | 'expense';
+  description: string;
+  amount: number;
+  date: string;
+}
+
+interface FinancialData {
+  balance: number;
+  totalIncome: number;
+  totalExpenses: number;
+  netProfit: number;
+  recentTransactions: Transaction[];
+}
 
 export default function Finance() {
-  // Фейк финансови данни
-  const financials = {
-    balance: 10540000,
-    weeklyIncome: 45000,
-    weeklyExpenses: 18500,
-    netProfit: 26500
-  };
+  const [financials, setFinancials] = useState<FinancialData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // История на транзакциите
-  const transactions = [
-    { id: 1, type: 'income', desc: "Player Wages Cut (10%)", amount: "+$35,000", date: "Today" },
-    { id: 2, type: 'income', desc: "Sponsorship Bonus: J. Bellingham", amount: "+$10,000", date: "Yesterday" },
-    { id: 3, type: 'expense', desc: "Scouting Network Upkeep", amount: "-$8,500", date: "2 days ago" },
-    { id: 4, type: 'expense', desc: "Office Rent & Staff", amount: "-$10,000", date: "3 days ago" },
-    { id: 5, type: 'income', desc: "Transfer Fee Commission (M. Rashford)", amount: "+$450,000", date: "1 week ago" },
-  ];
+  useEffect(() => {
+    const fetchFinanceData = async () => {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        setError('Не сте влезли в системата.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://localhost:7135/api/agency/${userId}/finance`);
+        if (!response.ok) throw new Error('Грешка при зареждане на финансовите данни.');
+        
+        const data = await response.json();
+        setFinancials(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFinanceData();
+  }, []);
 
   // Форматиране на пари
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   };
+
+  // Форматиране на дата
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64 text-yellow-500"><Loader2 className="animate-spin" size={48} /></div>;
+  }
+
+  if (error || !financials) {
+    return (
+      <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3 text-red-500">
+        <AlertCircle /> <p className="font-bold">{error || "Няма намерени данни."}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -42,8 +90,8 @@ export default function Finance() {
         {/* Приходи */}
         <div className="bg-gray-800 border border-gray-700 p-6 rounded-2xl flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Weekly Income</p>
-            <h3 className="text-2xl font-bold text-emerald-400 font-mono">{formatMoney(financials.weeklyIncome)}</h3>
+            <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Total Income</p>
+            <h3 className="text-2xl font-bold text-emerald-400 font-mono">{formatMoney(financials.totalIncome)}</h3>
           </div>
           <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">
             <TrendingUp size={24} />
@@ -53,8 +101,8 @@ export default function Finance() {
         {/* Разходи */}
         <div className="bg-gray-800 border border-gray-700 p-6 rounded-2xl flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Weekly Expenses</p>
-            <h3 className="text-2xl font-bold text-red-400 font-mono">{formatMoney(financials.weeklyExpenses)}</h3>
+            <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Total Expenses</p>
+            <h3 className="text-2xl font-bold text-red-400 font-mono">{formatMoney(financials.totalExpenses)}</h3>
           </div>
           <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500">
             <TrendingDown size={24} />
@@ -65,7 +113,9 @@ export default function Finance() {
         <div className="bg-gray-800 border border-gray-700 p-6 rounded-2xl flex items-center justify-between">
           <div>
             <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Net Profit</p>
-            <h3 className="text-2xl font-bold text-white font-mono">{formatMoney(financials.netProfit)}</h3>
+            <h3 className={`text-2xl font-bold font-mono ${financials.netProfit >= 0 ? 'text-white' : 'text-red-400'}`}>
+              {formatMoney(financials.netProfit)}
+            </h3>
           </div>
           <div className="w-12 h-12 bg-gray-900 border border-gray-700 rounded-xl flex items-center justify-center text-white">
             <DollarSign size={24} />
@@ -75,39 +125,21 @@ export default function Finance() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* 2. Детайли за приходите и разходите */}
+        {/* 2. Детайли за приходите и разходите (Засега статични, докато не ги разбием по категории в бекенда) */}
         <div className="lg:col-span-1 space-y-6">
           {/* Income Breakdown */}
           <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-lg">
-            <h3 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">Income Sources</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-400">Player Wages (10% Cut)</span>
-                <span className="font-mono text-emerald-400 font-bold">+$35,000</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-400">Sponsorship Deals</span>
-                <span className="font-mono text-emerald-400 font-bold">+$10,000</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Expenses Breakdown */}
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-lg">
-            <h3 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">Expenses</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-400">Office Maintenance</span>
-                <span className="font-mono text-red-400 font-bold">-$5,000</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-400">Staff Salaries</span>
-                <span className="font-mono text-red-400 font-bold">-$5,000</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-400">Scouting Operations</span>
-                <span className="font-mono text-red-400 font-bold">-$8,500</span>
-              </div>
+            <h3 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">Financial Health</h3>
+            <div className="space-y-4">
+               <p className="text-sm text-gray-400 leading-relaxed">
+                 Вашата агенция автоматично отчита приходи от комисионни и плаща 10% корпоративен данък към Световната Банка.
+               </p>
+               <div className="p-3 bg-gray-900 border border-gray-700 rounded-lg flex justify-between items-center text-sm">
+                 <span className="text-gray-400">Profit Margin</span>
+                 <span className="font-bold text-yellow-500">
+                   {financials.totalIncome > 0 ? Math.round((financials.netProfit / financials.totalIncome) * 100) : 0}%
+                 </span>
+               </div>
             </div>
           </div>
         </div>
@@ -119,29 +151,33 @@ export default function Finance() {
             <h2 className="text-xl font-bold text-white">Recent Transactions</h2>
           </div>
           
-          <div className="flex-1 p-0 overflow-y-auto">
-            <div className="divide-y divide-gray-700">
-              {transactions.map((tx) => (
-                <div key={tx.id} className="p-4 hover:bg-gray-750 transition-colors flex items-center justify-between group">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+          <div className="flex-1 p-0 overflow-y-auto max-h-[400px]">
+            {financials.recentTransactions.length === 0 ? (
+               <div className="p-8 text-center text-gray-500 italic">Няма записани транзакции все още.</div>
+            ) : (
+              <div className="divide-y divide-gray-700">
+                {financials.recentTransactions.map((tx) => (
+                  <div key={tx.id} className="p-4 hover:bg-gray-750 transition-colors flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                        tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                      }`}>
+                        {tx.type === 'income' ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
+                      </div>
+                      <div>
+                        <p className="font-bold text-white group-hover:text-yellow-500 transition-colors line-clamp-1">{tx.description}</p>
+                        <p className="text-xs text-gray-500">{formatDate(tx.date)}</p>
+                      </div>
+                    </div>
+                    <div className={`font-mono font-bold text-lg whitespace-nowrap pl-4 ${
+                      tx.type === 'income' ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {tx.type === 'income' ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
-                    </div>
-                    <div>
-                      <p className="font-bold text-white group-hover:text-yellow-500 transition-colors">{tx.desc}</p>
-                      <p className="text-xs text-gray-500">{tx.date}</p>
+                      {tx.type === 'income' ? '+' : '-'}{formatMoney(tx.amount)}
                     </div>
                   </div>
-                  <div className={`font-mono font-bold text-lg ${
-                    tx.type === 'income' ? 'text-emerald-400' : 'text-red-400'
-                  }`}>
-                    {tx.amount}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

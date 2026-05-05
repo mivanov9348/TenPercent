@@ -27,5 +27,10 @@
         // --- НОВО: История на договорите ---
         public ICollection<ClubContract> ClubContracts { get; set; } = new List<ClubContract>();
         public ICollection<RepresentationContract> RepresentationContracts { get; set; } = new List<RepresentationContract>();
+        
+        public ICollection<PlayerSeasonPerformance> SeasonPerformances { get; set; } = new List<PlayerSeasonPerformance>();
+        public ICollection<PlayerMatchPerformance> MatchPerformances { get; set; } = new List<PlayerMatchPerformance>();
+        public ICollection<AgencyShortlist> ShortlistedBy { get; set; } = new List<AgencyShortlist>();
+
     }
 }

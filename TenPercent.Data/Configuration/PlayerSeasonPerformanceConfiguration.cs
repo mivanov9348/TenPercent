@@ -14,12 +14,12 @@
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(pss => pss.Player)
-                .WithMany()
+                .WithMany(p => p.SeasonPerformances)
                 .HasForeignKey(pss => pss.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(pss => pss.Club)
-                .WithMany()
+                .WithMany() 
                 .HasForeignKey(pss => pss.ClubId)
                 .OnDelete(DeleteBehavior.SetNull);
 

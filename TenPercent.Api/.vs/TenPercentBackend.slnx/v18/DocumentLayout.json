@@ -1,7 +1,18 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Projects\\TenPercent\\TenPercent.Api\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\playerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\playerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\agencydomain\\agencyshortlist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\dtos\\agency\\addtoshortlistdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +20,50 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AddToShortlistDto.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Agency\\AddToShortlistDto.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Application\\DTOs\\Agency\\AddToShortlistDto.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Agency\\AddToShortlistDto.cs",
+              "RelativeToolTip": "..\\TenPercent.Application\\DTOs\\Agency\\AddToShortlistDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-04T18:24:57.21Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PlayersController.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\PlayersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PlayersController.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\PlayersController.cs",
+              "RelativeToolTip": "Controllers\\PlayersController.cs",
+              "ViewState": "AgIAAF8AAAAAAAAAAAAYwKQAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-04T18:21:56.081Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AgencyShortlist.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\AgencyDomain\\AgencyShortlist.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\AgencyDomain\\AgencyShortlist.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\AgencyDomain\\AgencyShortlist.cs",
+              "RelativeToolTip": "..\\TenPercent.Data\\Models\\AgencyDomain\\AgencyShortlist.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-04T18:21:39.404Z",
+              "EditorCaption": ""
             }
           ]
         }

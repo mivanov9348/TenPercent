@@ -11,5 +11,6 @@
         Task<IEnumerable<AgencyPlayerDto>> GetAgencyPlayersAsync(int userId);
         Task<(bool Success, string Message, bool Accepted)> OfferRepresentationAsync(int userId, OfferRepresentationDto dto);
         Task<(bool Success, string Message)> CreateAgencyAsync(CreateAgencyDto dto);
+        Task<AgencyFinanceDto?> GetAgencyFinanceAsync(int userId);
     }
 }

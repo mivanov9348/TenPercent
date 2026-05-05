@@ -4,6 +4,7 @@ using TenPercent.Application.Interfaces;
 using TenPercent.Application.Services;
 using TenPercent.Application.Services.Interfaces;
 using TenPercent.Data;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,21 @@ builder.Services.AddScoped<IFinanceService, FinanceService>();
 builder.Services.AddScoped<IPlayerContractService, PlayerContractService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IClubService, ClubService>();
+builder.Services.AddScoped<IScoutingEngine, ScoutingEngine>();
+
+builder.Services
+    .AddIdentity<IdentityUser, IdentityRole>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 3;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+
+        // ДОБАВИ ТОЗИ РЕД:
+        options.Password.RequireLowercase = false;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddCors(options =>
 {
@@ -47,10 +63,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await DbSeeder.SeedRolesAndAdminAsync(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Seeding error");
+    }
+}
+
+
 app.UseHttpsRedirection();
 
 app.UseCors("ReactAppPolicy");
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

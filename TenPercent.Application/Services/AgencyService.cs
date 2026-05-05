@@ -216,7 +216,10 @@
 
         public async Task<(bool Success, string Message)> CreateAgencyAsync(CreateAgencyDto dto)
         {
-            var user = await _context.Users.Include(u => u.Agent).FirstOrDefaultAsync(u => u.Id == dto.UserId);
+            var user = await _context.GameUsers
+         .Include(u => u.Agent)
+         .FirstOrDefaultAsync(u => u.Id == dto.UserId);
+
             if (user == null) return (false, "User not found.");
 
             if (user.Agent != null) return (false, "This user already has an agency.");
@@ -272,6 +275,49 @@
                 await transaction.RollbackAsync();
                 return (false, $"Error creating agency: {ex.Message}");
             }
+        }
+        public async Task<AgencyFinanceDto?> GetAgencyFinanceAsync(int userId)
+        {
+            var agent = await _context.Agents
+                .Include(a => a.Agency)
+                .FirstOrDefaultAsync(a => a.UserId == userId);
+
+            if (agent?.Agency == null) return null;
+
+            int agencyId = agent.Agency.Id;
+
+            // Взимаме последните 20 транзакции, в които Агенцията е участвала
+            var recentTransactions = await _context.Transactions
+                .Where(t => (t.SenderType == EntityType.Agency && t.SenderId == agencyId) ||
+                            (t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId))
+                .OrderByDescending(t => t.Date)
+                .Take(20)
+                .ToListAsync();
+
+            // Смятаме общите приходи и разходи за статистиката
+            decimal totalIncome = await _context.Transactions
+                .Where(t => t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId)
+                .SumAsync(t => t.Amount);
+
+            decimal totalExpenses = await _context.Transactions
+                .Where(t => t.SenderType == EntityType.Agency && t.SenderId == agencyId)
+                .SumAsync(t => t.Amount);
+
+            return new AgencyFinanceDto
+            {
+                Balance = agent.Agency.Budget,
+                TotalIncome = totalIncome,
+                TotalExpenses = totalExpenses,
+                RecentTransactions = recentTransactions.Select(t => new TransactionDto
+                {
+                    Id = t.Id,
+                    // Ако Агенцията е получател, значи е приход. Иначе е разход.
+                    Type = (t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId) ? "income" : "expense",
+                    Description = t.Description,
+                    Amount = t.Amount,
+                    Date = t.Date
+                }).ToList()
+            };
         }
     }
 }
