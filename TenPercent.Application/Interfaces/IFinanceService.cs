@@ -9,8 +9,8 @@
             EntityType senderType, int? senderId,
             EntityType receiverType, int? receiverId,
             decimal amount, TransactionCategory category, string description);
-
-        // Вече приема стартовия бюджет и връща съобщение
         Task<(bool Success, string Message)> InitializeWorldEconomyAsync(decimal initialBankBudget);
+
+        Task<(bool Success, string Message)> ProcessWeeklyWagesAsync();
     }
 }

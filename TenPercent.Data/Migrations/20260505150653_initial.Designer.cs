@@ -12,8 +12,8 @@ using TenPercent.Data;
 namespace TenPercent.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260504173424_Initial")]
-    partial class Initial
+    [Migration("20260505150653_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -262,6 +262,24 @@ namespace TenPercent.Data.Migrations
                     b.ToTable("Agencies");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.AgencyShortlist", b =>
+                {
+                    b.Property<int>("AgencyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("AgencyId", "PlayerId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("AgencyShortlists");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Agent", b =>
                 {
                     b.Property<int>("Id")
@@ -414,6 +432,10 @@ namespace TenPercent.Data.Migrations
                         .HasColumnType("decimal(18,4)");
 
                     b.Property<decimal>("ClubWageBudgetPercentage")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("GlobalIncomeTax")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
@@ -616,6 +638,10 @@ namespace TenPercent.Data.Migrations
 
                     b.Property<int?>("AgencyId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("ClubId")
                         .HasColumnType("int");
@@ -1093,6 +1119,25 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("Agent");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.AgencyShortlist", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.Agency", "Agency")
+                        .WithMany("Shortlist")
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TenPercent.Data.Models.Player", "Player")
+                        .WithMany("ShortlistedBy")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agency");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Agent", b =>
                 {
                     b.HasOne("TenPercent.Data.Models.User", "User")
@@ -1322,6 +1367,8 @@ namespace TenPercent.Data.Migrations
             modelBuilder.Entity("TenPercent.Data.Models.Agency", b =>
                 {
                     b.Navigation("Players");
+
+                    b.Navigation("Shortlist");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Agent", b =>
@@ -1362,6 +1409,8 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("RepresentationContracts");
 
                     b.Navigation("SeasonPerformances");
+
+                    b.Navigation("ShortlistedBy");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Position", b =>

@@ -14,11 +14,12 @@
     {
         private readonly AppDbContext _context;
         private readonly IMatchEngineService _matchEngine;
-
-        public SimulationService(AppDbContext context, IMatchEngineService matchEngine)
+        private readonly IFinanceService _financeService;
+        public SimulationService(AppDbContext context, IMatchEngineService matchEngine, IFinanceService financeService)
         {
             _context = context;
             _matchEngine = matchEngine;
+            _financeService = financeService;
         }
 
         public async Task<(bool Success, string Message)> SimulateNextGameweekAsync()
@@ -75,7 +76,21 @@
             // 7. Запазваме всичко наведнъж (Мачове, Класирания, MatchPerformances и SeasonPerformances)
             await _context.SaveChangesAsync();
 
-            return (true, $"Gameweek {activeSeason.CurrentGameweek - 1} симулиран успешно! Изиграни {fixturesToPlay.Count} мача.");
+            var financeResult = await _financeService.ProcessWeeklyWagesAsync();
+
+            string finalMessage = $"Gameweek {activeSeason.CurrentGameweek - 1} симулиран успешно! Изиграни {fixturesToPlay.Count} мача.";
+
+            // Добавяме финансовия репорт към крайното съобщение, за да го виждаш в Postman/Swagger
+            if (financeResult.Success)
+            {
+                finalMessage += $"\nФинансов отчет: {financeResult.Message}";
+            }
+            else
+            {
+                finalMessage += $"\nВНИМАНИЕ: Проблем с финансите: {financeResult.Message}";
+            }
+
+            return (true, finalMessage);
         }
 
         private void UpdateStandings(List<LeagueStanding> standings, Fixture match)

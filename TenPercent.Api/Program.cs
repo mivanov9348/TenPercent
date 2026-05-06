@@ -30,6 +30,9 @@ builder.Services.AddScoped<IPlayerContractService, PlayerContractService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IClubService, ClubService>();
 builder.Services.AddScoped<IScoutingEngine, ScoutingEngine>();
+builder.Services.AddScoped<INegotiationService, NegotiationService>();
+builder.Services.AddScoped<IAdminBankService, AdminBankService>();
+builder.Services.AddScoped<IAdminSettingsService, AdminSettingsService>();
 
 builder.Services
     .AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -49,7 +52,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactAppPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") 
+        policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

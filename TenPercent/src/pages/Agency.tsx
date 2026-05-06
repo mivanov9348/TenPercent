@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import { Building, Users, Wallet, TrendingUp, Target, Trophy, Shield, Crown, Star, Loader2, AlertCircle, Bookmark } from 'lucide-react';
+import { API_URL } from '../config';
+import { useAuth } from '../hooks/useAuth';
+import { useAgencyStore } from '../store/useAgencyStore';
 
-// Дефинираме как изглеждат данните, които очакваме от C#
 interface AgencyData {
   id: number;
   name: string;
@@ -19,20 +21,22 @@ export default function Agency() {
   const [agency, setAgency] = useState<AgencyData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const { getUserIdOrRedirect } = useAuth();
+  const { budget, setBudget } = useAgencyStore(); // Взимаме глобалния бюджет!
 
   useEffect(() => {
-    // Взимаме данните при първоначално зареждане на страницата
     const fetchAgency = async () => {
-      const userId = localStorage.getItem('userId');
+      const userId = getUserIdOrRedirect();
       if (!userId) return;
 
       try {
-        // ВНИМАНИЕ: Смени порта с твоя!
-        const response = await fetch(`https://localhost:7135/api/agency/${userId}`);
+        const response = await fetch(`${API_URL}/agency/${userId}`);
         if (!response.ok) throw new Error('Неуспешно зареждане на данните за агенцията.');
-        
+
         const data = await response.json();
         setAgency(data);
+        setBudget(data.budget); // Синхронизираме глобалния склад с актуалните данни
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -41,14 +45,12 @@ export default function Agency() {
     };
 
     fetchAgency();
-  }, []);
+  }, [getUserIdOrRedirect, setBudget]);
 
-  // Помощна функция за форматиране на бюджета
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   };
 
-  // Помощна функция за избор на икона спрямо logoId
   const renderLogo = (logoId: number) => {
     switch (logoId) {
       case 1: return <Shield size={48} />;
@@ -71,7 +73,6 @@ export default function Agency() {
     );
   }
 
-  // Фейк данни за ъпгрейди (ще ги вържем към базата по-късно)
   const facilities = [
     { id: 1, name: "Scouting Network", level: 2, maxLevel: 5, description: "Подобрява качеството на генерираните играчи на пазара." },
     { id: 2, name: "Legal Department", level: 4, maxLevel: 5, description: "Увеличава твоя процент (%) при преговори за договори." },
@@ -80,7 +81,6 @@ export default function Agency() {
 
   return (
     <div className="space-y-8">
-      
       {/* 1. Хедър на агенцията */}
       <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 flex items-center justify-between shadow-lg relative overflow-hidden">
         <div className="absolute -right-10 -top-10 text-gray-700/20">
@@ -100,8 +100,8 @@ export default function Agency() {
             <div className="flex items-center gap-2 mt-2 text-sm">
               <span className="text-gray-500">Reputation:</span>
               <div className="w-32 h-2 bg-gray-900 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400" 
+                <div
+                  className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400"
                   style={{ width: `${agency.reputation}%` }}
                 ></div>
               </div>
@@ -110,10 +110,9 @@ export default function Agency() {
           </div>
         </div>
 
-        {/* НОВО: БУТОН ЗА ШОРТЛИСТА ГОРИ ВДЯСНО */}
         <div className="relative z-10">
-          <Link 
-            to="/my-shortlist" 
+          <Link
+            to="/my-shortlist"
             className="flex items-center gap-2 bg-gray-900 border border-gray-700 hover:border-yellow-500 text-white px-5 py-3 rounded-xl font-bold transition-all hover:shadow-[0_0_15px_rgba(234,179,8,0.2)] group"
           >
             <Bookmark className="text-yellow-500 group-hover:fill-yellow-500 transition-all" size={20} />
@@ -122,16 +121,17 @@ export default function Agency() {
         </div>
       </div>
 
-      {/* 2. Бързи статистики (Вече с реални данни за бюджет и играчи) */}
+      {/* 2. Бързи статистики */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 flex items-center gap-4 hover:border-gray-500 transition-colors">
           <div className="p-3 bg-gray-900 rounded-lg text-yellow-500"><Wallet size={24} /></div>
           <div>
             <p className="text-sm text-gray-500 font-medium">Available Budget</p>
-            <p className="text-xl font-bold text-white font-mono">{formatMoney(agency.budget)}</p>
+            {/* Тук ползваме 'budget' от глобалния склад, за да се ъпдейтва на живо! */}
+            <p className="text-xl font-bold text-white font-mono">{budget !== null ? formatMoney(budget) : '...'}</p>
           </div>
         </div>
-        
+
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 flex items-center gap-4 hover:border-gray-500 transition-colors">
           <div className="p-3 bg-gray-900 rounded-lg text-blue-500"><Users size={24} /></div>
           <div>
@@ -157,7 +157,7 @@ export default function Agency() {
         </div>
       </div>
 
-      {/* 3. Инфраструктура / Ъпгрейди (Остава статично за сега) */}
+      {/* 3. Инфраструктура */}
       <div>
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <Target className="text-yellow-500" />
@@ -173,13 +173,12 @@ export default function Agency() {
                 </span>
               </div>
               <p className="text-gray-400 text-sm mb-6 flex-1">{facility.description}</p>
-              
-              <button 
-                className={`w-full py-2 rounded-lg font-bold text-sm transition-colors ${
-                  facility.level === facility.maxLevel 
-                    ? 'bg-gray-900 text-gray-600 cursor-not-allowed' 
+
+              <button
+                className={`w-full py-2 rounded-lg font-bold text-sm transition-colors ${facility.level === facility.maxLevel
+                    ? 'bg-gray-900 text-gray-600 cursor-not-allowed'
                     : 'bg-gray-700 text-white hover:bg-yellow-500 hover:text-black'
-                }`}
+                  }`}
                 disabled={facility.level === facility.maxLevel}
               >
                 {facility.level === facility.maxLevel ? 'MAX LEVEL' : 'UPGRADE ($50,000)'}
@@ -188,7 +187,6 @@ export default function Agency() {
           ))}
         </div>
       </div>
-
     </div>
   );
 }

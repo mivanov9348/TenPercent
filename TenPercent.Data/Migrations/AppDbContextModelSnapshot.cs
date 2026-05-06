@@ -432,6 +432,10 @@ namespace TenPercent.Data.Migrations
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
+                    b.Property<decimal>("GlobalIncomeTax")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<decimal>("InitialBankReserve")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
@@ -631,6 +635,10 @@ namespace TenPercent.Data.Migrations
 
                     b.Property<int?>("AgencyId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int?>("ClubId")
                         .HasColumnType("int");

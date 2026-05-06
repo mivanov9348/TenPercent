@@ -4,22 +4,6 @@
   "Documents": [
     {
       "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\financeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\finance\\economysettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\finance\\transaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\agencydomain\\representationcontract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\negotiationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\negotiationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\negotiationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -32,18 +16,8 @@
           "SelectedChildIndex": 1,
           "Children": [
             {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "NegotiationsController.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\NegotiationsController.cs",
-              "RelativeDocumentMoniker": "Controllers\\NegotiationsController.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\NegotiationsController.cs",
-              "RelativeToolTip": "Controllers\\NegotiationsController.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAQwCEAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T05:17:24.647Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
             },
             {
               "$type": "Document",
@@ -53,66 +27,10 @@
               "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\FinanceService.cs",
               "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\FinanceService.cs",
               "RelativeToolTip": "..\\TenPercent.Application\\Services\\FinanceService.cs",
-              "ViewState": "AgIAAMEAAAAAAAAAAAAgwNcAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAADQBAAAAAAAAAAAswAwAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T05:18:22.056Z",
+              "WhenOpened": "2026-05-05T18:10:53.988Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "EconomySettings.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\EconomySettings.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Finance\\EconomySettings.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\EconomySettings.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Finance\\EconomySettings.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAA6wBIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T05:18:04.507Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Transaction.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\Transaction.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Finance\\Transaction.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\Transaction.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Finance\\Transaction.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAiwBYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T05:17:58.565Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "RepresentationContract.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\AgencyDomain\\RepresentationContract.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\AgencyDomain\\RepresentationContract.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\AgencyDomain\\RepresentationContract.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\AgencyDomain\\RepresentationContract.cs",
-              "ViewState": "AgIAAA4AAAAAAAAAAAA+wCAAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T05:17:52.323Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "NegotiationService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\NegotiationService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\NegotiationService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\NegotiationService.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\NegotiationService.cs",
-              "ViewState": "AgIAAJ0AAAAAAAAAAAAgwLMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T05:17:35.532Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
             }
           ]
         }

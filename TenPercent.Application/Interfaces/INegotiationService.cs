@@ -6,5 +6,6 @@
     public interface INegotiationService
     {
         Task<ContractResponseDto> ProposeContractAsync(int userId, ContractOfferDto offer);
+        Task<ContractResponseDto> RenewContractAsync(int userId, ContractOfferDto offer);
     }
 }

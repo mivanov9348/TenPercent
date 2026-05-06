@@ -15,5 +15,7 @@
         public decimal ClubBaseGrant { get; set; } = 10_000_000m;
         public decimal ClubReputationMultiplier { get; set; } = 1_000_000m;
         public decimal ClubWageBudgetPercentage { get; set; } = 0.60m; // 60%
+
+        public decimal GlobalIncomeTax { get; set; } = 0.10m; // 10%
     }
 }

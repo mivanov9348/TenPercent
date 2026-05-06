@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Wallet, TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight, CreditCard, Loader2, AlertCircle } from 'lucide-react';
+import { API_URL } from '../config';
+import { useAuth } from '../hooks/useAuth';
+
 
 // Дефинираме типовете, които очакваме от бекенда
 interface Transaction {
@@ -23,19 +26,17 @@ export default function Finance() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const { getUserIdOrRedirect } = useAuth();
+
   useEffect(() => {
     const fetchFinanceData = async () => {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        setError('Не сте влезли в системата.');
-        setIsLoading(false);
-        return;
-      }
+      const userId = getUserIdOrRedirect();
+      if (!userId) return;
 
       try {
-        const response = await fetch(`https://localhost:7135/api/agency/${userId}/finance`);
+        const response = await fetch(`${API_URL}/agency/${userId}/finance`);
         if (!response.ok) throw new Error('Грешка при зареждане на финансовите данни.');
-        
+
         const data = await response.json();
         setFinancials(data);
       } catch (err: any) {
@@ -73,7 +74,7 @@ export default function Finance() {
 
   return (
     <div className="space-y-6">
-      
+
       {/* 1. Главен финансов преглед (Overview) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Баланс - Основна карта */}
@@ -124,22 +125,22 @@ export default function Finance() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* 2. Детайли за приходите и разходите (Засега статични, докато не ги разбием по категории в бекенда) */}
         <div className="lg:col-span-1 space-y-6">
           {/* Income Breakdown */}
           <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-lg">
             <h3 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">Financial Health</h3>
             <div className="space-y-4">
-               <p className="text-sm text-gray-400 leading-relaxed">
-                 Вашата агенция автоматично отчита приходи от комисионни и плаща 10% корпоративен данък към Световната Банка.
-               </p>
-               <div className="p-3 bg-gray-900 border border-gray-700 rounded-lg flex justify-between items-center text-sm">
-                 <span className="text-gray-400">Profit Margin</span>
-                 <span className="font-bold text-yellow-500">
-                   {financials.totalIncome > 0 ? Math.round((financials.netProfit / financials.totalIncome) * 100) : 0}%
-                 </span>
-               </div>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                Вашата агенция автоматично отчита приходи от комисионни и плаща 10% корпоративен данък към Световната Банка.
+              </p>
+              <div className="p-3 bg-gray-900 border border-gray-700 rounded-lg flex justify-between items-center text-sm">
+                <span className="text-gray-400">Profit Margin</span>
+                <span className="font-bold text-yellow-500">
+                  {financials.totalIncome > 0 ? Math.round((financials.netProfit / financials.totalIncome) * 100) : 0}%
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -150,18 +151,17 @@ export default function Finance() {
             <CreditCard className="text-gray-400" />
             <h2 className="text-xl font-bold text-white">Recent Transactions</h2>
           </div>
-          
+
           <div className="flex-1 p-0 overflow-y-auto max-h-[400px]">
             {financials.recentTransactions.length === 0 ? (
-               <div className="p-8 text-center text-gray-500 italic">Няма записани транзакции все още.</div>
+              <div className="p-8 text-center text-gray-500 italic">Няма записани транзакции все още.</div>
             ) : (
               <div className="divide-y divide-gray-700">
                 {financials.recentTransactions.map((tx) => (
                   <div key={tx.id} className="p-4 hover:bg-gray-750 transition-colors flex items-center justify-between group">
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                        tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
-                      }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                        }`}>
                         {tx.type === 'income' ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
                       </div>
                       <div>
@@ -169,9 +169,8 @@ export default function Finance() {
                         <p className="text-xs text-gray-500">{formatDate(tx.date)}</p>
                       </div>
                     </div>
-                    <div className={`font-mono font-bold text-lg whitespace-nowrap pl-4 ${
-                      tx.type === 'income' ? 'text-emerald-400' : 'text-red-400'
-                    }`}>
+                    <div className={`font-mono font-bold text-lg whitespace-nowrap pl-4 ${tx.type === 'income' ? 'text-emerald-400' : 'text-red-400'
+                      }`}>
                       {tx.type === 'income' ? '+' : '-'}{formatMoney(tx.amount)}
                     </div>
                   </div>

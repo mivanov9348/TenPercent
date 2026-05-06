@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
+// НОВО: Импортваме константата за API и глобалния склад!
+import { API_URL } from '../../config';
+import { useAgencyStore } from '../../store/useAgencyStore';
 
 export default function Login() {
   const navigate = useNavigate();
+  // Взимаме функцията за ресетване на бюджета
+  const { setBudget } = useAgencyStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,8 +16,11 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    // 1. Изчистваме браузъра
     localStorage.clear();
-  }, []);
+    // 2. ИЗЧИСТВАМЕ ГЛОБАЛНИЯ СКЛАД! Така Navbar 100% ще изтегли новите данни.
+    setBudget(0); 
+  }, [setBudget]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +28,8 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://localhost:7135/api/auth/login', {
+      // ПОЛЗВАМЕ ГЛОБАЛНИЯ API АДРЕС
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -32,18 +41,16 @@ export default function Login() {
         throw new Error(data || 'Грешен имейл или парола.');
       }
 
-      // Запазваме данните в браузъра
       localStorage.setItem('userId', data.userId.toString());
       localStorage.setItem('hasAgency', data.hasAgency.toString());
-      localStorage.setItem('role', data.role); // ЗАПАЗВАМЕ И РОЛЯТА
+      localStorage.setItem('role', data.role);
 
-      // ЛОГИКАТА ЗА ПРЕНАСОЧВАНЕ:
       if (data.role === 'Admin') {
-        navigate('/admin'); // Админът отива в своя панел
+        navigate('/admin');
       } else if (data.hasAgency) {
-        navigate('/'); // Играч с агенция отива в дашборда
+        navigate('/');
       } else {
-        navigate('/create-agency'); // Играч без агенция отива да си я създаде
+        navigate('/create-agency');
       }
 
     } catch (err: any) {

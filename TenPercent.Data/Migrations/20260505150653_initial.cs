@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TenPercent.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -75,7 +75,8 @@ namespace TenPercent.Data.Migrations
                     InitialBankReserve = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
                     ClubBaseGrant = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
                     ClubReputationMultiplier = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
-                    ClubWageBudgetPercentage = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false)
+                    ClubWageBudgetPercentage = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    GlobalIncomeTax = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -493,6 +494,7 @@ namespace TenPercent.Data.Migrations
                     PotentialAbility = table.Column<int>(type: "int", nullable: false),
                     MarketValue = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Form = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
                     ClubId = table.Column<int>(type: "int", nullable: true),
                     AgencyId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -517,6 +519,31 @@ namespace TenPercent.Data.Migrations
                         principalTable: "Positions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AgencyShortlists",
+                columns: table => new
+                {
+                    AgencyId = table.Column<int>(type: "int", nullable: false),
+                    PlayerId = table.Column<int>(type: "int", nullable: false),
+                    AddedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AgencyShortlists", x => new { x.AgencyId, x.PlayerId });
+                    table.ForeignKey(
+                        name: "FK_AgencyShortlists_Agencies_AgencyId",
+                        column: x => x.AgencyId,
+                        principalTable: "Agencies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AgencyShortlists_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -707,6 +734,11 @@ namespace TenPercent.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_AgencyShortlists_PlayerId",
+                table: "AgencyShortlists",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Agents_UserId",
                 table: "Agents",
                 column: "UserId",
@@ -877,6 +909,9 @@ namespace TenPercent.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AgencyShortlists");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 

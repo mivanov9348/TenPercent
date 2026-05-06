@@ -20,14 +20,18 @@
         public async Task<IActionResult> ProposeContract([FromBody] ContractOfferDto dto, [FromQuery] int userId)
         {
             if (userId <= 0) return Unauthorized("Invalid user.");
-
             var response = await _negotiationService.ProposeContractAsync(userId, dto);
+            if (response.Status == "Error") return BadRequest(new { message = response.Message });
+            return Ok(response);
+        }
 
-            if (response.Status == "Error")
-            {
-                return BadRequest(new { message = response.Message });
-            }
-
+        // НОВО: ENDPOINT ЗА ПРЕПОДПИСВАНЕ
+        [HttpPost("renew")]
+        public async Task<IActionResult> RenewContract([FromBody] ContractOfferDto dto, [FromQuery] int userId)
+        {
+            if (userId <= 0) return Unauthorized("Invalid user.");
+            var response = await _negotiationService.RenewContractAsync(userId, dto);
+            if (response.Status == "Error") return BadRequest(new { message = response.Message });
             return Ok(response);
         }
     }

@@ -13,6 +13,7 @@
     using TenPercent.Application.Services.Interfaces;
     using TenPercent.Data;
     using TenPercent.Data.Models;
+    using TenPercent.Data.DTOs.Admin; // Добавено
 
     [Route("api/[controller]")]
     [ApiController]
@@ -23,14 +24,29 @@
         private readonly IScheduleService _scheduleService;
         private readonly IPlayerContractService _contractService;
 
-        public AdminController(AppDbContext context, IPlayerGeneratorService playerGen, IScheduleService scheduleService, IPlayerContractService _contractService)
+        // НОВИ СЪРВИЗИ
+        private readonly IAdminBankService _adminBankService;
+        private readonly IAdminSettingsService _settingsService;
+
+        public AdminController(
+            AppDbContext context,
+            IPlayerGeneratorService playerGen,
+            IScheduleService scheduleService,
+            IPlayerContractService contractService,
+            IAdminBankService adminBankService, // НОВО
+            IAdminSettingsService settingsService) // НОВО
         {
             _context = context;
             _playerGen = playerGen;
             _scheduleService = scheduleService;
-                this._contractService = _contractService;
-                this._contractService = _contractService;
+            _contractService = contractService;
+            _adminBankService = adminBankService; // НОВО
+            _settingsService = settingsService; // НОВО
         }
+
+        // ==========================================
+        // 1. СТАРТИТЕ МЕТОДИ (ОСТАВАТ СИ СЪЩИТЕ)
+        // ==========================================
 
         [HttpPost("initialize-world")]
         public async Task<IActionResult> InitializeWorld()
@@ -72,7 +88,7 @@
                 TotalGameweeks = activeSeason?.TotalGameweeks ?? 0,
                 IsSeasonActive = activeSeason != null && activeSeason.IsActive,
                 IsSimulationRunning = worldState.IsSimulationRunning,
-                NextMatchdayDate = worldState.NextMatchdayDate // Уверих се, че и тук се връща!
+                NextMatchdayDate = worldState.NextMatchdayDate
             });
         }
 
@@ -100,7 +116,6 @@
 
                 if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(abbr))
                 {
-                    // Проверка дали вече не съществува, за да не дублираме
                     if (!await _context.Positions.AnyAsync(p => p.Abbreviation == abbr))
                     {
                         positions.Add(new Position { Name = name, Abbreviation = abbr });
@@ -416,16 +431,40 @@
                 _context.Players.AddRange(newPlayers);
                 await _context.SaveChangesAsync();
 
-                // НОВО: След като играчите са записани в базата, им генерираме договорите!
                 await _contractService.GenerateInitialContractsAsync();
 
                 return Ok(new { message = $"Успешно поправени {fixedClubsCount} отбора. Генерирани {newPlayers.Count} нови играчи с договори." });
             }
 
-            // Дори да няма нови играчи, проверяваме дали старите нямат нужда от договори
             await _contractService.GenerateInitialContractsAsync();
 
             return Ok(new { message = "Отборите са пълни. Договорите са актуализирани." });
+        }
+
+        // ==========================================
+        // 2. НОВИ МЕТОДИ ЗА БАНКАТА И НАСТРОЙКИТЕ
+        // ==========================================
+
+        [HttpGet("bank")]
+        public async Task<IActionResult> GetBankDashboard()
+        {
+            var stats = await _adminBankService.GetBankStatsAsync();
+            return Ok(stats);
+        }
+
+        [HttpGet("settings")]
+        public async Task<IActionResult> GetSettings()
+        {
+            var settings = await _settingsService.GetSettingsAsync();
+            return Ok(settings);
+        }
+
+        [HttpPut("settings")]
+        public async Task<IActionResult> UpdateSettings([FromBody] EconomySettingsDto dto)
+        {
+            var result = await _settingsService.UpdateSettingsAsync(dto);
+            if (!result.Success) return BadRequest(new { message = result.Message });
+            return Ok(new { message = result.Message });
         }
     }
 }

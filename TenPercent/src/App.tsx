@@ -22,14 +22,18 @@ import PlayerDetails from './pages/world/PlayerDetails';
 import RequireAuth from './components/layout/RequireAuth';
 import RequireAgency from './components/layout/RequireAgency';
 
+// Админ Страници
 import RequireAdmin from './pages/admin/RequireAdmin';
+import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminBank from './pages/admin/AdminBank';
+
 import ClubDetails from './pages/world/ClubDetails';
 import ScoutingPool from './pages/ScoutingPool';
 import MyShortlist from './pages/MyShortlist';
+import AdminSettings from './pages/admin/AdminSettings';
 
 function App() {
-
   return (
     <BrowserRouter>
       <Routes>
@@ -37,11 +41,18 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
+        {/* ================================== */}
+        {/* АДМИН ЗОНА (Обновена с Layout)     */}
+        {/* ================================== */}
         <Route path="/admin" element={
           <RequireAdmin>
-            <AdminDashboard />
+            <AdminLayout />
           </RequireAdmin>
-        } />
+        }>
+          <Route index element={<AdminDashboard />} />
+          <Route path="bank" element={<AdminBank />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
 
         {/* Защитени страници - ПЪРВО ниво */}
         <Route element={<RequireAuth />}>
@@ -64,7 +75,7 @@ function App() {
                   <Route index element={<Navigate to="standings" replace />} />
                   <Route path="standings" element={<Standings />} />
                   <Route path="fixtures" element={<Fixtures />} />
-                  <Route path="stats" element={<SeasonStats />} /> {/* ПРОМЕНЕНО */}
+                  <Route path="stats" element={<SeasonStats />} />
                 </Route>
 
                 <Route path="club/:id" element={<ClubDetails />} />

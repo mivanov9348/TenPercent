@@ -173,6 +173,59 @@
         }
       }
     },
+    "/api/Admin/bank": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Admin/settings": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EconomySettingsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EconomySettingsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EconomySettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Agency/{userId}": {
       "get": {
         "tags": [
@@ -464,6 +517,88 @@
         "tags": [
           "Leagues"
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Negotiations/propose": {
+      "post": {
+        "tags": [
+          "Negotiations"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractOfferDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractOfferDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Negotiations/renew": {
+      "post": {
+        "tags": [
+          "Negotiations"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractOfferDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractOfferDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractOfferDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -767,6 +902,36 @@
         },
         "additionalProperties": false
       },
+      "ContractOfferDto": {
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wageCommissionPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "transferCommissionPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "signingBonusPaid": {
+            "type": "number",
+            "format": "double"
+          },
+          "agencyReleaseClause": {
+            "type": "number",
+            "format": "double"
+          },
+          "durationYears": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "CreateAgencyDto": {
         "type": "object",
         "properties": {
@@ -785,6 +950,44 @@
           "logoId": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EconomySettingsDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "agencyStartupGrant": {
+            "type": "number",
+            "format": "double"
+          },
+          "agencyIncomeTaxRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "initialBankReserve": {
+            "type": "number",
+            "format": "double"
+          },
+          "clubBaseGrant": {
+            "type": "number",
+            "format": "double"
+          },
+          "clubReputationMultiplier": {
+            "type": "number",
+            "format": "double"
+          },
+          "clubWageBudgetPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "globalIncomeTax": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false

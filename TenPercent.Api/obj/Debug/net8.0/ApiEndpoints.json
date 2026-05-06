@@ -1,6 +1,16 @@
 [
   {
     "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "GetBankDashboard",
+    "RelativePath": "api/Admin/bank",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
     "Method": "GenerateSchedule",
     "RelativePath": "api/Admin/generate-schedule",
     "HttpMethod": "POST",
@@ -75,6 +85,32 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "GetSettings",
+    "RelativePath": "api/Admin/settings",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "UpdateSettings",
+    "RelativePath": "api/Admin/settings",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "TenPercent.Data.DTOs.Admin.EconomySettingsDto",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -294,6 +330,48 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.NegotiationsController",
+    "Method": "ProposeContract",
+    "RelativePath": "api/Negotiations/propose",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "TenPercent.Application.DTOs.ContractOfferDto",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.NegotiationsController",
+    "Method": "RenewContract",
+    "RelativePath": "api/Negotiations/renew",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "TenPercent.Application.DTOs.ContractOfferDto",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {

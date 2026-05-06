@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, BookmarkMinus, Search, Calendar, UserPlus } from 'lucide-react';
 import OfferRepresentationModal from './world/OfferRepresentationModal';
 
-const [pitchPlayer, setPitchPlayer] = useState<any>(null);
-
 interface ShortlistedPlayer {
   playerId: number;
   name: string;
@@ -18,6 +16,10 @@ interface ShortlistedPlayer {
 
 export default function MyShortlist() {
   const navigate = useNavigate();
+  
+  // ✅ ПРАВИЛНО: Преместен тук, вътре в компонента!
+  const [pitchPlayer, setPitchPlayer] = useState<any>(null); 
+  
   const [players, setPlayers] = useState<ShortlistedPlayer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
