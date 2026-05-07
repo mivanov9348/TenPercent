@@ -3,42 +3,15 @@
   "WorkspaceRootPath": "D:\\Projects\\TenPercent\\TenPercent.Api\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\agencycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\agencycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\adminsettingsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\agencyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\interfaces\\iadminsettingsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\dtos\\admin\\economysettingsdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\finance\\economysettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\adminbankservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\finance\\transaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\finance\\bank.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\financeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\simulationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\simulationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\simulationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\matchengineservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -57,157 +30,40 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "Controllers\\AdminController.cs",
-              "ViewState": "AgIAAL8BAAAAAAAAAAAgwNUBAAABAAAAAAAAAA==",
+              "Title": "AgencyController.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\AgencyController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AgencyController.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\AgencyController.cs",
+              "RelativeToolTip": "Controllers\\AgencyController.cs",
+              "ViewState": "AgIAAFAAAAAAAAAAAAAgwGAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T17:13:17.07Z",
+              "WhenOpened": "2026-05-06T17:58:08.208Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "AdminSettingsService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\AdminSettingsService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\AdminSettingsService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\AdminSettingsService.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\AdminSettingsService.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAYwDwAAAABAAAAAAAAAA==",
+              "Title": "AgencyService.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\AgencyService.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\AgencyService.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\AgencyService.cs",
+              "RelativeToolTip": "..\\TenPercent.Application\\Services\\AgencyService.cs",
+              "ViewState": "AgIAABkBAAAAAAAAAAAgwCkBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T17:12:44.256Z",
+              "WhenOpened": "2026-05-06T17:53:22.021Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "IAdminSettingsService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Interfaces\\IAdminSettingsService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Interfaces\\IAdminSettingsService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Interfaces\\IAdminSettingsService.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Interfaces\\IAdminSettingsService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAmwF4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T17:12:24.473Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "EconomySettingsDto.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Admin\\EconomySettingsDto.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\DTOs\\Admin\\EconomySettingsDto.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Admin\\EconomySettingsDto.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\DTOs\\Admin\\EconomySettingsDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T17:11:46.835Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "AdminBankService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\AdminBankService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\AdminBankService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\AdminBankService.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\AdminBankService.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAgwDkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T16:43:26.707Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "EconomySettings.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\EconomySettings.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Finance\\EconomySettings.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\EconomySettings.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Finance\\EconomySettings.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAA6wBQAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T14:54:05.14Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Transaction.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\Transaction.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Finance\\Transaction.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\Transaction.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Finance\\Transaction.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAiwBYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T14:54:01.842Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Bank.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\Bank.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\Finance\\Bank.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\Finance\\Bank.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\Finance\\Bank.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T14:53:58.549Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "FinanceService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\FinanceService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\FinanceService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\FinanceService.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\FinanceService.cs",
-              "ViewState": "AgIAAF8BAAAAAAAAAAAuwGgBAAAiAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T12:27:47.117Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "MatchEngineService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\MatchEngineService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\MatchEngineService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\MatchEngineService.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\MatchEngineService.cs",
-              "ViewState": "AgIAAL4AAAAAAAAAAAAYwNMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T10:03:08.142Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "SimulationService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\SimulationService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\SimulationService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\SimulationService.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\SimulationService.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAzwFwAAAAoAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T10:03:00.717Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "SimulationController.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\SimulationController.cs",
-              "RelativeDocumentMoniker": "Controllers\\SimulationController.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\SimulationController.cs",
-              "RelativeToolTip": "Controllers\\SimulationController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-05T10:02:45.529Z",
+              "WhenOpened": "2026-05-06T17:50:43.282Z",
               "EditorCaption": ""
             }
           ]

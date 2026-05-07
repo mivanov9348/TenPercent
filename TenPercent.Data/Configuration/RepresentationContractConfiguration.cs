@@ -8,8 +8,9 @@
     {
         public void Configure(EntityTypeBuilder<RepresentationContract> builder)
         {
-            builder.Property(c => c.WageCommissionPercentage).HasPrecision(5, 2); // напр. 10.50%
+            builder.Property(c => c.IncomeCommissionPercentage).HasPrecision(5, 2);
             builder.Property(c => c.TransferCommissionPercentage).HasPrecision(5, 2);
+            builder.Property(c => c.AgencyBrokerFee).HasPrecision(18, 2);
             builder.Property(c => c.SigningBonusPaid).HasPrecision(18, 2);
             builder.Property(c => c.AgencyReleaseClause).HasPrecision(18, 2);
 
@@ -22,6 +23,8 @@
                 .WithMany()
                 .HasForeignKey(c => c.AgencyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+           
         }
     }
 }

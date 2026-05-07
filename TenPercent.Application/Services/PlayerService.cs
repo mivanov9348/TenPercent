@@ -89,7 +89,7 @@ namespace TenPercent.Application.Services
 
                 // Contract Details
                 WeeklyWage = activeContract?.WeeklyWage ?? 0,
-                ContractYearsLeft = activeContract != null ? (activeContract.EndDate.Year - DateTime.UtcNow.Year) : 0,
+                ContractYearsLeft = activeContract != null ? (activeContract.EndSeasonNumber - activeContract.StartSeasonNumber) : 0,
 
                 // Season Performance Stats
                 SeasonAppearances = currentSeasonStats?.Appearances ?? 0,

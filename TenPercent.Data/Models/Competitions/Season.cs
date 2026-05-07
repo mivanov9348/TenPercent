@@ -9,7 +9,7 @@
         public int TotalGameweeks { get; set; } = 0; 
 
         public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime? EndDate { get; set; }  
         public bool IsActive { get; set; } = true; 
 
         public ICollection<Fixture> Fixtures { get; set; } = new List<Fixture>();

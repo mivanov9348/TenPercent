@@ -1,10 +1,11 @@
 ﻿namespace TenPercent.Api.Controllers
 {
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.AspNetCore.Identity; // ДОБАВЕНО ЗА UserManager
-    using TenPercent.Api.DTOs;
-    using TenPercent.Application.Services.Interfaces;
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
     using TenPercent.Data;
     using TenPercent.Data.Models;
 
@@ -12,98 +13,83 @@
     [ApiController]
     public class AuthController : ControllerBase
     {
+        // ВЕЧЕ ПОЛЗВАМЕ НАШИЯ КЛАС User !
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly AppDbContext _context;
-        private readonly IAgencyService _agencyService;
-        private readonly UserManager<IdentityUser> _userManager; // ДОБАВЕНО
 
-        public AuthController(AppDbContext context, IAgencyService agencyService, UserManager<IdentityUser> userManager)
+        public AuthController(
+            UserManager<User> userManager,
+            SignInManager<User> signInManager,
+            AppDbContext context)
         {
+            _userManager = userManager;
+            _signInManager = signInManager;
             _context = context;
-            _agencyService = agencyService;
-            _userManager = userManager; // ДОБАВЕНО
         }
 
-        // POST: api/auth/register
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto dto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            if (await _context.GameUsers.AnyAsync(u => u.Email == dto.Email || u.Username == dto.Username))
-            {
-                return BadRequest(new { message = "Потребител с този имейл или име вече съществува." });
-            }
-
+            // 1. Създаваме нашия User
             var user = new User
             {
-                Username = dto.Username,
+                UserName = dto.Username,
                 Email = dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+                Role = "Player",
+                CreatedAt = DateTime.UtcNow
             };
 
-            _context.GameUsers.Add(user);
-            await _context.SaveChangesAsync();
+            var result = await _userManager.CreateAsync(user, dto.Password);
 
-            return Ok(new { userId = user.Id, message = "Registration successful!" });
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, "Player");
+
+                // Връщаме int ID на React-а
+                return Ok(new { userId = user.Id, message = "Registration successful" });
+            }
+
+            return BadRequest(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
-        // POST: api/auth/login 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto dto)
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            // 1. ПЪРВО ПРОВЕРЯВАМЕ ДАЛИ Е НОРМАЛЕН ИГРАЧ (в GameUsers)
-            var playerUser = await _context.GameUsers
-                .Include(u => u.Agent)
-                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+            // 1. Търсим по имейл
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null) return Unauthorized("Грешен имейл или парола.");
 
-            if (playerUser != null)
+            // 2. Проверяваме паролата
+            var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
+            if (!result.Succeeded) return Unauthorized("Грешен имейл или парола.");
+
+            // 3. Проверяваме дали този User вече си е създал Агенция
+            bool hasAgency = await _context.Agents
+                .Include(a => a.Agency)
+                .AnyAsync(a => a.UserId == user.Id && a.Agency != null);
+
+            // 4. Връщаме данните към React
+            return Ok(new
             {
-                if (!BCrypt.Net.BCrypt.Verify(dto.Password, playerUser.PasswordHash))
-                    return Unauthorized(new { message = "Грешна парола." });
-
-                return Ok(new
-                {
-                    userId = playerUser.Id.ToString(), // Връщаме като string
-                    hasAgency = playerUser.Agent != null,
-                    role = playerUser.Role,
-                    message = "Login successful!"
-                });
-            }
-
-            // 2. АКО НЕ Е ИГРАЧ, ПРОВЕРЯВАМЕ ДАЛИ Е АДМИН (в Identity)
-            var adminUser = await _userManager.FindByEmailAsync(dto.Email);
-
-            if (adminUser != null)
-            {
-                // Identity има собствен начин за проверка на пароли (не ползва нашия BCrypt)
-                if (!await _userManager.CheckPasswordAsync(adminUser, dto.Password))
-                    return Unauthorized(new { message = "Грешна парола." });
-
-                var roles = await _userManager.GetRolesAsync(adminUser);
-                string role = roles.FirstOrDefault() ?? "Admin";
-
-                return Ok(new
-                {
-                    userId = adminUser.Id, // Identity връща GUID (string)
-                    hasAgency = false, // Админът няма агенция
-                    role = role,
-                    message = "Admin login successful!"
-                });
-            }
-
-            // 3. АКО ГО НЯМА НИКЪДЕ:
-            return Unauthorized(new { message = "Грешен имейл или парола." });
+                userId = user.Id,
+                hasAgency = hasAgency,
+                role = user.Role
+            });
         }
+    }
 
-        [HttpPost("create-agency")]
-        public async Task<IActionResult> CreateAgency(CreateAgencyDto dto)
-        {
-            var result = await _agencyService.CreateAgencyAsync(dto);
+    // Помощни DTO класове (ако ги държиш в отделна папка, можеш да ги изтриеш от тук и да си ги import-неш)
+    public class RegisterDto
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
 
-            if (!result.Success)
-            {
-                return BadRequest(new { message = result.Message });
-            }
-
-            return Ok(new { message = result.Message });
-        }
+    public class LoginDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }

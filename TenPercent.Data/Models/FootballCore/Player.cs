@@ -1,5 +1,8 @@
 ﻿namespace TenPercent.Data.Models
 {
+    using System;
+    using System.Collections.Generic;
+
     public class Player
     {
         public int Id { get; set; }
@@ -32,5 +35,20 @@
         public ICollection<PlayerSeasonPerformance> SeasonPerformances { get; set; } = new List<PlayerSeasonPerformance>();
         public ICollection<PlayerMatchPerformance> MatchPerformances { get; set; } = new List<PlayerMatchPerformance>();
         public ICollection<AgencyShortlist> ShortlistedBy { get; set; } = new List<AgencyShortlist>();
+
+        public void RecalculateCurrentAbility()
+        {
+            if (Position == null || Attributes == null) return;
+
+            decimal ovr =
+                (Attributes.Pace * Position.PaceWeight) +
+                (Attributes.Shooting * Position.ShootingWeight) +
+                (Attributes.Passing * Position.PassingWeight) +
+                (Attributes.Dribbling * Position.DribblingWeight) +
+                (Attributes.Defending * Position.DefendingWeight) +
+                (Attributes.Physical * Position.PhysicalWeight);
+
+            CurrentAbility = (int)Math.Round(ovr, 0);
+        }
     }
 }

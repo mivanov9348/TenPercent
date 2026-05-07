@@ -56,29 +56,33 @@
                 Name = $"{faker.Name.FirstName(Bogus.DataSets.Name.Gender.Male)} {faker.Name.LastName()}",
                 Nationality = faker.Address.Country(),
                 PositionId = position.Id,
-                Position = position, // Required for GenerateAttributes to read the abbreviation
+                Position = position,
                 ClubId = clubId,
                 Form = "Good"
             };
 
             player.Age = GetRandomAge();
-            player.PotentialAbility = GetRandomAbility(70, 15);
 
-            // Calculation: Older players are closer to their potential
+            // Задаваме целеви потенциал и текущо умение
+            int targetPA = GetRandomAbility(70, 15);
             double ageFactor = Math.Clamp((player.Age - 15.0) / (28.0 - 15.0), 0.0, 1.0);
-            int currentAbilityBase = (int)(40 + (player.PotentialAbility - 40) * ageFactor);
+            int targetCA = (int)(40 + (targetPA - 40) * ageFactor);
 
-            player.CurrentAbility = Math.Clamp(currentAbilityBase + _rand.Next(-5, 5), 1, player.PotentialAbility);
-
-            // Apply age regression for players over 32
             if (player.Age > 32)
             {
-                player.CurrentAbility = Math.Clamp(player.CurrentAbility - _rand.Next(1, (player.Age - 30) * 2), 1, 100);
+                targetCA = Math.Clamp(targetCA - _rand.Next(1, (player.Age - 30) * 2), 1, 100);
             }
 
-            player.Attributes = GenerateAttributes(player);
+            // 1. Генерираме атрибутите базирано на Позицията, Годините и Целевия OVR!
+            player.Attributes = GenerateAttributes(player, targetCA, targetPA);
 
-            // Market Value calculation formula
+            // 2. След като атрибутите са готови, извикваме метода да сметне ИСТИНСКИЯ OVR!
+            player.RecalculateCurrentAbility();
+
+            // 3. Смятаме истинския потенциал
+            player.PotentialAbility = CalculateOVR(player.Attributes, position, isPotential: true);
+
+            // 4. Формула за цена
             decimal valueBase = player.CurrentAbility * 100000m;
             decimal potBonus = (player.PotentialAbility - player.CurrentAbility) * 50000m;
             decimal youthPremium = player.Age < 23 ? 1.5m : (player.Age > 30 ? 0.5m : 1.0m);
@@ -97,101 +101,117 @@
             var posCm = availablePositions.First(p => p.Abbreviation == "MID");
             var posSt = availablePositions.First(p => p.Abbreviation == "ST");
 
-            // Build starting XI
             squad.Add(GeneratePlayer("", clubId, posGk));
             for (int i = 0; i < 4; i++) squad.Add(GeneratePlayer("", clubId, posCb));
             for (int i = 0; i < 4; i++) squad.Add(GeneratePlayer("", clubId, posCm));
             for (int i = 0; i < 2; i++) squad.Add(GeneratePlayer("", clubId, posSt));
 
-            // Build bench
             squad.Add(GeneratePlayer("", clubId, posGk));
             squad.Add(GeneratePlayer("", clubId, posCb));
             squad.Add(GeneratePlayer("", clubId, posCm));
             squad.Add(GeneratePlayer("", clubId, posCm));
             squad.Add(GeneratePlayer("", clubId, posSt));
 
-            // Adjust abilities based on club reputation
+            // Обновяваме силата спрямо репутацията на клуба
             foreach (var p in squad)
             {
                 int targetCA = Math.Clamp(clubReputation + _rand.Next(-10, 5), 40, 95);
-                p.CurrentAbility = targetCA;
-                p.PotentialAbility = Math.Clamp(targetCA + _rand.Next(0, 15), targetCA, 99);
+                int targetPA = Math.Clamp(targetCA + _rand.Next(0, 15), targetCA, 99);
 
-                p.Attributes = GenerateAttributes(p);
+                p.Attributes = GenerateAttributes(p, targetCA, targetPA);
+                p.RecalculateCurrentAbility(); // Перфектно калкулиран OVR
+                p.PotentialAbility = CalculateOVR(p.Attributes, p.Position, isPotential: true);
+
                 p.MarketValue = (p.CurrentAbility * 150000m);
             }
 
             return squad;
         }
 
-        private PlayerAttributes GenerateAttributes(Player p)
+        private PlayerAttributes GenerateAttributes(Player p, int targetCA, int targetPA)
         {
             var attr = new PlayerAttributes
             {
                 Ambition = _rand.Next(1, 101),
                 Greed = _rand.Next(1, 101),
-                Loyalty = _rand.Next(1, 101)
+                Loyalty = _rand.Next(1, 101),
+                InjuryProne = _rand.Next(1, 100) // Генерираме склонност към контузии
             };
 
-            // Local helper function to generate stats around a base ability
-            int GenStat(int baseAbility) => Math.Clamp(baseAbility + _rand.Next(-10, 11), 1, 100);
+            var pos = p.Position;
+            int age = p.Age;
 
-            // Shape attributes based on positional roles
-            if (p.Position.Abbreviation == "ST")
+            // --- УМНАТА ФОРМУЛА ЗА ГЕНЕРИРАНЕ ---
+            int GenStat(int targetOvr, decimal weight, bool isPhysical)
             {
-                attr.Pace = GenStat(p.CurrentAbility + 5);
-                attr.Shooting = GenStat(p.CurrentAbility + 15);
-                attr.Passing = GenStat(p.CurrentAbility - 10);
-                attr.Dribbling = GenStat(p.CurrentAbility);
-                attr.Defending = GenStat(p.CurrentAbility - 30);
-                attr.Physical = GenStat(p.CurrentAbility);
-            }
-            else if (p.Position.Abbreviation == "MID")
-            {
-                attr.Pace = GenStat(p.CurrentAbility);
-                attr.Shooting = GenStat(p.CurrentAbility - 5);
-                attr.Passing = GenStat(p.CurrentAbility + 15);
-                attr.Dribbling = GenStat(p.CurrentAbility + 10);
-                attr.Defending = GenStat(p.CurrentAbility - 5);
-                attr.Physical = GenStat(p.CurrentAbility - 5);
-            }
-            else if (p.Position.Abbreviation == "DEF")
-            {
-                attr.Pace = GenStat(p.CurrentAbility - 5);
-                attr.Shooting = GenStat(p.CurrentAbility - 30);
-                attr.Passing = GenStat(p.CurrentAbility - 5);
-                attr.Dribbling = GenStat(p.CurrentAbility - 10);
-                attr.Defending = GenStat(p.CurrentAbility + 15);
-                attr.Physical = GenStat(p.CurrentAbility + 10);
-            }
-            else // GK
-            {
-                attr.Pace = GenStat(p.CurrentAbility - 40);
-                attr.Shooting = GenStat(p.CurrentAbility - 40);
-                attr.Passing = GenStat(p.CurrentAbility - 15);
-                attr.Dribbling = GenStat(p.CurrentAbility - 30);
-                attr.Defending = GenStat(p.CurrentAbility + 20);
-                attr.Physical = GenStat(p.CurrentAbility + 10);
+                // База: Половината от таргета + тежестта на атрибута * мултипликатор
+                int val = (int)(targetOvr * 0.5m + (targetOvr * 1.8m * weight) + _rand.Next(-6, 7));
+
+                // ВЛИЯНИЕ НА ГОДИНИТЕ:
+                if (age > 30)
+                {
+                    if (isPhysical) val -= (age - 30) * 2; // Физиката пада рязко
+                    else val += (age - 30); // Менталните се вдигат леко (Опит)
+                }
+                else if (age < 21)
+                {
+                    if (!isPhysical) val -= (21 - age) * 2; // Младите грешат и нямат поглед
+                    else val += (21 - age); // Но имат неизчерпаема енергия
+                }
+
+                return Math.Clamp(val, 1, 99);
             }
 
-            // Cap potential attributes ensuring they are at least equal to current attributes
-            attr.PotentialPace = Math.Max(attr.Pace, GenStat(p.PotentialAbility));
-            attr.PotentialShooting = Math.Max(attr.Shooting, GenStat(p.PotentialAbility));
-            attr.PotentialPassing = Math.Max(attr.Passing, GenStat(p.PotentialAbility));
-            attr.PotentialDribbling = Math.Max(attr.Dribbling, GenStat(p.PotentialAbility));
-            attr.PotentialDefending = Math.Max(attr.Defending, GenStat(p.PotentialAbility));
-            attr.PotentialPhysical = Math.Max(attr.Physical, GenStat(p.PotentialAbility));
+            // Генериране на ТЕКУЩИ атрибути (чрез използване на тежестите от Position!)
+            attr.Pace = GenStat(targetCA, pos.PaceWeight, isPhysical: true);
+            attr.Shooting = GenStat(targetCA, pos.ShootingWeight, isPhysical: false);
+            attr.Passing = GenStat(targetCA, pos.PassingWeight, isPhysical: false);
+            attr.Dribbling = GenStat(targetCA, pos.DribblingWeight, isPhysical: false);
+            attr.Defending = GenStat(targetCA, pos.DefendingWeight, isPhysical: false);
+            attr.Physical = GenStat(targetCA, pos.PhysicalWeight, isPhysical: true);
+
+            attr.Goalkeeping = GenStat(targetCA, pos.GoalkeepingWeight, isPhysical: false);
+            attr.Vision = GenStat(targetCA, pos.VisionWeight, isPhysical: false);
+            attr.Stamina = GenStat(targetCA, pos.StaminaWeight, isPhysical: true);
+
+            // Генериране на ПОТЕНЦИАЛНИ атрибути (трябва да са поне колкото текущите)
+            attr.PotentialPace = Math.Max(attr.Pace, GenStat(targetPA, pos.PaceWeight, true));
+            attr.PotentialShooting = Math.Max(attr.Shooting, GenStat(targetPA, pos.ShootingWeight, false));
+            attr.PotentialPassing = Math.Max(attr.Passing, GenStat(targetPA, pos.PassingWeight, false));
+            attr.PotentialDribbling = Math.Max(attr.Dribbling, GenStat(targetPA, pos.DribblingWeight, false));
+            attr.PotentialDefending = Math.Max(attr.Defending, GenStat(targetPA, pos.DefendingWeight, false));
+            attr.PotentialPhysical = Math.Max(attr.Physical, GenStat(targetPA, pos.PhysicalWeight, true));
+
+            attr.PotentialGoalkeeping = Math.Max(attr.Goalkeeping, GenStat(targetPA, pos.GoalkeepingWeight, false));
+            attr.PotentialVision = Math.Max(attr.Vision, GenStat(targetPA, pos.VisionWeight, false));
+            attr.PotentialStamina = Math.Max(attr.Stamina, GenStat(targetPA, pos.StaminaWeight, true));
 
             return attr;
         }
 
+        // Помощен метод за изчисляване на Потенциала
+        private int CalculateOVR(PlayerAttributes attr, Position pos, bool isPotential)
+        {
+            decimal ovr =
+                ((isPotential ? attr.PotentialPace : attr.Pace) * pos.PaceWeight) +
+                ((isPotential ? attr.PotentialShooting : attr.Shooting) * pos.ShootingWeight) +
+                ((isPotential ? attr.PotentialPassing : attr.Passing) * pos.PassingWeight) +
+                ((isPotential ? attr.PotentialDribbling : attr.Dribbling) * pos.DribblingWeight) +
+                ((isPotential ? attr.PotentialDefending : attr.Defending) * pos.DefendingWeight) +
+                ((isPotential ? attr.PotentialPhysical : attr.Physical) * pos.PhysicalWeight) +
+                ((isPotential ? attr.PotentialGoalkeeping : attr.Goalkeeping) * pos.GoalkeepingWeight) +
+                ((isPotential ? attr.PotentialVision : attr.Vision) * pos.VisionWeight) +
+                ((isPotential ? attr.PotentialStamina : attr.Stamina) * pos.StaminaWeight);
+
+            return (int)Math.Clamp(Math.Round(ovr, 0), 1, 99);
+        }
+
         private int GetRandomAge()
         {
-            // Box-Muller transform for normal distribution
             double u1 = 1.0 - _rand.NextDouble();
             double u2 = 1.0 - _rand.NextDouble();
             double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
-            double randNormal = 24 + 4 * randStdNormal; // Mean 24, StdDev 4
+            double randNormal = 24 + 4 * randStdNormal;
             return Math.Clamp((int)Math.Round(randNormal), 15, 38);
         }
 

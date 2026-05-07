@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building, Shield, Crown, Star, Loader2, AlertCircle } from 'lucide-react';
+// НОВО: Импортваме глобалния API_URL (Увери се, че пътят съвпада с твоята структура!)
+import { API_URL } from '../../config'; 
 
 export default function CreateAgency() {
   const navigate = useNavigate();
@@ -30,12 +32,13 @@ export default function CreateAgency() {
 
     if (!userId) {
       setError('Критична грешка: Не сте влезли в профила си (липсва UserId).');
+      setIsLoading(false);
       return;
     }
 
-
     try {
-      const response = await fetch('https://localhost:7135/api/auth/create-agency', {
+      // ПРОМЯНА: Вече сочи към правилния контролер (AgencyController -> create)
+      const response = await fetch(`${API_URL}/agency/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -49,18 +52,12 @@ export default function CreateAgency() {
       const data = await response.json();
 
       if (!response.ok) {
-        // 1. Ако грешката идва от нашия Service (където връщаме { message: "..." })
         if (data.message) {
           throw new Error(data.message);
-        }
-        // 2. Ако грешката е автоматична от ASP.NET валидацията
-        else if (data.errors) {
-          // Събираме всички съобщения за грешки от ASP.NET в един текст
+        } else if (data.errors) {
           const errorMessages = Object.values(data.errors).flat().join(' | ');
           throw new Error(`Грешка във формата: ${errorMessages}`);
-        } 
-        // 3. Fallback
-        else {
+        } else {
           throw new Error(JSON.stringify(data));
         }
       }

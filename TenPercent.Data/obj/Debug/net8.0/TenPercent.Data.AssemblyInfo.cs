@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TenPercent.Data")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9129b73c60cfa50480ad5ea026e28becbd430d52")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bf1780c57220900d8e0a55bf70d4045298aa5ea6")]
 [assembly: System.Reflection.AssemblyProductAttribute("TenPercent.Data")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TenPercent.Data")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

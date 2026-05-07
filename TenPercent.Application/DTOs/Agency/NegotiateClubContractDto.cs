@@ -13,6 +13,5 @@
         public decimal CleanSheetBonus { get; set; }
         public decimal ReleaseClause { get; set; }
 
-        public string SquadRole { get; set; } = "Rotation"; // Crucial, Rotation, Backup
     }
 }

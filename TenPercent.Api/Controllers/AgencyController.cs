@@ -2,9 +2,9 @@
 {
     using Microsoft.AspNetCore.Mvc;
     using System.Threading.Tasks;
+    using TenPercent.Api.DTOs;
     using TenPercent.Application.DTOs;
     using TenPercent.Application.Services.Interfaces;
-
 
     [Route("api/[controller]")]
     [ApiController]
@@ -14,8 +14,26 @@
 
         public AgencyController(IAgencyService agencyService)
         {
-            // Вече инжектираме САМО сървиза!
             _agencyService = agencyService;
+        }
+
+        // ==========================================
+        // ЕТО ГО ЛИПСВАЩИЯ МЕТОД ЗА СЪЗДАВАНЕ!
+        // ==========================================
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateAgency([FromBody] CreateAgencyDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Невалидни данни.");
+
+            var result = await _agencyService.CreateAgencyAsync(dto);
+
+            if (!result.Success)
+            {
+                return BadRequest(new { message = result.Message });
+            }
+
+            return Ok(new { message = result.Message });
         }
 
         // GET: api/agency/{userId}

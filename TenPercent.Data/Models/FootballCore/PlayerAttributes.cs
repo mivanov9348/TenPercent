@@ -6,12 +6,16 @@
 
         public int PlayerId { get; set; }
         public Player Player { get; set; } = null!;
+
         public int Pace { get; set; }
         public int Shooting { get; set; }
         public int Passing { get; set; }
         public int Dribbling { get; set; }
         public int Defending { get; set; }
         public int Physical { get; set; }
+        public int Goalkeeping { get; set; }
+        public int Vision { get; set; }
+        public int Stamina { get; set; }
 
         // --- ПОТЕНЦИАЛНИ АТРИБУТИ (Таванът на развитие) ---
         public int PotentialPace { get; set; }
@@ -20,6 +24,9 @@
         public int PotentialDribbling { get; set; }
         public int PotentialDefending { get; set; }
         public int PotentialPhysical { get; set; }
+        public int PotentialGoalkeeping { get; set; }
+        public int PotentialVision { get; set; }
+        public int PotentialStamina { get; set; }
 
         public int Ambition { get; set; } // Иска трансфери в топ клубове
         public int Greed { get; set; }    // Иска огромни заплати и бонуси

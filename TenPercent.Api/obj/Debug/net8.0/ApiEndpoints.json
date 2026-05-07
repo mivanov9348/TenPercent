@@ -213,9 +213,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TenPercent.Api.Controllers.AuthController",
+    "ContainingType": "TenPercent.Api.Controllers.AgencyController",
     "Method": "CreateAgency",
-    "RelativePath": "api/Auth/create-agency",
+    "RelativePath": "api/Agency/create",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -238,7 +238,7 @@
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "TenPercent.Api.DTOs.LoginDto",
+        "Type": "TenPercent.Api.Controllers.LoginDto",
         "IsRequired": true
       }
     ],
@@ -254,7 +254,7 @@
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "TenPercent.Api.DTOs.RegisterDto",
+        "Type": "TenPercent.Api.Controllers.RegisterDto",
         "IsRequired": true
       }
     ],

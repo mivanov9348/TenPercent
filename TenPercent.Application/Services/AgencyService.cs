@@ -111,86 +111,70 @@
             // 4. МАТЕМАТИКАТА ЗА ПРЕГОВОРИТЕ (AI LOGIC)
             // ==========================================
 
-            // Базов шанс за подписване (започва от 50%)
             double acceptanceChance = 50.0;
-
-            // А. Влияние на Репутацията срещу OVR на играча
-            // Ако си Ниво 1 (Rep 0), а той е 90 OVR, разликата е огромна.
-            // Приемаме, че 1 OVR = 10 Репутация за баланс.
             double expectedReputation = player.CurrentAbility * 10;
             double reputationDiff = agency.Reputation - expectedReputation;
-
-            // За всеки 100 точки разлика шансът се променя с 5%
             acceptanceChance += (reputationDiff / 100.0) * 5.0;
 
-            // Б. Влияние на Алчността (Greed) и Комисионните
-            // Колкото е по-алчен, толкова повече мрази ти да взимаш висок процент
-            double greedFactor = player.Attributes.Greed / 100.0; // от 0.01 до 1.00
+            double greedFactor = player.Attributes.Greed / 100.0;
             double totalCommission = (double)(dto.WageCommissionPercentage + dto.TransferCommissionPercentage);
-
-            // Наказание за високи комисионни, умножено по алчността
             acceptanceChance -= (totalCommission * 2.0) * (1.0 + greedFactor);
 
-            // В. Влияние на Signing Bonus
-            // Сравняваме бонуса с пазарната му цена. Алчните играчи искат по-голям бонус!
-            double bonusToValueRatio = (double)(dto.SigningBonusPaid / (player.MarketValue + 1m)); // +1 против делене на 0
-
-            // Ако му дадеш 10% от пазарната му цена като бонус, това е огромен плюс
+            double bonusToValueRatio = (double)(dto.SigningBonusPaid / (player.MarketValue + 1m));
             double bonusBoost = (bonusToValueRatio * 1000.0) * (1.0 + greedFactor);
-            acceptanceChance += Math.Min(bonusBoost, 40.0); // Ограничаваме бууста до макс 40%
+            acceptanceChance += Math.Min(bonusBoost, 40.0);
 
-            // Г. Опит за "Кражба" на играч (Ако има друга агенция)
             if (player.AgencyId.HasValue)
             {
                 double loyaltyFactor = player.Attributes.Loyalty / 100.0;
-                // Наказание между 10% и 40% в зависимост от лоялността му към сегашния агент
                 acceptanceChance -= (10.0 + (30.0 * loyaltyFactor));
             }
 
             // ==========================================
             // 5. РЕШЕНИЕТО НА ИГРАЧА
             // ==========================================
-
-            // Хвърляме зар от 1 до 100
             int roll = _rand.Next(1, 101);
-
-            // Ограничаваме шанса между 1% и 99% (винаги има шанс за изненада)
             acceptanceChance = Math.Clamp(acceptanceChance, 1.0, 99.0);
-
             bool isAccepted = roll <= acceptanceChance;
 
             if (!isAccepted)
             {
-                // Играчът отказва. 
                 return (true, $"{player.Name} отхвърли вашата оферта. (Шанс: {acceptanceChance:F1}%, Зар: {roll})", false);
+            }
+
+            // ==========================================
+            // --- НОВО: ВЗИМАМЕ ТЕКУЩИЯ СЕЗОН ---
+            // ==========================================
+            var worldState = await _context.WorldStates.FirstOrDefaultAsync();
+            int currentSeasonNumber = 1;
+            if (worldState != null && worldState.CurrentSeasonId.HasValue)
+            {
+                var activeSeason = await _context.Seasons.FindAsync(worldState.CurrentSeasonId.Value);
+                if (activeSeason != null) currentSeasonNumber = activeSeason.SeasonNumber;
             }
 
             // ==========================================
             // 6. ИГРАЧЪТ ПРИЕМА - ЗАПИСВАМЕ В БАЗАТА
             // ==========================================
-
-            // Създаваме транзакция, защото пипаме пари и договори едновременно
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // 1. Взимаме му парите от бюджета
                 agency.Budget -= dto.SigningBonusPaid;
 
-                // 2. Прекратяваме стария му договор с друга агенция (ако има такъв)
                 if (player.AgencyId.HasValue)
                 {
                     var oldContract = player.RepresentationContracts.FirstOrDefault(c => c.IsActive && c.AgencyId == player.AgencyId);
                     if (oldContract != null) oldContract.IsActive = false;
                 }
 
-                // 3. Създаваме новия договор
+                // --- НОВО: ОБНОВЕНИТЕ ПОЛЕТА НА ДОГОВОРА ---
                 var newContract = new RepresentationContract
                 {
                     PlayerId = player.Id,
                     AgencyId = agency.Id,
-                    StartDate = DateTime.UtcNow,
-                    EndDate = DateTime.UtcNow.AddYears(dto.DurationYears),
-                    WageCommissionPercentage = dto.WageCommissionPercentage,
+                    StartSeasonNumber = currentSeasonNumber,
+                    EndSeasonNumber = currentSeasonNumber + dto.DurationYears, // DurationYears реално са сезони
+                    IncomeCommissionPercentage = dto.WageCommissionPercentage, // Пълним новото поле със старата стойност от DTO
                     TransferCommissionPercentage = dto.TransferCommissionPercentage,
                     SigningBonusPaid = dto.SigningBonusPaid,
                     AgencyReleaseClause = dto.AgencyReleaseClause,
@@ -198,8 +182,6 @@
                 };
 
                 _context.RepresentationContracts.Add(newContract);
-
-                // 4. Закачаме го официално към твоята агенция
                 player.AgencyId = agency.Id;
 
                 await _context.SaveChangesAsync();
@@ -216,15 +198,13 @@
 
         public async Task<(bool Success, string Message)> CreateAgencyAsync(CreateAgencyDto dto)
         {
-            var user = await _context.GameUsers
+            var user = await _context.Users
          .Include(u => u.Agent)
          .FirstOrDefaultAsync(u => u.Id == dto.UserId);
 
             if (user == null) return (false, "User not found.");
-
             if (user.Agent != null) return (false, "This user already has an agency.");
 
-            // Използваме транзакция, за да сме сигурни, че ако Банката няма пари (или гръмне), агенцията няма да се създаде
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -239,28 +219,25 @@
                     Name = dto.AgencyName,
                     LogoId = dto.LogoId,
                     Agent = agent,
-                    Budget = 0m // Стартира на 0
+                    Budget = 0m
                 };
 
                 _context.Agents.Add(agent);
                 _context.Agencies.Add(agency);
 
-                // Запазваме, за да генерираме ID на агенцията, което ни трябва за транзакцията
                 await _context.SaveChangesAsync();
 
-                // Взимаме настройките за гранта
                 var settings = await _context.EconomySettings.FirstOrDefaultAsync();
                 decimal grantAmount = settings?.AgencyStartupGrant ?? 1_000_000m;
 
                 var bank = await _context.Banks.FirstOrDefaultAsync();
                 if (bank != null)
                 {
-                    // Банката превежда парите
                     var financeResult = await _financeService.ProcessTransactionAsync(
                         EntityType.Bank, bank.Id,
                         EntityType.Agency, agency.Id,
                         grantAmount,
-                        TransactionCategory.StartupGrant, // Използвай новия Enum
+                        TransactionCategory.StartupGrant,
                         "Welcome Solidarity Grant from World Central Bank"
                     );
 
@@ -276,6 +253,7 @@
                 return (false, $"Error creating agency: {ex.Message}");
             }
         }
+
         public async Task<AgencyFinanceDto?> GetAgencyFinanceAsync(int userId)
         {
             var agent = await _context.Agents
@@ -286,7 +264,6 @@
 
             int agencyId = agent.Agency.Id;
 
-            // Взимаме последните 20 транзакции, в които Агенцията е участвала
             var recentTransactions = await _context.Transactions
                 .Where(t => (t.SenderType == EntityType.Agency && t.SenderId == agencyId) ||
                             (t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId))
@@ -294,7 +271,6 @@
                 .Take(20)
                 .ToListAsync();
 
-            // Смятаме общите приходи и разходи за статистиката
             decimal totalIncome = await _context.Transactions
                 .Where(t => t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId)
                 .SumAsync(t => t.Amount);
@@ -311,7 +287,6 @@
                 RecentTransactions = recentTransactions.Select(t => new TransactionDto
                 {
                     Id = t.Id,
-                    // Ако Агенцията е получател, значи е приход. Иначе е разход.
                     Type = (t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId) ? "income" : "expense",
                     Description = t.Description,
                     Amount = t.Amount,

@@ -4,23 +4,25 @@
     using Microsoft.EntityFrameworkCore;
     using TenPercent.Data.Models;
     using TenPercent.Data.Models.Finance;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-    public class AppDbContext : IdentityDbContext
+    // Казваме на Identity да използва нашия User, базов IdentityRole и int за ключове
+    public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
         // --- ХОРА И АГЕНЦИИ ---
-        public DbSet<User> GameUsers { get; set; }
+        // ПРЕМАХНАТО: DbSet<User> GameUsers; (Вече се ползва вграденото _context.Users)
         public DbSet<Agent> Agents { get; set; }
         public DbSet<Agency> Agencies { get; set; }
 
         // --- ИГРАЧИ ---
         public DbSet<Player> Players { get; set; }
         public DbSet<PlayerAttributes> PlayerAttributes { get; set; }
-        public DbSet<Position> Positions { get; set; } 
+        public DbSet<Position> Positions { get; set; }
 
         // --- СВЯТ И ОТБОРИ ---
         public DbSet<Club> Clubs { get; set; }
@@ -30,11 +32,11 @@
         // --- СЕЗОНИ, МАЧОВЕ И КЛАСИРАНИЯ ---
         public DbSet<Season> Seasons { get; set; }
         public DbSet<Fixture> Fixtures { get; set; }
-        public DbSet<LeagueStanding> LeagueStandings { get; set; } // Живо класиране
-        public DbSet<SeasonStanding> SeasonStandings { get; set; } // Архив класиране
+        public DbSet<LeagueStanding> LeagueStandings { get; set; }
+        public DbSet<SeasonStanding> SeasonStandings { get; set; }
 
-        public DbSet<PlayerMatchPerformance> PlayerMatchPerformances { get; set; } // Текущ мач
-        public DbSet<PlayerSeasonPerformance> PlayerSeasonStats { get; set; } // Архив сезон
+        public DbSet<PlayerMatchPerformance> PlayerMatchPerformances { get; set; }
+        public DbSet<PlayerSeasonPerformance> PlayerSeasonStats { get; set; }
 
         public DbSet<ClubContract> ClubContracts { get; set; }
         public DbSet<RepresentationContract> RepresentationContracts { get; set; }
@@ -49,15 +51,12 @@
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             base.ConfigureConventions(configurationBuilder);
-
-
             configurationBuilder.Properties<decimal>().HavePrecision(18, 4);
         }
     }

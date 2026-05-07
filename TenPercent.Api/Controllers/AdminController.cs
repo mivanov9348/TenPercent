@@ -13,7 +13,7 @@
     using TenPercent.Application.Services.Interfaces;
     using TenPercent.Data;
     using TenPercent.Data.Models;
-    using TenPercent.Data.DTOs.Admin; // Добавено
+    using TenPercent.Data.DTOs.Admin;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -23,8 +23,6 @@
         private readonly IPlayerGeneratorService _playerGen;
         private readonly IScheduleService _scheduleService;
         private readonly IPlayerContractService _contractService;
-
-        // НОВИ СЪРВИЗИ
         private readonly IAdminBankService _adminBankService;
         private readonly IAdminSettingsService _settingsService;
 
@@ -33,20 +31,16 @@
             IPlayerGeneratorService playerGen,
             IScheduleService scheduleService,
             IPlayerContractService contractService,
-            IAdminBankService adminBankService, // НОВО
-            IAdminSettingsService settingsService) // НОВО
+            IAdminBankService adminBankService,
+            IAdminSettingsService settingsService)
         {
             _context = context;
             _playerGen = playerGen;
             _scheduleService = scheduleService;
             _contractService = contractService;
-            _adminBankService = adminBankService; // НОВО
-            _settingsService = settingsService; // НОВО
+            _adminBankService = adminBankService;
+            _settingsService = settingsService;
         }
-
-        // ==========================================
-        // 1. СТАРТИТЕ МЕТОДИ (ОСТАВАТ СИ СЪЩИТЕ)
-        // ==========================================
 
         [HttpPost("initialize-world")]
         public async Task<IActionResult> InitializeWorld()
@@ -92,6 +86,9 @@
             });
         }
 
+        // ==========================================
+        // ОБНОВЕН МЕТОД ЗА ИМПОРТ НА ПОЗИЦИИ
+        // ==========================================
         [HttpPost("import-positions")]
         public async Task<IActionResult> ImportPositions(IFormFile file)
         {
@@ -118,7 +115,21 @@
                 {
                     if (!await _context.Positions.AnyAsync(p => p.Abbreviation == abbr))
                     {
-                        positions.Add(new Position { Name = name, Abbreviation = abbr });
+                        // Вземаме всички нови тежести от CSV файла!
+                        positions.Add(new Position
+                        {
+                            Name = name,
+                            Abbreviation = abbr,
+                            PaceWeight = csv.GetField<decimal>("PaceWeight"),
+                            ShootingWeight = csv.GetField<decimal>("ShootingWeight"),
+                            PassingWeight = csv.GetField<decimal>("PassingWeight"),
+                            DribblingWeight = csv.GetField<decimal>("DribblingWeight"),
+                            DefendingWeight = csv.GetField<decimal>("DefendingWeight"),
+                            PhysicalWeight = csv.GetField<decimal>("PhysicalWeight"),
+                            GoalkeepingWeight = csv.GetField<decimal>("GoalkeepingWeight"),
+                            VisionWeight = csv.GetField<decimal>("VisionWeight"),
+                            StaminaWeight = csv.GetField<decimal>("StaminaWeight")
+                        });
                     }
                 }
             }
@@ -440,10 +451,6 @@
 
             return Ok(new { message = "Отборите са пълни. Договорите са актуализирани." });
         }
-
-        // ==========================================
-        // 2. НОВИ МЕТОДИ ЗА БАНКАТА И НАСТРОЙКИТЕ
-        // ==========================================
 
         [HttpGet("bank")]
         public async Task<IActionResult> GetBankDashboard()

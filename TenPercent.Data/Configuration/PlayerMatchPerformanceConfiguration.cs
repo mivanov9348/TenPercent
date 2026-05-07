@@ -14,12 +14,17 @@
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(pmp => pmp.Player)
-                .WithMany()
+                .WithMany(p => p.MatchPerformances)
                 .HasForeignKey(pmp => pmp.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(pmp => pmp.MatchRating)
                 .HasPrecision(4, 1);
+
+            builder.HasOne(pmp => pmp.Season)
+                .WithMany()
+                .HasForeignKey(pmp => pmp.SeasonId)
+                .OnDelete(DeleteBehavior.Restrict); 
         }
     }
 }

@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TenPercent.Api.Services;
 using TenPercent.Application.Interfaces;
 using TenPercent.Application.Services;
 using TenPercent.Application.Services.Interfaces;
 using TenPercent.Data;
-using Microsoft.AspNetCore.Identity;
+using TenPercent.Data.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,14 +36,12 @@ builder.Services.AddScoped<IAdminBankService, AdminBankService>();
 builder.Services.AddScoped<IAdminSettingsService, AdminSettingsService>();
 
 builder.Services
-    .AddIdentity<IdentityUser, IdentityRole>(options =>
+    .AddIdentity<User, IdentityRole<int>>(options => 
     {
         options.Password.RequireDigit = false;
         options.Password.RequiredLength = 3;
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = false;
-
-        // ДОБАВИ ТОЗИ РЕД:
         options.Password.RequireLowercase = false;
     })
     .AddEntityFrameworkStores<AppDbContext>()
