@@ -18,7 +18,7 @@
         }
 
         // ==========================================
-        // ЕТО ГО ЛИПСВАЩИЯ МЕТОД ЗА СЪЗДАВАНЕ!
+        // СЪЗДАВАНЕ НА АГЕНЦИЯ
         // ==========================================
         [HttpPost("create")]
         public async Task<IActionResult> CreateAgency([FromBody] CreateAgencyDto dto)
@@ -36,19 +36,23 @@
             return Ok(new { message = result.Message });
         }
 
-        // GET: api/agency/{userId}
+        // ==========================================
+        // ВЗИМАНЕ НА ДАННИ ЗА АГЕНЦИЯТА
+        // ==========================================
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetMyAgency(int userId)
         {
             var agencyDto = await _agencyService.GetMyAgencyAsync(userId);
 
             if (agencyDto == null)
-                return NotFound("Agency not found for this user.");
+                return NotFound(new { message = "Agency not found for this user." });
 
             return Ok(agencyDto);
         }
 
-        // GET: api/agency/{userId}/players
+        // ==========================================
+        // ОСТАНАЛИТЕ МЕТОДИ
+        // ==========================================
         [HttpGet("{userId}/players")]
         public async Task<IActionResult> GetAgencyPlayers(int userId)
         {
@@ -60,7 +64,6 @@
             return Ok(players);
         }
 
-        // POST: api/agency/{userId}/offer-contract
         [HttpPost("{userId}/offer-contract")]
         public async Task<IActionResult> OfferRepresentation(int userId, [FromBody] OfferRepresentationDto dto)
         {
@@ -82,7 +85,6 @@
             return Ok(new { accepted = true, message = result.Message });
         }
 
-        // GET: api/agency/{userId}/finance
         [HttpGet("{userId}/finance")]
         public async Task<IActionResult> GetAgencyFinance(int userId)
         {

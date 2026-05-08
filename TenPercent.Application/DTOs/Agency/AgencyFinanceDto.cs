@@ -1,16 +1,18 @@
 ﻿namespace TenPercent.Application.DTOs
 {
-    using System;
     using System.Collections.Generic;
 
     public class AgencyFinanceDto
     {
         public decimal Balance { get; set; }
-        public decimal TotalIncome { get; set; }
-        public decimal TotalExpenses { get; set; }
-        public decimal NetProfit => TotalIncome - TotalExpenses;
+        public decimal StartupCapital { get; set; } 
 
-        public List<TransactionDto> RecentTransactions { get; set; } = new List<TransactionDto>();
+        public decimal OperatingIncome { get; set; }
+        public decimal OperatingExpenses { get; set; }
+        public decimal NetProfit => OperatingIncome - OperatingExpenses;
+
+        public List<SeasonFinanceSummaryDto> SeasonalRecords { get; set; } = new();
+        public List<TransactionDto> RecentTransactions { get; set; } = new();
     }
 
 }

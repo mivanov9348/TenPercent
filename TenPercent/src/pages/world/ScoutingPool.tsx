@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, UserPlus, Loader2, ChevronLeft, ChevronRight, Users, UserMinus, SlidersHorizontal, ArrowUpDown, Star, Flame, Briefcase, LayoutTemplate, BookmarkPlus } from 'lucide-react';
-import OfferRepresentationModal from './world/OfferRepresentationModal';
+import OfferRepresentationModal from '../world/OfferRepresentationModal';
 
 export default function ScoutingPool() {
   const navigate = useNavigate();

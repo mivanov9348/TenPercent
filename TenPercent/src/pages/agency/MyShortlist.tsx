@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, BookmarkMinus, Search, Calendar, UserPlus } from 'lucide-react';
-import OfferRepresentationModal from './world/OfferRepresentationModal';
+import OfferRepresentationModal from '../world/OfferRepresentationModal';
 
 interface ShortlistedPlayer {
   playerId: number;

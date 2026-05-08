@@ -453,10 +453,21 @@
         }
       }
     },
-    "/api/Dashboard/home": {
+    "/api/Dashboard/home/{userId}": {
       "get": {
         "tags": [
           "Dashboard"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
         ],
         "responses": {
           "200": {

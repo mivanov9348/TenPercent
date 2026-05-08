@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Star, AlertTriangle, TrendingUp, Clock, CalendarDays, Loader2, Info, Trophy, Swords, User, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+// Предполагам, че имаш API_URL импортиран някъде. Замени го с твоя импорт, ако трябва.
+// import { API_URL } from '../../config'; 
 
 export default function Home() {
   const navigate = useNavigate();
@@ -11,7 +13,11 @@ export default function Home() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch('https://localhost:7135/api/dashboard/home');
+        // Взимаме userId, за да го пратим на бекенда
+        const userId = localStorage.getItem('userId');
+        const url = userId ? `https://localhost:7135/api/dashboard/home/${userId}` : 'https://localhost:7135/api/dashboard/home';
+
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
           setDashboardData(data);
@@ -116,19 +122,72 @@ export default function Home() {
 
       {/* Грид за Агенцията */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Предстоящи мачове на клиентите */}
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0"><Calendar className="text-blue-400" /> My Client Matches</h2>
           <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {clientMatches.length > 0 ? clientMatches.map((match: any) => (<div key={match.id}></div>)) : (
+            {clientMatches.length > 0 ? (
+              clientMatches.map((match: any) => (
+                <div key={match.id} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex flex-col justify-center hover:border-gray-600 transition-colors">
+                  <div className="flex justify-between items-center text-white font-bold text-sm">
+                    <span className="truncate">{match.homeTeam}</span>
+                    <span className="text-gray-600 mx-2 text-xs">VS</span>
+                    <span className="truncate flex-1 text-right">{match.awayTeam}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">{match.league}</span>
+                    <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded font-bold">
+                      {new Date(match.date).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  {/* НОВО: Показваме кои играчи участват */}
+                  {match.playersInvolved && match.playersInvolved.length > 0 && (
+                    <div className="mt-3 pt-2 border-t border-gray-800 flex flex-wrap gap-2">
+                      {match.playersInvolved.map((player: any, idx: number) => (
+                        <span key={idx} className="text-[11px] flex items-center gap-1 bg-gray-800 text-gray-300 px-2 py-1 rounded">
+                          <User size={10} className="text-yellow-500" />
+                          {player.name} <span className="text-gray-500">({player.pos})</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
               <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed"><Calendar size={48} className="mb-3 opacity-50" /><p className="font-bold">No upcoming client matches.</p></div>
             )}
           </div>
         </div>
-
+        {/* Оценки (Match Reports) от изминали мачове */}
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[350px]">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0"><TrendingUp className="text-emerald-400" /> Client Reports (Last Round)</h2>
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0"><TrendingUp className="text-emerald-400" /> Client Reports</h2>
           <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {clientReports.length > 0 ? clientReports.map((report: any) => (<div key={report.id}></div>)) : (
+            {clientReports.length > 0 ? (
+              clientReports.map((report: any) => (
+                <div key={report.id} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex items-center justify-between hover:border-gray-600 transition-colors cursor-pointer">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-white truncate">{report.playerName}</p>
+                      <span className="text-[10px] bg-gray-800 text-gray-400 px-1 rounded">{report.position}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-1">
+                      GW {report.gameweek} • {report.result} • {report.minutes}'
+                      {report.goals > 0 && <span className="text-yellow-500 ml-2">⚽ {report.goals}</span>}
+                      {report.assists > 0 && <span className="text-blue-400 ml-2">👟 {report.assists}</span>}
+                    </p>
+                  </div>
+                  <div className="ml-3 shrink-0">
+                    <span className={`px-2 py-1 rounded font-black text-sm ${report.rating >= 8.0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' :
+                        report.rating >= 6.0 ? 'bg-gray-800 text-white' :
+                          'bg-red-500/20 text-red-400 border border-red-500/50'
+                      }`}>
+                      {report.rating.toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
               <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 bg-gray-900/50 rounded-xl border border-gray-800/50 border-dashed"><TrendingUp size={48} className="mb-3 opacity-50" /><p className="font-bold">No reports available.</p></div>
             )}
           </div>
@@ -169,7 +228,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* НОВО: Минали мачове */}
+        {/* Минали мачове */}
         <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg flex flex-col h-[400px]">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 shrink-0">
             <CheckCircle2 className="text-emerald-500" /> Last Matchday Results

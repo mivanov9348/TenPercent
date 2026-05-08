@@ -1,8 +1,6 @@
 ﻿namespace TenPercent.Application.DTOs
 {
     using System;
-    using System.Collections.Generic;   
-
     public class TransactionDto
     {
         public int Id { get; set; }

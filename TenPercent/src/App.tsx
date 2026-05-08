@@ -2,10 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 
 // Страници на играта
-import Home from './pages/Home';
-import Agency from './pages/Agency';
-import Players from './pages/Players';
-import Finance from './pages/Finance';
+import Home from './pages/agency/Home';
+import Agency from './pages/agency/Agency';
+import Players from './pages/agency/Players';
+import Finance from './pages/agency/Finance';
 
 // Auth Страници
 import Login from './pages/auth/Login';
@@ -16,11 +16,11 @@ import WorldLayout from './pages/world/WorldLayout';
 import Standings from './pages/world/Standings';
 import Fixtures from './pages/world/Fixtures';
 import SeasonStats from './pages/world/SeasonStats';
-import Inbox from './pages/Inbox';
+import Inbox from './pages/agency/Inbox';
 import PlayerDetails from './pages/world/PlayerDetails';
 
-import RequireAuth from './components/layout/RequireAuth';
-import RequireAgency from './components/layout/RequireAgency';
+import RequireAuth from './components/guards/RequireAuth';
+import RequireAgency from './components/guards/RequireAgency';
 
 // Админ Страници
 import RequireAdmin from './pages/admin/RequireAdmin';
@@ -29,8 +29,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBank from './pages/admin/AdminBank';
 
 import ClubDetails from './pages/world/ClubDetails';
-import ScoutingPool from './pages/ScoutingPool';
-import MyShortlist from './pages/MyShortlist';
+import ScoutingPool from './pages/world/ScoutingPool';
+import MyShortlist from './pages/agency/MyShortlist';
 import AdminSettings from './pages/admin/AdminSettings';
 
 function App() {

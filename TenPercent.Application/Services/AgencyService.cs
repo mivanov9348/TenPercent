@@ -29,10 +29,41 @@
             var agent = await _context.Agents
                 .Include(a => a.Agency)
                 .ThenInclude(ag => ag.Players)
+                .ThenInclude(p => p.ClubContracts.Where(cc => cc.IsActive))
+                .Include(a => a.Agency)
+                .ThenInclude(ag => ag.Players)
+                .ThenInclude(p => p.RepresentationContracts.Where(rc => rc.IsActive))
                 .FirstOrDefaultAsync(a => a.UserId == userId);
 
             if (agent?.Agency == null)
                 return null;
+
+            var activePlayers = agent.Agency.Players.Where(p => p.ClubContracts.Any() && p.RepresentationContracts.Any()).ToList();
+
+            decimal totalProjectedIncome = 0;
+            decimal totalContractsValue = 0;
+            string topEarner = "N/A";
+            decimal maxEarnerIncome = 0;
+
+            foreach (var player in activePlayers)
+            {
+                var clubContract = player.ClubContracts.First();
+                var repContract = player.RepresentationContracts.First();
+
+                decimal weeklyCommission = clubContract.WeeklyWage * (repContract.IncomeCommissionPercentage / 100m);
+                decimal projectedSeasonCommission = weeklyCommission * 40;
+                totalProjectedIncome += projectedSeasonCommission;
+
+                int remainingSeasons = clubContract.EndSeasonNumber - clubContract.StartSeasonNumber;
+                decimal contractValue = (clubContract.WeeklyWage * 40 * (remainingSeasons > 0 ? remainingSeasons : 1)) + clubContract.ReleaseClause;
+                totalContractsValue += contractValue;
+
+                if (weeklyCommission > maxEarnerIncome)
+                {
+                    maxEarnerIncome = weeklyCommission;
+                    topEarner = player.Name;
+                }
+            }
 
             return new AgencyDto
             {
@@ -44,7 +75,10 @@
                 Reputation = agent.Agency.Reputation,
                 Level = agent.Agency.Level,
                 EstablishedAt = agent.Agency.EstablishedAt,
-                TotalPlayersCount = agent.Agency.Players.Count
+                TotalPlayersCount = agent.Agency.Players.Count,
+                ProjectedSeasonIncome = totalProjectedIncome,
+                TotalContractsValue = totalContractsValue,
+                TopEarnerName = topEarner
             };
         }
 
@@ -57,8 +91,21 @@
             if (agent?.Agency == null)
                 return null;
 
+            // Взимаме текущия сезон
+            var worldState = await _context.WorldStates.FirstOrDefaultAsync();
+            int currentSeasonNumber = 1;
+            if (worldState != null && worldState.CurrentSeasonId.HasValue)
+            {
+                var activeSeason = await _context.Seasons.FindAsync(worldState.CurrentSeasonId.Value);
+                if (activeSeason != null) currentSeasonNumber = activeSeason.SeasonNumber;
+            }
+
             var players = await _context.Players
                 .Include(p => p.Position)
+                .Include(p => p.Club)
+                .Include(p => p.Attributes)
+                .Include(p => p.ClubContracts.Where(c => c.IsActive))
+                .Include(p => p.RepresentationContracts.Where(c => c.IsActive))
                 .Where(p => p.AgencyId == agent.Agency.Id)
                 .Select(p => new AgencyPlayerDto
                 {
@@ -66,10 +113,27 @@
                     Name = p.Name,
                     Pos = p.Position.Abbreviation,
                     Age = p.Age,
+                    Nationality = p.Nationality,
+                    ClubName = p.Club != null ? p.Club.Name : "Free Agent",
+
                     Skill = p.CurrentAbility,
-                    Potential = p.PotentialAbility,
                     Value = p.MarketValue,
-                    Form = p.Form ?? "Average"
+                    Wage = p.ClubContracts.Any() ? p.ClubContracts.First().WeeklyWage : 0,
+
+                    // Изчисляване на оставащите сезони
+                    ClubContractYearsLeft = p.ClubContracts.Any() ? Math.Max(0, p.ClubContracts.First().EndSeasonNumber - currentSeasonNumber) : 0,
+                    AgencyContractYearsLeft = p.RepresentationContracts.Any() ? Math.Max(0, p.RepresentationContracts.First().EndSeasonNumber - currentSeasonNumber) : 0,
+
+                    // Атрибути
+                    Pace = p.Attributes.Pace,
+                    Shooting = p.Attributes.Shooting,
+                    Passing = p.Attributes.Passing,
+                    Dribbling = p.Attributes.Dribbling,
+                    Defending = p.Attributes.Defending,
+                    Physical = p.Attributes.Physical,
+                    Goalkeeping = p.Attributes.Goalkeeping,
+                    Vision = p.Attributes.Vision,
+                    Stamina = p.Attributes.Stamina
                 })
                 .ToListAsync();
 
@@ -78,7 +142,6 @@
 
         public async Task<(bool Success, string Message, bool Accepted)> OfferRepresentationAsync(int userId, OfferRepresentationDto dto)
         {
-            // 1. Намираме Агенцията
             var agent = await _context.Agents
                 .Include(a => a.Agency)
                 .FirstOrDefaultAsync(a => a.UserId == userId);
@@ -88,7 +151,6 @@
 
             var agency = agent.Agency;
 
-            // 2. Намираме Играча (С неговите атрибути)
             var player = await _context.Players
                 .Include(p => p.Attributes)
                 .Include(p => p.RepresentationContracts)
@@ -97,7 +159,6 @@
             if (player == null)
                 return (false, "Играчът не съществува.", false);
 
-            // 3. Базови Валидации
             if (agency.Budget < dto.SigningBonusPaid)
                 return (false, "Нямате достатъчно бюджет за този Signing Bonus.", false);
 
@@ -106,10 +167,6 @@
 
             if (dto.WageCommissionPercentage > 15m || dto.TransferCommissionPercentage > 15m)
                 return (false, "ФИФА не позволява комисионни над 15%.", false);
-
-            // ==========================================
-            // 4. МАТЕМАТИКАТА ЗА ПРЕГОВОРИТЕ (AI LOGIC)
-            // ==========================================
 
             double acceptanceChance = 50.0;
             double expectedReputation = player.CurrentAbility * 10;
@@ -130,9 +187,6 @@
                 acceptanceChance -= (10.0 + (30.0 * loyaltyFactor));
             }
 
-            // ==========================================
-            // 5. РЕШЕНИЕТО НА ИГРАЧА
-            // ==========================================
             int roll = _rand.Next(1, 101);
             acceptanceChance = Math.Clamp(acceptanceChance, 1.0, 99.0);
             bool isAccepted = roll <= acceptanceChance;
@@ -142,9 +196,6 @@
                 return (true, $"{player.Name} отхвърли вашата оферта. (Шанс: {acceptanceChance:F1}%, Зар: {roll})", false);
             }
 
-            // ==========================================
-            // --- НОВО: ВЗИМАМЕ ТЕКУЩИЯ СЕЗОН ---
-            // ==========================================
             var worldState = await _context.WorldStates.FirstOrDefaultAsync();
             int currentSeasonNumber = 1;
             if (worldState != null && worldState.CurrentSeasonId.HasValue)
@@ -153,9 +204,6 @@
                 if (activeSeason != null) currentSeasonNumber = activeSeason.SeasonNumber;
             }
 
-            // ==========================================
-            // 6. ИГРАЧЪТ ПРИЕМА - ЗАПИСВАМЕ В БАЗАТА
-            // ==========================================
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -167,14 +215,13 @@
                     if (oldContract != null) oldContract.IsActive = false;
                 }
 
-                // --- НОВО: ОБНОВЕНИТЕ ПОЛЕТА НА ДОГОВОРА ---
                 var newContract = new RepresentationContract
                 {
                     PlayerId = player.Id,
                     AgencyId = agency.Id,
                     StartSeasonNumber = currentSeasonNumber,
-                    EndSeasonNumber = currentSeasonNumber + dto.DurationYears, // DurationYears реално са сезони
-                    IncomeCommissionPercentage = dto.WageCommissionPercentage, // Пълним новото поле със старата стойност от DTO
+                    EndSeasonNumber = currentSeasonNumber + dto.DurationYears,
+                    IncomeCommissionPercentage = dto.WageCommissionPercentage,
                     TransferCommissionPercentage = dto.TransferCommissionPercentage,
                     SigningBonusPaid = dto.SigningBonusPaid,
                     AgencyReleaseClause = dto.AgencyReleaseClause,
@@ -253,7 +300,6 @@
                 return (false, $"Error creating agency: {ex.Message}");
             }
         }
-
         public async Task<AgencyFinanceDto?> GetAgencyFinanceAsync(int userId)
         {
             var agent = await _context.Agents
@@ -264,34 +310,64 @@
 
             int agencyId = agent.Agency.Id;
 
-            var recentTransactions = await _context.Transactions
+            // Взимаме ВСИЧКИ транзакции за тази агенция, заедно със Сезона
+            var allTransactions = await _context.Transactions
+                .Include(t => t.Season)
                 .Where(t => (t.SenderType == EntityType.Agency && t.SenderId == agencyId) ||
                             (t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId))
-                .OrderByDescending(t => t.Date)
-                .Take(20)
                 .ToListAsync();
 
-            decimal totalIncome = await _context.Transactions
-                .Where(t => t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId)
-                .SumAsync(t => t.Amount);
+            // 1. Изолираме стартовия капитал (ПРОВЕРЯВАМЕ И ТИПА!)
+            decimal startupCapital = allTransactions
+                .Where(t => t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId && t.Category == TransactionCategory.StartupGrant)
+                .Sum(t => t.Amount);
 
-            decimal totalExpenses = await _context.Transactions
+            // 2. Оперативни приходи (Всичко БЕЗ грантовете)
+            decimal operatingIncome = allTransactions
+                .Where(t => t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId && t.Category != TransactionCategory.StartupGrant)
+                .Sum(t => t.Amount);
+
+            // 3. Оперативни разходи (Внимаваме изпращачът да е АГЕНЦИЯ, а не Банката с ID 1)
+            decimal operatingExpenses = allTransactions
                 .Where(t => t.SenderType == EntityType.Agency && t.SenderId == agencyId)
-                .SumAsync(t => t.Amount);
+                .Sum(t => t.Amount);
 
-            return new AgencyFinanceDto
-            {
-                Balance = agent.Agency.Budget,
-                TotalIncome = totalIncome,
-                TotalExpenses = totalExpenses,
-                RecentTransactions = recentTransactions.Select(t => new TransactionDto
+            // 4. ГРУПИРАНЕ ПО СЕЗОНИ (Само оперативни транзакции)
+            var seasonalRecords = allTransactions
+                .Where(t => t.SeasonId.HasValue && t.Category != TransactionCategory.StartupGrant)
+                .GroupBy(t => new { t.SeasonId, t.Season!.SeasonNumber })
+                .Select(g => new SeasonFinanceSummaryDto
+                {
+                    SeasonId = g.Key.SeasonId.Value,
+                    SeasonNumber = g.Key.SeasonNumber,
+                    // Отново задължително филтрираме по Тип и ID
+                    Income = g.Where(t => t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId).Sum(t => t.Amount),
+                    Expenses = g.Where(t => t.SenderType == EntityType.Agency && t.SenderId == agencyId).Sum(t => t.Amount)
+                })
+                .OrderByDescending(s => s.SeasonNumber) // Най-новите сезони първи
+                .ToList();
+
+            // 5. Последните 30 транзакции за лога
+            var recentTransactions = allTransactions
+                .OrderByDescending(t => t.Date)
+                .Take(30)
+                .Select(t => new TransactionDto
                 {
                     Id = t.Id,
                     Type = (t.ReceiverType == EntityType.Agency && t.ReceiverId == agencyId) ? "income" : "expense",
                     Description = t.Description,
                     Amount = t.Amount,
                     Date = t.Date
-                }).ToList()
+                }).ToList();
+
+            return new AgencyFinanceDto
+            {
+                Balance = agent.Agency.Budget,
+                StartupCapital = startupCapital,
+                OperatingIncome = operatingIncome,
+                OperatingExpenses = operatingExpenses,
+                SeasonalRecords = seasonalRecords,
+                RecentTransactions = recentTransactions
             };
         }
     }

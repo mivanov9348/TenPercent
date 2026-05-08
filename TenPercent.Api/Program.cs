@@ -34,6 +34,8 @@ builder.Services.AddScoped<IScoutingEngine, ScoutingEngine>();
 builder.Services.AddScoped<INegotiationService, NegotiationService>();
 builder.Services.AddScoped<IAdminBankService, AdminBankService>();
 builder.Services.AddScoped<IAdminSettingsService, AdminSettingsService>();
+builder.Services.AddScoped<IScoutReportGenerator, ScoutReportGenerator>();
+builder.Services.AddScoped<IScoutingService, ScoutingService>();
 
 builder.Services
     .AddIdentity<User, IdentityRole<int>>(options => 

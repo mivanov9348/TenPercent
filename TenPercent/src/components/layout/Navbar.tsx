@@ -1,100 +1,102 @@
-import { useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Building2, Users, Wallet, ShoppingCart, LogOut, Globe } from 'lucide-react';
-import { API_URL } from '../../config';
-import { useAuth } from '../../hooks/useAuth';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Users, Briefcase, Wallet, LogOut, Globe, Search, Mail } from 'lucide-react';
 import { useAgencyStore } from '../../store/useAgencyStore';
 
-
 export default function Navbar() {
-  const { getUserIdOrRedirect } = useAuth();
-  const { budget, setBudget } = useAgencyStore();
+  const location = useLocation();
   const navigate = useNavigate();
+  
+  // Взимаме бюджета от глобалния стейт
+  const { budget } = useAgencyStore();
 
-  useEffect(() => {
-    const fetchBudget = async () => {
-      const userId = getUserIdOrRedirect();
-      if (!userId) return;
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('hasAgency');
+    localStorage.removeItem('role');
+    navigate('/login');
+  };
 
-      try {
-        const response = await fetch(`${API_URL}/agency/${userId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setBudget(data.budget);
-        }
-      } catch (error) {
-        console.error("Failed to fetch budget:", error);
-      }
-    };
+  const navLinks = [
+    { name: 'Home', path: '/', icon: <Home size={18} /> },
+    { name: 'Inbox', path: '/inbox', icon: <Mail size={18} /> }, // НОВО: Inbox е тук
+    { name: 'My Agency', path: '/agency', icon: <Briefcase size={18} /> },
+    { name: 'My Clients', path: '/players', icon: <Users size={18} /> },
+    { name: 'Finance', path: '/finance', icon: <Wallet size={18} /> },
+    { name: 'Scouting Pool', path: '/scouting-pool', icon: <Search size={18} /> },
+    { name: 'World', path: '/world', icon: <Globe size={18} /> },
+  ];
 
-    // Дърпаме бюджета само ако все още е null
-    if (budget === null) {
-      fetchBudget();
-    }
-  }, [budget, setBudget, getUserIdOrRedirect]);
-
+  // Форматиране на парите за хедъра
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    setBudget(0); // Изчистваме и глобалния бюджет при изход
-    navigate('/login');
-  };
-
-  const menuItems = [
-    { name: 'Home', path: '/', icon: <Home size={18} /> },
-    { name: 'My Agency', path: '/agency', icon: <Building2 size={18} /> },
-    { name: 'My Players', path: '/players', icon: <Users size={18} /> },
-    { name: 'Finance', path: '/finance', icon: <Wallet size={18} /> },
-    { name: 'Scouting Pool', path: '/scouting-pool', icon: <ShoppingCart size={18} /> },
-    { name: 'World', path: '/world/standings', icon: <Globe size={18} /> },
-  ];
+  // ФЕЙК БРОЙ НЕПРОЧЕТЕНИ СЪОБЩЕНИЯ (Засега)
+  const unreadMessagesCount = 2;
 
   return (
-    <header className="w-full h-16 bg-gray-950 border-b border-gray-800 flex items-center justify-between px-6 shrink-0">
-      <div className="flex items-center">
-        <h2 className="text-xl font-black tracking-tighter">
-          <span className="text-white">TEN</span>
-          <span className="text-yellow-500 underline decoration-yellow-500/50">PERCENT</span>
-        </h2>
-      </div>
-
-      <nav className="hidden md:flex items-center gap-2">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 text-sm font-medium ${isActive
-                ? 'bg-yellow-500 text-black shadow-[0_0_10px_rgba(234,179,8,0.3)]'
-                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-              }`
-            }
-          >
-            {item.icon}
-            <span>{item.name}</span>
-          </NavLink>
-        ))}
-      </nav>
-
-      <div className="flex items-center gap-4">
-        <div className="bg-gray-900 border border-gray-800 px-4 py-1.5 rounded-md flex items-center gap-2 shadow-inner">
-          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">Budget</span>
-          <span className="text-yellow-500 font-mono font-bold">
-            {budget !== null ? formatMoney(budget) : '...'}
-          </span>
+    <nav className="bg-gray-950 border-b border-gray-800 shrink-0">
+      <div className="max-w-[1600px] mx-auto px-4 flex justify-between items-center h-16">
+        
+        {/* Лява част - Лого */}
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-black tracking-tighter">
+            <span className="text-white">TEN</span>
+            <span className="text-yellow-500 underline decoration-yellow-500/50">PERCENT</span>
+          </h1>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors flex items-center justify-center"
-          title="Изход от системата"
-        >
-          <LogOut size={20} />
-        </button>
+        {/* Средна част - Линкове */}
+        <div className="hidden lg:flex gap-1">
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+            return (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition-all ${
+                  isActive 
+                    ? 'bg-yellow-500 text-black shadow-[0_0_10px_rgba(234,179,8,0.3)]' 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                {link.icon}
+                {link.name}
+                
+                {/* БАДЖ ЗА НЕПРОЧЕТЕНИ СЪОБЩЕНИЯ ДО ТЕКСТА */}
+                {link.name === 'Inbox' && unreadMessagesCount > 0 && (
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ml-1 ${isActive ? 'bg-black text-yellow-500' : 'bg-red-500 text-white'}`}>
+                    {unreadMessagesCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Дясна част - Бюджет и Изход (Камбанката е премахната) */}
+        <div className="flex items-center gap-4">
+          
+          {/* БЮДЖЕТ */}
+          <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg shadow-inner">
+            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Budget</span>
+            <span className="text-yellow-500 font-black font-mono text-sm">
+              {budget !== null ? formatMoney(budget) : '...'}
+            </span>
+          </div>
+
+          <div className="w-px h-6 bg-gray-800"></div>
+          
+          <button 
+            onClick={handleLogout} 
+            className="text-gray-500 hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors"
+            title="Logout"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
+
       </div>
-    </header>
+    </nav>
   );
 }
