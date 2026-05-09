@@ -41,10 +41,10 @@
 
             // 1. Проверяваме дали играчът е наш клиент
             bool isOwnClient = player.AgencyId == agency.Id;
-            decimal reportCost = isOwnClient ? 0m : 10000m; // Чуждите струват $10,000
+            decimal reportCost = isOwnClient ? 0m : 10000m;
 
-            // Нивото на детайлност: Нашите клиенти винаги са Level 5. За чуждите ползваме нивото на агенцията + 1 (за да не е съвсем сляпо)
-            int knowledgeLevel = isOwnClient ? 5 : Math.Clamp(agency.Level + 1, 1, 5);
+            // Ниво на детайлност: Засега фиксираме на 4 за чужди, 5 за наши (докато направим сградата)
+            int knowledgeLevel = isOwnClient ? 5 : Math.Clamp(agency.Level + 2, 1, 5);
 
             // 2. Взимаме парите (ако не е наш клиент)
             if (reportCost > 0)
@@ -54,13 +54,11 @@
                     return (false, $"Нямате достатъчно бюджет за скаутване. Нужни са ви {reportCost:C0}.", null!);
                 }
 
-                // ВАЖНО: Увери се, че имаш TransactionCategory.Expense или нещо подобно в Enums! 
-                // Ако нямаш Expense, ползвай TransactionCategory.InitialAllocation временно или добави ново.
                 var financeResult = await _financeService.ProcessTransactionAsync(
                     EntityType.Agency, agency.Id,
-                    EntityType.Bank, 1, // Парите отиват в Световната банка
+                    EntityType.Bank, 1,
                     reportCost,
-                    TransactionCategory.Tax, // Временно ползваме Tax, ако нямаш ScoutingCategory
+                    TransactionCategory.Scouting, // Увери се, че си добавил Scouting в TransactionCategory Енума!
                     $"Scouting Report requested for {player.Name}"
                 );
 
@@ -70,7 +68,7 @@
                 }
             }
 
-            // 3. Проверяваме дали вече имаме стар доклад за този играч
+            // 3. Проверяваме дали вече имаме стар доклад
             var existingReport = await _context.ScoutReports
                 .FirstOrDefaultAsync(r => r.AgencyId == agency.Id && r.PlayerId == player.Id);
 
@@ -78,14 +76,12 @@
 
             if (existingReport != null)
             {
-                // Обновяваме стария
                 reportEntity = existingReport;
                 reportEntity.GeneratedAt = DateTime.UtcNow;
                 reportEntity.KnowledgeLevel = knowledgeLevel;
             }
             else
             {
-                // Създаваме нов
                 reportEntity = new ScoutReport
                 {
                     AgencyId = agency.Id,
@@ -96,12 +92,12 @@
                 _context.ScoutReports.Add(reportEntity);
             }
 
-            // 4. Викаме нашия умен генератор, който създадохме в предишната стъпка
+            // 4. Генерираме текста!
             reportEntity = await _reportGenerator.GenerateReportAsync(reportEntity, player, knowledgeLevel);
 
             await _context.SaveChangesAsync();
 
-            // 5. Връщаме красиво DTO
+            // 5. Връщаме DTO
             var dto = MapToDto(reportEntity, player.Name);
 
             return (true, "Успешно генериран доклад!", dto);
@@ -124,7 +120,6 @@
             return MapToDto(report, report.Player.Name);
         }
 
-        // --- Помощен мапер ---
         private ScoutReportDto MapToDto(ScoutReport report, string playerName)
         {
             return new ScoutReportDto
@@ -147,4 +142,4 @@
             };
         }
     }
-}
+}   

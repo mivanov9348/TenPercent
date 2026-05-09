@@ -69,6 +69,22 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "ImportScoutTemplates",
+    "RelativePath": "api/Admin/import-scout-templates",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
     "Method": "InitializeStandings",
     "RelativePath": "api/Admin/initialize-standings",
     "HttpMethod": "POST",
@@ -526,6 +542,43 @@
       {
         "Name": "userId",
         "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.ScoutingController",
+    "Method": "GetReport",
+    "RelativePath": "api/Scouting/report/{userId}/{playerId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "playerId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.ScoutingController",
+    "Method": "RequestReport",
+    "RelativePath": "api/Scouting/request-report",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "TenPercent.Application.DTOs.Scouting.RequestReportDto",
         "IsRequired": true
       }
     ],

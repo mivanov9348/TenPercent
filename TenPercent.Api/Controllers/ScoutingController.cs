@@ -2,6 +2,8 @@
 {
     using Microsoft.AspNetCore.Mvc;
     using System.Threading.Tasks;
+    using TenPercent.Application.DTOs;
+    using TenPercent.Application.DTOs.Scouting;
     using TenPercent.Application.Services.Interfaces;
 
     [Route("api/[controller]")]
@@ -42,11 +44,5 @@
 
             return Ok(report);
         }
-    }
-
-    public class RequestReportDto
-    {
-        public int UserId { get; set; }
-        public int PlayerId { get; set; }
     }
 }

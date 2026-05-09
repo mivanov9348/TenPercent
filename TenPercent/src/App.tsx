@@ -18,6 +18,7 @@ import Fixtures from './pages/world/Fixtures';
 import SeasonStats from './pages/world/SeasonStats';
 import Inbox from './pages/agency/Inbox';
 import PlayerDetails from './pages/world/PlayerDetails';
+import ScoutReportView from './pages/world/ScoutReportView';
 
 import RequireAuth from './components/guards/RequireAuth';
 import RequireAgency from './components/guards/RequireAgency';
@@ -80,6 +81,7 @@ function App() {
 
                 <Route path="club/:id" element={<ClubDetails />} />
                 <Route path="player/:id" element={<PlayerDetails />} />
+                <Route path="player/:id/report" element={<ScoutReportView />} />
               </Route>
             </Route>
           </Route>

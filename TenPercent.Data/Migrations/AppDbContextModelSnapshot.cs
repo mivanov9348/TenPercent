@@ -923,6 +923,105 @@ namespace TenPercent.Data.Migrations
                     b.ToTable("RepresentationContracts");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.ScoutReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AgencyId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("EstimatedMarketValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("EstimatedWageDemand")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("KnowledgeLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxEstimatedOVR")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxEstimatedPOT")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinEstimatedOVR")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinEstimatedPOT")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PersonalityNotes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RecommendationGrade")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Strengths")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Weaknesses")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("AgencyId", "PlayerId")
+                        .IsUnique();
+
+                    b.ToTable("ScoutReports");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.ScoutTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AttributeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxValue")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinValue")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TargetPosition")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScoutTemplates");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Season", b =>
                 {
                     b.Property<int>("Id")
@@ -1393,6 +1492,25 @@ namespace TenPercent.Data.Migrations
                         .WithMany("RepresentationContracts")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agency");
+
+                    b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.ScoutReport", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.Agency", "Agency")
+                        .WithMany()
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TenPercent.Data.Models.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Agency");

@@ -8,6 +8,8 @@
     using TenPercent.Application.Services.Interfaces;
     using TenPercent.Data;
     using TenPercent.Data.Models;
+    using TenPercent.Data.Enums.TenPercent.Data.Models.Enums; // Увери се, че пътят към енума е верен!
+
     public class ScoutReportGenerator : IScoutReportGenerator
     {
         private readonly AppDbContext _context;
@@ -23,14 +25,13 @@
             var attr = player.Attributes;
             string pos = player.Position.Abbreviation;
 
-            // Дърпаме всички шаблони от базата, за да ги филтрираме бързо в паметта
             var allTemplates = await _context.ScoutTemplates.ToListAsync();
 
             var strengths = new List<string>();
             var weaknesses = new List<string>();
 
-            // --- ПОМОЩНА ФУНКЦИЯ ЗА ТЪРСЕНЕ НА ФРАЗИ ---
-            void EvaluateAttribute(string category, string attrName, int attrValue, List<string> listToFill)
+            // --- ПОМОЩНА ФУНКЦИЯ (ВЕЧЕ ПРИЕМА ENUM!) ---
+            void EvaluateAttribute(ScoutCategory category, string attrName, int attrValue, List<string> listToFill)
             {
                 var matchingTemplates = allTemplates
                     .Where(t => t.Category == category
@@ -42,44 +43,45 @@
 
                 if (matchingTemplates.Any())
                 {
-                    // Избираме рандъм фраза от намерените
                     var selectedPhrase = matchingTemplates[_rand.Next(matchingTemplates.Count)];
                     listToFill.Add(selectedPhrase.Text);
                 }
             }
 
-            // Оценяваме Силни страни (Търсим високи атрибути)
-            EvaluateAttribute("Strength", "Pace", attr.Pace, strengths);
-            EvaluateAttribute("Strength", "Shooting", attr.Shooting, strengths);
-            EvaluateAttribute("Strength", "Passing", attr.Passing, strengths);
-            EvaluateAttribute("Strength", "Dribbling", attr.Dribbling, strengths);
-            EvaluateAttribute("Strength", "Defending", attr.Defending, strengths);
-            EvaluateAttribute("Strength", "Physical", attr.Physical, strengths);
+            // --- 1. СИЛНИ СТРАНИ ---
+            EvaluateAttribute(ScoutCategory.Strength, "Pace", attr.Pace, strengths);
+            EvaluateAttribute(ScoutCategory.Strength, "Shooting", attr.Shooting, strengths);
+            EvaluateAttribute(ScoutCategory.Strength, "Passing", attr.Passing, strengths);
+            EvaluateAttribute(ScoutCategory.Strength, "Dribbling", attr.Dribbling, strengths);
+            EvaluateAttribute(ScoutCategory.Strength, "Defending", attr.Defending, strengths);
+            EvaluateAttribute(ScoutCategory.Strength, "Physical", attr.Physical, strengths);
+            EvaluateAttribute(ScoutCategory.Strength, "Goalkeeping", attr.Goalkeeping, strengths); // Важно за вратарите!
 
-            // Оценяваме Слаби страни (Търсим ниски атрибути или висока склонност към контузии)
-            EvaluateAttribute("Weakness", "Stamina", attr.Stamina, weaknesses);
-            EvaluateAttribute("Weakness", "InjuryProne", attr.InjuryProne, weaknesses);
-            EvaluateAttribute("Weakness", "Pace", attr.Pace, weaknesses);
-            EvaluateAttribute("Weakness", "Defending", attr.Defending, weaknesses);
+            // --- 2. СЛАБИ СТРАНИ ---
+            EvaluateAttribute(ScoutCategory.Weakness, "Stamina", attr.Stamina, weaknesses);
+            EvaluateAttribute(ScoutCategory.Weakness, "InjuryProne", attr.InjuryProne, weaknesses);
+            EvaluateAttribute(ScoutCategory.Weakness, "Pace", attr.Pace, weaknesses);
+            EvaluateAttribute(ScoutCategory.Weakness, "Defending", attr.Defending, weaknesses);
+            EvaluateAttribute(ScoutCategory.Weakness, "Shooting", attr.Shooting, weaknesses);
+            EvaluateAttribute(ScoutCategory.Weakness, "Passing", attr.Passing, weaknesses);
 
-            // Резервни фрази, ако не намерим нищо
+            // Резервни фрази
             if (strengths.Count == 0) strengths.Add("Добре балансиран играч, но без изявени качества.");
             if (weaknesses.Count == 0) weaknesses.Add("Няма очевидни слаби звена в играта си.");
 
-            // Разбъркваме списъците и взимаме топ 2 (за да не е прекалено дълъг доклада)
             report.Strengths = string.Join(" ", strengths.OrderBy(x => _rand.Next()).Take(2));
             report.Weaknesses = string.Join(" ", weaknesses.OrderBy(x => _rand.Next()).Take(2));
 
-            // --- ХАРАКТЕР (Personality) ---
+            // --- 3. ХАРАКТЕР (Personality) ---
             if (knowledgeLevel >= 3)
             {
                 var personalityPhrases = new List<string>();
-                EvaluateAttribute("Personality", "Greed", attr.Greed, personalityPhrases);
-                EvaluateAttribute("Personality", "Loyalty", attr.Loyalty, personalityPhrases);
-                EvaluateAttribute("Personality", "Ambition", attr.Ambition, personalityPhrases);
+                EvaluateAttribute(ScoutCategory.Personality, "Greed", attr.Greed, personalityPhrases);
+                EvaluateAttribute(ScoutCategory.Personality, "Loyalty", attr.Loyalty, personalityPhrases);
+                EvaluateAttribute(ScoutCategory.Personality, "Ambition", attr.Ambition, personalityPhrases);
 
                 report.PersonalityNotes = personalityPhrases.Any()
-                    ? personalityPhrases.First() // Взимаме само 1 изявена черта
+                    ? personalityPhrases.First()
                     : "Нормален професионалист. Не създава проблеми.";
             }
             else
@@ -87,13 +89,15 @@
                 report.PersonalityNotes = "Нужно е по-задълбочено проучване за характера на играча.";
             }
 
-            // --- ПРЕПОРЪКА ОТ СКАУТА (Grade) ---
+            // --- 4. ПРЕПОРЪКА ОТ СКАУТА ---
             if (knowledgeLevel < 2)
             {
                 report.RecommendationGrade = "Monitor (Недостатъчно данни)";
             }
             else
             {
+                // За Препоръките можеш да ползваш директно темплейтите от базата или тази твърда логика!
+                // Засега я оставяме твърда, защото е по-сложна математика.
                 int potentialDiff = player.PotentialAbility - player.CurrentAbility;
                 if (player.CurrentAbility >= 85 || potentialDiff >= 15) report.RecommendationGrade = "A+ (Sign Immediately)";
                 else if (player.CurrentAbility >= 75 || potentialDiff >= 10) report.RecommendationGrade = "B (Solid Addition)";
@@ -101,14 +105,14 @@
                 else report.RecommendationGrade = "D (Avoid)";
             }
 
-            // --- ОЧАКВАНА ЦЕНА (С лека грешка спрямо Knowledge Level) ---
+            // --- 5. ОЧАКВАНА ЦЕНА И ЗАПЛАТА ---
             double errorMargin = (5 - knowledgeLevel) * 0.1;
             decimal errorMultiplier = 1m + (decimal)(_rand.NextDouble() * errorMargin * 2 - errorMargin);
 
             report.EstimatedMarketValue = Math.Round(player.MarketValue * errorMultiplier, 0);
             report.EstimatedWageDemand = Math.Round((player.CurrentAbility * 1000m) * errorMultiplier, 0);
 
-            // --- OVR и POT (Маскирани диапазони) ---
+            // --- 6. МАСКИРАНЕ НА OVR И POT ---
             int range = (5 - knowledgeLevel) * 3;
             report.MinEstimatedOVR = Math.Max(1, player.CurrentAbility - range);
             report.MaxEstimatedOVR = Math.Min(99, player.CurrentAbility + range);

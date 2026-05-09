@@ -4,16 +4,17 @@
     using CsvHelper.Configuration;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using System.Collections.Generic;
     using TenPercent.Application.Interfaces;
     using TenPercent.Application.Services.Interfaces;
     using TenPercent.Data;
-    using TenPercent.Data.Models;
     using TenPercent.Data.DTOs.Admin;
+    using TenPercent.Data.Enums.TenPercent.Data.Models.Enums;
+    using TenPercent.Data.Models;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -84,6 +85,64 @@
                 IsSimulationRunning = worldState.IsSimulationRunning,
                 NextMatchdayDate = worldState.NextMatchdayDate
             });
+        }
+
+        [HttpPost("import-scout-templates")]
+        public async Task<IActionResult> ImportScoutTemplates(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("Please upload a valid CSV file.");
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                DetectDelimiter = true,
+                ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
+            };
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, config);
+            csv.Read();
+            csv.ReadHeader();
+
+            var templates = new List<ScoutTemplate>();
+
+            while (csv.Read())
+            {
+                var categoryStr = csv.GetField<string>("Category");
+                var attrName = csv.GetField<string>("AttributeName");
+
+                if (string.IsNullOrWhiteSpace(categoryStr) || string.IsNullOrWhiteSpace(attrName)) continue;
+
+                // Опитваме се да парснем стринга към Енума
+                if (Enum.TryParse<ScoutCategory>(categoryStr, true, out var categoryEnum))
+                {
+                    var targetPos = csv.GetField<string>("TargetPosition");
+
+                    templates.Add(new ScoutTemplate
+                    {
+                        Category = categoryEnum,
+                        AttributeName = attrName,
+                        MinValue = csv.GetField<int>("MinValue"),
+                        MaxValue = csv.GetField<int>("MaxValue"),
+                        TargetPosition = string.IsNullOrWhiteSpace(targetPos) ? null : targetPos,
+                        Text = csv.GetField<string>("Text")
+                    });
+                }
+            }
+
+            if (templates.Any())
+            {
+                // Изтриваме старите, за да ги презапишем на чисто
+                _context.ScoutTemplates.RemoveRange(_context.ScoutTemplates);
+                await _context.SaveChangesAsync();
+
+                _context.ScoutTemplates.AddRange(templates);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = $"Successfully imported {templates.Count} scout templates." });
+            }
+
+            return BadRequest("No valid templates found in the file.");
         }
 
         // ==========================================

@@ -126,6 +126,24 @@ namespace TenPercent.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ScoutTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    AttributeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MinValue = table.Column<int>(type: "int", nullable: false),
+                    MaxValue = table.Column<int>(type: "int", nullable: false),
+                    TargetPosition = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ScoutTemplates", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Seasons",
                 columns: table => new
                 {
@@ -741,6 +759,44 @@ namespace TenPercent.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ScoutReports",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PlayerId = table.Column<int>(type: "int", nullable: false),
+                    AgencyId = table.Column<int>(type: "int", nullable: false),
+                    GeneratedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    KnowledgeLevel = table.Column<int>(type: "int", nullable: false),
+                    MinEstimatedOVR = table.Column<int>(type: "int", nullable: false),
+                    MaxEstimatedOVR = table.Column<int>(type: "int", nullable: false),
+                    MinEstimatedPOT = table.Column<int>(type: "int", nullable: false),
+                    MaxEstimatedPOT = table.Column<int>(type: "int", nullable: false),
+                    RecommendationGrade = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Strengths = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Weaknesses = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PersonalityNotes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EstimatedMarketValue = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    EstimatedWageDemand = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ScoutReports", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ScoutReports_Agencies_AgencyId",
+                        column: x => x.AgencyId,
+                        principalTable: "Agencies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ScoutReports_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Agencies_AgentId",
                 table: "Agencies",
@@ -905,6 +961,17 @@ namespace TenPercent.Data.Migrations
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ScoutReports_AgencyId_PlayerId",
+                table: "ScoutReports",
+                columns: new[] { "AgencyId", "PlayerId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ScoutReports_PlayerId",
+                table: "ScoutReports",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SeasonStandings_ClubId",
                 table: "SeasonStandings",
                 column: "ClubId");
@@ -969,6 +1036,12 @@ namespace TenPercent.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "RepresentationContracts");
+
+            migrationBuilder.DropTable(
+                name: "ScoutReports");
+
+            migrationBuilder.DropTable(
+                name: "ScoutTemplates");
 
             migrationBuilder.DropTable(
                 name: "SeasonStandings");
