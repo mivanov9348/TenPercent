@@ -27,12 +27,13 @@ import RequireAgency from './components/guards/RequireAgency';
 import RequireAdmin from './pages/admin/RequireAdmin';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminSetup from './pages/admin/AdminSetup'; // <-- ДОБАВЕН ИМПОРТ
 import AdminBank from './pages/admin/AdminBank';
+import AdminSettings from './pages/admin/AdminSettings';
 
 import ClubDetails from './pages/world/ClubDetails';
 import ScoutingPool from './pages/world/ScoutingPool';
 import MyShortlist from './pages/agency/MyShortlist';
-import AdminSettings from './pages/admin/AdminSettings';
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
           </RequireAdmin>
         }>
           <Route index element={<AdminDashboard />} />
+          <Route path="setup" element={<AdminSetup />} /> {/* <-- ДОБАВЕН РУТ ЗА SETUP */}
           <Route path="bank" element={<AdminBank />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>

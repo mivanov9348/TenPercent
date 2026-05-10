@@ -1,27 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Projects\\TenPercent\\TenPercent.Api\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\scoutingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\scoutingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\scoutingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\dtos\\scouting\\scoutreportdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\scoutingengine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\agencydomain\\scouttemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\agencydomain\\scoutreport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -29,89 +9,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ScoutReportDto.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Scouting\\ScoutReportDto.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\DTOs\\Scouting\\ScoutReportDto.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Scouting\\ScoutReportDto.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\DTOs\\Scouting\\ScoutReportDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T13:20:50.367Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ScoutingEngine.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\ScoutingEngine.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\ScoutingEngine.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\ScoutingEngine.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\ScoutingEngine.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAgwCEAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T12:10:17.504Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ScoutingService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\ScoutingService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\ScoutingService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\ScoutingService.cs*",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\ScoutingService.cs*",
-              "ViewState": "AgIAAHoAAAAAAAAAAAA3wJAAAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T12:10:12.051Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ScoutTemplate.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\AgencyDomain\\ScoutTemplate.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\AgencyDomain\\ScoutTemplate.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\AgencyDomain\\ScoutTemplate.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\AgencyDomain\\ScoutTemplate.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAA6wBMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T12:10:00.807Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ScoutReport.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\AgencyDomain\\ScoutReport.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\AgencyDomain\\ScoutReport.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\AgencyDomain\\ScoutReport.cs",
-              "RelativeToolTip": "..\\TenPercent.Data\\Models\\AgencyDomain\\ScoutReport.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAmwC4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T12:09:56.995Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ScoutingController.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\ScoutingController.cs",
-              "RelativeDocumentMoniker": "Controllers\\ScoutingController.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\ScoutingController.cs",
-              "RelativeToolTip": "Controllers\\ScoutingController.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAuwC8AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T12:09:41.737Z",
-              "EditorCaption": ""
             }
           ]
         }

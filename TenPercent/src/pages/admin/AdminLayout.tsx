@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Landmark, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Landmark, Settings, LogOut, Database } from 'lucide-react';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -10,7 +10,8 @@ export default function AdminLayout() {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
+    { name: 'Game Operations', path: '/admin', icon: <LayoutDashboard size={20} /> },
+    { name: 'World Setup', path: '/admin/setup', icon: <Database size={20} /> },
     { name: 'Central Bank', path: '/admin/bank', icon: <Landmark size={20} /> },
     { name: 'Economy Settings', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
