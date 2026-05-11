@@ -231,5 +231,45 @@
                 return (false, "Грешка при подписване: " + ex.Message, false);
             }
         }
+        public async Task ProcessContractsYearEndAsync(int endingSeasonNumber)
+        {
+            // 1. Клубни договори
+            var expiringClubContracts = await _context.ClubContracts
+                .Include(c => c.Player)
+                .Where(c => c.IsActive && c.EndSeasonNumber <= endingSeasonNumber)
+                .ToListAsync();
+
+            foreach (var contract in expiringClubContracts)
+            {
+                contract.IsActive = false;
+
+                // Играчът става свободен агент
+                if (contract.Player != null)
+                {
+                    contract.Player.ClubId = null;
+                }
+            }
+
+            // 2. Агентски договори (Representation Contracts)
+            var expiringRepContracts = await _context.RepresentationContracts
+                .Include(c => c.Player)
+                .Where(c => c.IsActive && c.EndSeasonNumber <= endingSeasonNumber)
+                .ToListAsync();
+
+            foreach (var contract in expiringRepContracts)
+            {
+                contract.IsActive = false;
+
+                if (contract.Player != null)
+                {
+                    contract.Player.AgencyId = null;
+                }
+            }
+
+            // Записваме промените
+            _context.ClubContracts.UpdateRange(expiringClubContracts);
+            _context.RepresentationContracts.UpdateRange(expiringRepContracts);
+            await _context.SaveChangesAsync();
+        }
     }
 }

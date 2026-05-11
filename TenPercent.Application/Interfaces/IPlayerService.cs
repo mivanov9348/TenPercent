@@ -13,5 +13,8 @@
             int? minAge, int? maxAge, decimal? maxValue,
             bool? hasAgency, string? sortBy, int page, int pageSize);
 
+
+        Task ProcessYearlyProgressionAsync();
+
     }
 }

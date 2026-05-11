@@ -1,7 +1,24 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Projects\\TenPercent\\TenPercent.Api\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\seasonservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\seasoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\seasoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\playerservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A3B7997C-F04A-4205-BB10-01268221CAEA}|..\\TenPercent.Data\\TenPercent.Data.csproj|d:\\projects\\tenpercent\\tenpercent.data\\models\\footballcore\\playerattributes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\playergeneratorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +26,76 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "SeasonController.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\SeasonController.cs",
+              "RelativeDocumentMoniker": "Controllers\\SeasonController.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\SeasonController.cs",
+              "RelativeToolTip": "Controllers\\SeasonController.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAQwCAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T18:08:18.268Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "SeasonService.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\SeasonService.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\SeasonService.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\SeasonService.cs",
+              "RelativeToolTip": "..\\TenPercent.Application\\Services\\SeasonService.cs",
+              "ViewState": "AgIAAJkAAAAAAAAAAAAYwKEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T18:04:44.531Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PlayerAttributes.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\FootballCore\\PlayerAttributes.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Models\\FootballCore\\PlayerAttributes.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Models\\FootballCore\\PlayerAttributes.cs",
+              "RelativeToolTip": "..\\TenPercent.Data\\Models\\FootballCore\\PlayerAttributes.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAAUwCQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T17:51:35.198Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PlayerService.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\PlayerService.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\PlayerService.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\PlayerService.cs",
+              "RelativeToolTip": "..\\TenPercent.Application\\Services\\PlayerService.cs",
+              "ViewState": "AgIAAFUAAAAAAAAAAAAQwEEBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T17:50:36.102Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PlayerGeneratorService.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\PlayerGeneratorService.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\PlayerGeneratorService.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\PlayerGeneratorService.cs",
+              "RelativeToolTip": "..\\TenPercent.Application\\Services\\PlayerGeneratorService.cs",
+              "ViewState": "AgIAAM4AAAAAAAAAAAAQwOIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T17:50:26.668Z",
+              "EditorCaption": ""
             }
           ]
         }

@@ -8,5 +8,6 @@
         Task<bool> GenerateInitialContractsAsync();
 
         Task<(bool Success, string Message, bool Accepted)> NegotiateContractAsync(NegotiateClubContractDto dto);
+        Task ProcessContractsYearEndAsync(int endingSeasonNumber);
     }
 }

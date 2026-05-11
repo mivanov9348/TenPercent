@@ -217,5 +217,105 @@ namespace TenPercent.Application.Services
                 Items = playersDto
             };
         }
+        public async Task ProcessYearlyProgressionAsync()
+        {
+            // Взимаме всички играчи с техните атрибути и позиции (за да можем да сметнем OVR накрая)
+            var players = await _context.Players
+                .Include(p => p.Attributes)
+                .Include(p => p.Position)
+                .ToListAsync();
+
+            var rand = new Random();
+
+            foreach (var player in players)
+            {
+                player.Age += 1;
+                var attr = player.Attributes;
+
+                // ----------------------------------------------------
+                // 1. ПРОГРЕСИЯ НА МЛАДИ ИГРАЧИ (Под 26 години)
+                // ----------------------------------------------------
+                if (player.Age <= 26)
+                {
+                    // Помощна функция: ВРЪЩА новата стойност
+                    int GrowAttribute(int current, int potential, int maxGrowth)
+                    {
+                        if (current < potential)
+                        {
+                            // Шанс да се вдигне с от 1 до maxGrowth точки (ако не надминава потенциала)
+                            int growth = rand.Next(1, maxGrowth + 1);
+                            return Math.Min(potential, current + growth);
+                        }
+                        return current;
+                    }
+
+                    // Колкото по-млад е, толкова по-бързо се развива
+                    int growthSpeed = player.Age < 21 ? 3 : (player.Age < 24 ? 2 : 1);
+
+                    // Пренасочваме резултата обратно към property-то
+                    attr.Pace = GrowAttribute(attr.Pace, attr.PotentialPace, growthSpeed);
+                    attr.Shooting = GrowAttribute(attr.Shooting, attr.PotentialShooting, growthSpeed);
+                    attr.Passing = GrowAttribute(attr.Passing, attr.PotentialPassing, growthSpeed);
+                    attr.Dribbling = GrowAttribute(attr.Dribbling, attr.PotentialDribbling, growthSpeed);
+                    attr.Defending = GrowAttribute(attr.Defending, attr.PotentialDefending, growthSpeed);
+                    attr.Physical = GrowAttribute(attr.Physical, attr.PotentialPhysical, growthSpeed);
+                    attr.Goalkeeping = GrowAttribute(attr.Goalkeeping, attr.PotentialGoalkeeping, growthSpeed);
+                    attr.Vision = GrowAttribute(attr.Vision, attr.PotentialVision, growthSpeed);
+                    attr.Stamina = GrowAttribute(attr.Stamina, attr.PotentialStamina, growthSpeed);
+                }
+
+                // ----------------------------------------------------
+                // 2. ДЕГРАДАЦИЯ (РЕГРЕСИЯ) НА ВЕТЕРАНИ (Над 30 години)
+                // ----------------------------------------------------
+                else if (player.Age >= 31)
+                {
+                    // Помощна функция: ВРЪЩА новата по-ниска стойност
+                    int DeclineAttribute(int current, int maxDecline)
+                    {
+                        // Шанс да се свали с от 0 до maxDecline точки
+                        int decline = rand.Next(0, maxDecline + 1);
+                        return Math.Max(1, current - decline); // Не пада под 1
+                    }
+
+                    // След 30 г. деградацията е бавна, след 33 става по-агресивна
+                    int declineSpeed = player.Age > 33 ? 3 : 1;
+
+                    // Физическите атрибути падат най-бързо!
+                    attr.Pace = DeclineAttribute(attr.Pace, declineSpeed + 1);
+                    attr.Stamina = DeclineAttribute(attr.Stamina, declineSpeed + 1);
+                    attr.Physical = DeclineAttribute(attr.Physical, declineSpeed);
+
+                    // Техническите и менталните падат много по-бавно (или изобщо не)
+                    if (player.Age > 34)
+                    {
+                        attr.Dribbling = DeclineAttribute(attr.Dribbling, 1);
+                        attr.Shooting = DeclineAttribute(attr.Shooting, 1);
+                        attr.Defending = DeclineAttribute(attr.Defending, 1);
+                    }
+                }
+
+                // ----------------------------------------------------
+                // 3. ПРЕИЗЧИСЛЯВАНЕ НА OVR И ПАЗАРНА ЦЕНА
+                // ----------------------------------------------------
+                player.RecalculateCurrentAbility();
+
+                // Формула за цена
+                decimal valueBase = player.CurrentAbility * 100000m;
+                decimal potBonus = Math.Max(0, player.PotentialAbility - player.CurrentAbility) * 50000m;
+
+                // Възрастова премия: Младите са скъпи, старите са евтини
+                decimal youthPremium = 1.0m;
+                if (player.Age < 21) youthPremium = 1.5m;
+                else if (player.Age < 24) youthPremium = 1.2m;
+                else if (player.Age > 33) youthPremium = 0.4m;
+                else if (player.Age > 30) youthPremium = 0.7m;
+
+                player.MarketValue = (valueBase + potBonus) * youthPremium;
+            }
+
+            // Записваме всички промени в базата
+            _context.Players.UpdateRange(players);
+            await _context.SaveChangesAsync();
+        }
     }
 }
