@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Database, Loader2, CheckCircle2, AlertCircle, Upload, Landmark, FileText, Power, Globe } from 'lucide-react';
+import { Database, Loader2, CheckCircle2, AlertCircle, Upload, Landmark, FileText, Power, Globe, Mail } from 'lucide-react'; // Добавен е Mail иконата
 
 export default function AdminSetup() {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +11,7 @@ export default function AdminSetup() {
   const leagueFileInputRef = useRef<HTMLInputElement>(null);
   const clubFileInputRef = useRef<HTMLInputElement>(null);
   const scoutFileInputRef = useRef<HTMLInputElement>(null);
+  const messageTemplateInputRef = useRef<HTMLInputElement>(null); // НОВО: Реф за мейл шаблоните
 
   // Проверяваме дали светът съществува
   useEffect(() => {
@@ -166,13 +167,24 @@ export default function AdminSetup() {
           <p className="text-gray-500 text-sm mb-6 flex-1">Upload scout_templates.csv for dynamic phrases.</p>
           <input type="file" accept=".csv" className="hidden" ref={scoutFileInputRef} onChange={(e) => handleFileUpload(e, 'import-scout-templates')} />
           <button onClick={() => scoutFileInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
-            {isLoading ? <Loader2 className="animate-spin" /> : 'UPLOAD TEMPLATES'}
+            {isLoading ? <Loader2 className="animate-spin" /> : 'UPLOAD SCOUT TPLS'}
+          </button>
+        </div>
+
+        {/* НОВО КАРЕ: IMPORT MESSAGE TEMPLATES */}
+        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col items-center text-center shadow-lg">
+          <div className="w-16 h-16 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center mb-4"><Mail size={32} /></div>
+          <h2 className="text-xl font-bold text-white mb-2">5. Message Templates</h2>
+          <p className="text-gray-500 text-sm mb-6 flex-1">Upload message_templates.csv for Inbox and Negotiations.</p>
+          <input type="file" accept=".csv" className="hidden" ref={messageTemplateInputRef} onChange={(e) => handleFileUpload(e, 'import-message-templates')} />
+          <button onClick={() => messageTemplateInputRef.current?.click()} disabled={isLoading} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50 mt-auto">
+            {isLoading ? <Loader2 className="animate-spin" /> : 'UPLOAD MAIL TPLS'}
           </button>
         </div>
 
         <div className="bg-gray-900 border border-green-500/30 p-6 rounded-2xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(34,197,94,0.1)] relative overflow-hidden">
           <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-2xl flex items-center justify-center mb-4 z-10"><Landmark size={32} /></div>
-          <h2 className="text-xl font-bold text-white mb-2 z-10">5. Global Economy</h2>
+          <h2 className="text-xl font-bold text-white mb-2 z-10">6. Global Economy</h2>
           <p className="text-gray-500 text-sm mb-6 flex-1 z-10">Creates Central Bank & distributes budgets.</p>
           <button onClick={handleInitializeEconomy} disabled={isLoading} className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-30 z-10 mt-auto">
             {isLoading ? <Loader2 className="animate-spin" /> : 'INITIALIZE ECONOMY'}

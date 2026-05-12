@@ -13,6 +13,7 @@
     using TenPercent.Application.Services.Interfaces;
     using TenPercent.Data;
     using TenPercent.Data.DTOs.Admin;
+    using TenPercent.Data.Enums;
     using TenPercent.Data.Enums.TenPercent.Data.Models.Enums;
     using TenPercent.Data.Models;
 
@@ -305,6 +306,62 @@
             _context.Clubs.AddRange(clubs);
             await _context.SaveChangesAsync();
             return Ok(new { message = $"Successfully imported {clubs.Count} clubs. Players were NOT generated." });
+        }
+
+        [HttpPost("import-message-templates")]
+        public async Task<IActionResult> ImportMessageTemplates(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("Please upload a valid CSV file.");
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                DetectDelimiter = true, // CsvHelper сам ще разбере дали е запетая или точка и запетая
+                ShouldSkipRecord = args => args.Row.Parser.Record.All(string.IsNullOrWhiteSpace)
+            };
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, config);
+
+            csv.Read();
+            csv.ReadHeader();
+
+            var templates = new List<MessageTemplate>();
+
+            while (csv.Read())
+            {
+                var typeStr = csv.GetField<string>("Type");
+                var subject = csv.GetField<string>("SubjectTemplate");
+                var content = csv.GetField<string>("ContentTemplate");
+
+                if (string.IsNullOrWhiteSpace(typeStr) || string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(content))
+                    continue;
+
+                // Опитваме се да парснем стринга към MessageType Енума (напр. "TransferOffer" -> MessageType.TransferOffer)
+                if (System.Enum.TryParse<MessageType>(typeStr, true, out var msgTypeEnum))
+                {
+                    templates.Add(new MessageTemplate
+                    {
+                        Type = msgTypeEnum,
+                        SubjectTemplate = subject,
+                        ContentTemplate = content
+                    });
+                }
+            }
+
+            if (templates.Any())
+            {
+                // Изтриваме старите шаблони, за да имаме "чиста" база при нов импорт
+                _context.MessageTemplates.RemoveRange(_context.MessageTemplates);
+                await _context.SaveChangesAsync();
+
+                _context.MessageTemplates.AddRange(templates);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = $"Successfully imported {templates.Count} message templates." });
+            }
+
+            return BadRequest("No valid message templates found in the file.");
         }
 
         [HttpPost("initialize-standings")]

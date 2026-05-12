@@ -49,6 +49,8 @@
         public DbSet<AgencyShortlist> AgencyShortlists { get; set; }
         public DbSet<ScoutReport> ScoutReports { get; set; }
         public DbSet<ScoutTemplate> ScoutTemplates { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<MessageTemplate> MessageTemplates { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -103,6 +103,21 @@ namespace TenPercent.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MessageTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    SubjectTemplate = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    ContentTemplate = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MessageTemplates", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Positions",
                 columns: table => new
                 {
@@ -497,6 +512,36 @@ namespace TenPercent.Data.Migrations
                         name: "FK_SeasonStandings_Seasons_SeasonId",
                         column: x => x.SeasonId,
                         principalTable: "Seasons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReceiverAgencyId = table.Column<int>(type: "int", nullable: true),
+                    SenderType = table.Column<int>(type: "int", nullable: false),
+                    SenderId = table.Column<int>(type: "int", nullable: false),
+                    SenderName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    RelatedEntityId = table.Column<int>(type: "int", nullable: true),
+                    DataValue = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: true),
+                    IsActioned = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Agencies_ReceiverAgencyId",
+                        column: x => x.ReceiverAgencyId,
+                        principalTable: "Agencies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -900,6 +945,11 @@ namespace TenPercent.Data.Migrations
                 column: "LeagueId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Messages_ReceiverAgencyId",
+                table: "Messages",
+                column: "ReceiverAgencyId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlayerAttributes_PlayerId",
                 table: "PlayerAttributes",
                 column: "PlayerId",
@@ -1024,6 +1074,12 @@ namespace TenPercent.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "LeagueStandings");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "MessageTemplates");
 
             migrationBuilder.DropTable(
                 name: "PlayerAttributes");

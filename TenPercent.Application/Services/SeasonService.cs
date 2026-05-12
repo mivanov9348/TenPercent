@@ -159,7 +159,7 @@
             }
         }
 
-
+    
 
         public async Task<(bool Success, string Message)> StartNewSeasonAsync()
         {

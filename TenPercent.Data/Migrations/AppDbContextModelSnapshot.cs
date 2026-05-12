@@ -573,6 +573,88 @@ namespace TenPercent.Data.Migrations
                     b.ToTable("LeagueStandings");
                 });
 
+            modelBuilder.Entity("TenPercent.Data.Models.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("DataValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<bool>("IsActioned")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ReceiverAgencyId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RelatedEntityId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SenderType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverAgencyId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.MessageTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentTemplate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SubjectTemplate")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MessageTemplates");
+                });
+
             modelBuilder.Entity("TenPercent.Data.Models.Player", b =>
                 {
                     b.Property<int>("Id")
@@ -1389,6 +1471,16 @@ namespace TenPercent.Data.Migrations
                     b.Navigation("Club");
 
                     b.Navigation("League");
+                });
+
+            modelBuilder.Entity("TenPercent.Data.Models.Message", b =>
+                {
+                    b.HasOne("TenPercent.Data.Models.Agency", "ReceiverAgency")
+                        .WithMany()
+                        .HasForeignKey("ReceiverAgencyId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("ReceiverAgency");
                 });
 
             modelBuilder.Entity("TenPercent.Data.Models.Player", b =>
