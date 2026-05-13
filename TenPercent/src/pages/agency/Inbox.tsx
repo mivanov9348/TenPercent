@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Mail, MailOpen, AlertCircle, Briefcase, FileText, Loader2, Trash2 } from 'lucide-react';
-import { API_URL } from '../../config'; // Увери се, че пътят е правилен
+import Swal from 'sweetalert2'; // <-- ИМПОРТИРАМЕ SWEETALERT
+import { API_URL } from '../../config';
+import OfferModal from './OfferModal';
 
-interface Message {
+export interface Message {
   id: number;
   senderName: string;
   subject: string;
@@ -11,14 +13,21 @@ interface Message {
   isRead: boolean;
   type: string;
   relatedEntityId: number | null;
+  dataValue?: number;
+  isActioned?: boolean;
 }
 
 export default function Inbox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeMessageId, setActiveMessageId] = useState<number | null>(null);
+  
+  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
 
-  // Взимане на съобщенията при зареждане
+  useEffect(() => {
+    setIsOfferModalOpen(false);
+  }, [activeMessageId]);
+
   const fetchMessages = async () => {
     setIsLoading(true);
     try {
@@ -30,7 +39,6 @@ export default function Inbox() {
         const data = await response.json();
         setMessages(data);
         
-        // Автоматично отваряме първото непрочетено съобщение (или първото въобще)
         if (data.length > 0 && activeMessageId === null) {
           const firstUnread = data.find((m: Message) => !m.isRead);
           setActiveMessageId(firstUnread ? firstUnread.id : data[0].id);
@@ -49,12 +57,10 @@ export default function Inbox() {
 
   const activeMessage = messages.find(m => m.id === activeMessageId);
 
-  // Маркиране като прочетено в бекенда и фронтенда
   const handleSelectMessage = async (msg: Message) => {
     setActiveMessageId(msg.id);
     
     if (!msg.isRead) {
-      // Маркираме локално веднага за бързина
       setMessages(messages.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
       
       const userId = localStorage.getItem('userId');
@@ -66,10 +72,23 @@ export default function Inbox() {
     }
   };
 
-  // Изтриване на съобщение
   const handleDeleteMessage = async (e: React.MouseEvent, id: number) => {
-    e.stopPropagation(); // За да не се отвори съобщението при клик върху коша
-    if (!window.confirm("Are you sure you want to delete this message?")) return;
+    e.stopPropagation();
+    
+    // 1. SWEETALERT ЗА ПОТВЪРЖДЕНИЕ (вместо window.confirm)
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#eab308', // yellow-500
+      cancelButtonColor: '#ef4444', // red-500
+      confirmButtonText: 'Yes, delete it!',
+      background: '#1f2937', // gray-800
+      color: '#fff'
+    });
+
+    if (!result.isConfirmed) return;
 
     const userId = localStorage.getItem('userId');
     try {
@@ -77,11 +96,73 @@ export default function Inbox() {
       if (response.ok) {
         setMessages(messages.filter(m => m.id !== id));
         if (activeMessageId === id) setActiveMessageId(null);
+        
+        // Опционално: Малко съобщение за успех долу в ъгъла (Toast)
+        Swal.fire({
+          toast: true,
+          position: 'bottom-end',
+          icon: 'success',
+          title: 'Message deleted',
+          showConfirmButton: false,
+          timer: 2000,
+          background: '#1f2937',
+          color: '#fff'
+        });
       } else {
-        alert("Това съобщение не може да бъде изтрито (вероятно е глобално).");
+        // 2. SWEETALERT ЗА ГРЕШКА ПРИ ИЗТРИВАНЕ
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Това съобщение не може да бъде изтрито (вероятно е глобално).',
+          background: '#1f2937',
+          color: '#fff'
+        });
       }
     } catch (err) {
       console.error("Failed to delete message", err);
+    }
+  };
+
+  const handleOfferResponse = async (isAccepted: boolean) => {
+    if (!activeMessage) return;
+    const userId = localStorage.getItem('userId');
+    
+    try {
+      const response = await fetch(`${API_URL}/negotiations/respond-approach?userId=${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          messageId: activeMessage.id, 
+          isAccepted: isAccepted 
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      // 3. SWEETALERT ЗА УСПЕШЕН ОТГОВОР НА ОФЕРТА
+      Swal.fire({
+        icon: 'success',
+        title: isAccepted ? 'Offer Accepted!' : 'Offer Rejected!',
+        text: data.message,
+        confirmButtonColor: '#10b981', // emerald-500
+        background: '#1f2937',
+        color: '#fff'
+      });
+      
+      setMessages(messages.map(m => m.id === activeMessage.id ? { ...m, isActioned: true } : m));
+      setIsOfferModalOpen(false);
+      fetchMessages(); 
+    } catch (err: any) {
+      // 4. SWEETALERT ЗА ГРЕШКА ПРИ ОТГОВОР
+      Swal.fire({
+        icon: 'error',
+        title: 'Error processing offer',
+        text: err.message,
+        confirmButtonColor: '#eab308',
+        background: '#1f2937',
+        color: '#fff'
+      });
     }
   };
 
@@ -100,9 +181,9 @@ export default function Inbox() {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] bg-gray-800 border border-gray-700 rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+    <div className="h-[calc(100vh-8rem)] bg-gray-800 border border-gray-700 rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row relative">
       
-      {/* ЛЯВ ПАНЕЛ - СПИСЪК */}
+      {/* ЛЯВ ПАНЕЛ */}
       <div className="w-full md:w-1/3 border-r border-gray-700 bg-gray-900/50 flex flex-col h-full relative">
         <div className="p-4 border-b border-gray-700 flex items-center justify-between bg-gray-800 shrink-0">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -143,7 +224,6 @@ export default function Inbox() {
                   </div>
                 </div>
 
-                {/* Бутон за изтриване (появява се при hover) */}
                 <button 
                   onClick={(e) => handleDeleteMessage(e, msg.id)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -157,7 +237,7 @@ export default function Inbox() {
         </div>
       </div>
 
-      {/* ДЕСЕН ПАНЕЛ - СЪДЪРЖАНИЕ */}
+      {/* ДЕСЕН ПАНЕЛ */}
       <div className="flex-1 bg-gray-800 p-6 flex flex-col h-full overflow-y-auto">
         {activeMessage ? (
           <div className="animate-in fade-in duration-200 h-full flex flex-col">
@@ -173,17 +253,27 @@ export default function Inbox() {
               {activeMessage.content}
             </div>
 
-            {/* ДИНАМИЧНИ БУТОНИ ЗА ДЕЙСТВИЕ */}
             {activeMessage.type === 'TransferOffer' && (
-              <div className="mt-8 pt-6 border-t border-gray-700 flex gap-4">
-                <button className="bg-yellow-500 text-black px-6 py-2 rounded-lg font-bold hover:bg-yellow-400 transition-colors">ENTER NEGOTIATIONS</button>
-                <button className="bg-gray-900 text-gray-400 px-6 py-2 rounded-lg font-bold hover:text-white hover:bg-red-500/20 transition-colors">REJECT OFFER</button>
+              <div className="mt-8 pt-6 border-t border-gray-700">
+                {activeMessage.isActioned ? (
+                   <div className="bg-gray-900 border border-gray-700 text-gray-400 px-6 py-3 rounded-lg font-bold flex items-center gap-2 w-fit">
+                     <AlertCircle size={18} />
+                     Офертата е приключена
+                   </div>
+                ) : (
+                  <button 
+                    onClick={() => setIsOfferModalOpen(true)}
+                    className="bg-yellow-500 text-black px-8 py-3 rounded-lg font-black hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20 flex items-center gap-2"
+                  >
+                    <Briefcase size={20} />
+                    VIEW OFFER
+                  </button>
+                )}
               </div>
             )}
             
             {activeMessage.type === 'ScoutReport' && activeMessage.relatedEntityId && (
               <div className="mt-8 pt-6 border-t border-gray-700">
-                 {/* Тук по-късно може да сложим Link към /world/player/{activeMessage.relatedEntityId} */}
                 <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-500 transition-colors">VIEW PLAYER PROFILE</button>
               </div>
             )}
@@ -195,6 +285,13 @@ export default function Inbox() {
           </div>
         )}
       </div>
+
+      <OfferModal 
+        isOpen={isOfferModalOpen}
+        onClose={() => setIsOfferModalOpen(false)}
+        message={activeMessage}
+        onRespond={handleOfferResponse}
+      />
 
     </div>
   );

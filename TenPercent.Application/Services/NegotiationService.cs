@@ -14,11 +14,13 @@
         private readonly AppDbContext _context;
         private readonly IFinanceService _financeService;
         private readonly Random _rand = new Random();
+        private readonly IMessageService _messageService;
 
-        public NegotiationService(AppDbContext context, IFinanceService financeService)
+        public NegotiationService(AppDbContext context, IFinanceService financeService, IMessageService messageService)
         {
             _context = context;
             _financeService = financeService;
+            _messageService = messageService;
         }
 
         public async Task<ContractResponseDto> ProposeContractAsync(int userId, ContractOfferDto offer)
@@ -191,6 +193,128 @@
                 else if (totalOfferedCommission - expectedTotalCommission > 5) rejectReason = "Опитвате се да му вземете твърде голяма комисионна.";
 
                 return new ContractResponseDto { Status = "Rejected", Message = $"{player.Name} стана от масата и си тръгна. {rejectReason}" };
+            }
+        }
+    
+    
+    
+    public async Task<(bool Success, string Message)> SendPoachOfferAsync(int sendingUserId, AgencyPoachOfferDto offerDto)
+        {
+            var senderAgent = await _context.Agents.Include(a => a.Agency).FirstOrDefaultAsync(a => a.UserId == sendingUserId);
+            if (senderAgent?.Agency == null) return (false, "Нямате агенция.");
+
+            var player = await _context.Players.Include(p => p.Agency).FirstOrDefaultAsync(p => p.Id == offerDto.TargetPlayerId);
+
+            if (player == null) return (false, "Играчът не съществува.");
+            if (player.AgencyId == null) return (false, "Този играч няма агент. Използвайте Pitch Player.");
+            if (player.AgencyId == senderAgent.Agency.Id) return (false, "Това вече е ваш клиент!");
+
+            if (senderAgent.Agency.Budget < offerDto.OfferedAmount) return (false, "Нямате достатъчно бюджет за тази оферта.");
+
+            var placeholders = new Dictionary<string, string>
+            {
+                { "SenderName", senderAgent.Agency.Name },
+                { "ReceiverName", player.Agency!.Name },
+                { "PlayerName", player.Name },
+                { "OfferAmount", offerDto.OfferedAmount.ToString("N0") }
+            };
+
+            // Пращаме шаблона. 
+            // Забележи: RelatedEntityId = player.Id, DataValue = Офертата!
+            var message = await _messageService.SendTemplatedMessageAsync(
+                receiverAgencyId: player.AgencyId,
+                senderType: EntityType.Agency,
+                senderId: senderAgent.Agency.Id,
+                senderName: senderAgent.Agency.Name,
+                type: MessageType.TransferOffer, // Тригерира Accept/Reject бутони
+                placeholders: placeholders,
+                relatedEntityId: player.Id
+            );
+
+            // Тъй като SendTemplatedMessageAsync не приема DataValue, трябва да го ъпдейтнем ръчно
+            message.DataValue = offerDto.OfferedAmount;
+            await _context.SaveChangesAsync();
+
+            return (true, $"Оферта от ${offerDto.OfferedAmount:N0} беше изпратена до агенцията на играча ({player.Agency.Name}).");
+        }
+
+        // =========================================================================
+        // ОТГОВОР НА ОФЕРТАТА (ACCEPT / REJECT)
+        // =========================================================================
+        public async Task<(bool Success, string Message)> RespondToPoachOfferAsync(int respondingUserId, RespondToMessageOfferDto responseDto)
+        {
+            var responderAgent = await _context.Agents.Include(a => a.Agency).FirstOrDefaultAsync(a => a.UserId == respondingUserId);
+            if (responderAgent?.Agency == null) return (false, "Нямате агенция.");
+
+            var message = await _context.Messages.FirstOrDefaultAsync(m => m.Id == responseDto.MessageId && m.ReceiverAgencyId == responderAgent.Agency.Id);
+
+            if (message == null) return (false, "Съобщението не е намерено.");
+            if (message.Type != MessageType.TransferOffer) return (false, "Това съобщение не е оферта.");
+            if (message.RelatedEntityId == null) return (false, "Грешка в данните на офертата.");
+            if (message.IsActioned) return (false, "Вече сте отговорили на тази оферта.");
+
+            var targetPlayer = await _context.Players.Include(p => p.RepresentationContracts).FirstOrDefaultAsync(p => p.Id == message.RelatedEntityId.Value);
+            if (targetPlayer == null || targetPlayer.AgencyId != responderAgent.Agency.Id)
+                return (false, "Играчът вече не е ваш клиент.");
+
+            decimal offeredAmount = message.DataValue ?? 0;
+
+            if (responseDto.IsAccepted)
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // 1. Извършваме транзакцията (Агенция А плаща на Агенция Б)
+                    // message.SenderId е ID-то на Агенцията, която купува!
+                    if (offeredAmount > 0)
+                    {
+                        var financeResult = await _financeService.ProcessTransactionAsync(
+                            EntityType.Agency, message.SenderId,
+                            EntityType.Agency, responderAgent.Agency.Id,
+                            offeredAmount, TransactionCategory.TransferFee, // Може да се наложи да добавиш TransferFee в Enum-а
+                            $"Buyout fee for {targetPlayer.Name} rights"
+                        );
+
+                        if (!financeResult.Success) throw new Exception(financeResult.Message);
+                    }
+
+                    // 2. Деактивираме стария договор
+                    var oldContract = targetPlayer.RepresentationContracts.FirstOrDefault(c => c.IsActive);
+                    if (oldContract != null) oldContract.IsActive = false;
+
+                    // 3. Сменяме агента
+                    targetPlayer.AgencyId = message.SenderId;
+
+                    // В реална ситуация тук трябва да се генерира нов RepresentationContract за новия агент (по договаряне).
+                    // Засега просто местим играча.
+
+                    // 4. Известяваме купувача
+                    await _messageService.SendMessageAsync(
+                        message.SenderId, EntityType.Agency, responderAgent.Agency.Id, responderAgent.Agency.Name,
+                        "Офертата е приета!", $"Приехме вашата оферта за {targetPlayer.Name}. Той вече е ваш клиент.", MessageType.Info);
+
+                    message.IsActioned = true;
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return (true, "Вие приехте офертата и прехвърлихте правата.");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return (false, "Грешка при трансфера: " + ex.Message);
+                }
+            }
+            else
+            {
+                // Отказ
+                await _messageService.SendMessageAsync(
+                    message.SenderId, EntityType.Agency, responderAgent.Agency.Id, responderAgent.Agency.Name,
+                    "Офертата е отхвърлена", $"Отхвърлихме вашата оферта за {targetPlayer.Name}.", MessageType.Info);
+
+                message.IsActioned = true;
+                await _context.SaveChangesAsync();
+                return (true, "Вие отхвърлихте офертата.");
             }
         }
     }

@@ -157,6 +157,38 @@
         }
       }
     },
+    "/api/Admin/import-message-templates": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Admin/initialize-standings": {
       "post": {
         "tags": [
@@ -759,6 +791,88 @@
         }
       }
     },
+    "/api/Negotiations/approach-agent": {
+      "post": {
+        "tags": [
+          "Negotiations"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgencyPoachOfferDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgencyPoachOfferDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgencyPoachOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Negotiations/respond-approach": {
+      "post": {
+        "tags": [
+          "Negotiations"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondToMessageOfferDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondToMessageOfferDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondToMessageOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Players/{id}": {
       "get": {
         "tags": [
@@ -1118,6 +1232,20 @@
         },
         "additionalProperties": false
       },
+      "AgencyPoachOfferDto": {
+        "type": "object",
+        "properties": {
+          "targetPlayerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offeredAmount": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "ContractOfferDto": {
         "type": "object",
         "properties": {
@@ -1280,6 +1408,19 @@
           "playerId": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RespondToMessageOfferDto": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isAccepted": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

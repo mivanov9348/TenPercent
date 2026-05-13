@@ -41,8 +41,10 @@
                 Content = m.Content,
                 SentAt = m.SentAt,
                 IsRead = m.IsRead,
-                Type = m.Type.ToString(), // "TransferOffer", "Finance", "Info" и т.н.
-                RelatedEntityId = m.RelatedEntityId
+                Type = m.Type.ToString(),
+                RelatedEntityId = m.RelatedEntityId,
+                DataValue = m.DataValue,
+                IsActioned = m.IsActioned
             }).ToList();
 
             return Ok(dtos);

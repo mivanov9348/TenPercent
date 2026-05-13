@@ -2,13 +2,16 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Shield, Building2, TrendingUp, DollarSign, Activity, Loader2, FileSignature, CheckCircle2, Search, FileText, Lock } from 'lucide-react';
 import OfferRepresentationModal from './OfferRepresentationModal';
+import ApproachAgentModal from './ApproachAgentModal';
 import { API_URL } from '../../config';
 
 export default function PlayerDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [player, setPlayer] = useState<any>(null);
   
+  const [player, setPlayer] = useState<any>(null);
+  const [myAgencyId, setMyAgencyId] = useState<number | null>(null); // 🔥 НОВО: Пазим нашето ID тук, за да знаем дали играчът е наш
+
   // Състояния за скаутинга
   const [hasReport, setHasReport] = useState(false);
   const [scoutReportData, setScoutReportData] = useState<any>(null);
@@ -19,12 +22,26 @@ export default function PlayerDetails() {
   // UI States
   const [activeTab, setActiveTab] = useState<'attributes' | 'stats' | 'contract'>('attributes');
   const [isPitchModalOpen, setIsPitchModalOpen] = useState(false);
+  const [isApproachModalOpen, setIsApproachModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
   const fetchPlayerAndReport = async () => {
     setIsLoading(true);
     try {
       const userId = localStorage.getItem('userId');
+
+      // 🔥 0. ДЪРПАМЕ НАШИЯ AGENCY ID 🔥
+      if (userId) {
+        try {
+          const agencyRes = await fetch(`${API_URL}/agency/${userId}`);
+          if (agencyRes.ok) {
+            const agencyData = await agencyRes.json();
+            setMyAgencyId(agencyData.id); // Запазваме си нашето ID!
+          }
+        } catch (e) {
+          console.error("Failed to fetch my agency info.");
+        }
+      }
 
       // 1. Дърпаме играча
       const playerRes = await fetch(`${API_URL}/players/${id}`);
@@ -73,7 +90,7 @@ export default function PlayerDetails() {
       if (!res.ok) throw new Error(data.message);
 
       setSuccessMessage(data.message);
-      fetchPlayerAndReport(); 
+      fetchPlayerAndReport();
 
     } catch (err: any) {
       alert(err.message);
@@ -94,7 +111,11 @@ export default function PlayerDetails() {
 
   if (!player) return <div className="text-center text-red-500 mt-10">Player not found!</div>;
 
-  const isOurClient = player.agencyName && player.agencyName !== "Unrepresented";
+  // ==============================================================================
+  // 🔥 ФИКС ЗА БЪГА: Проверяваме дали ID-то на агенцията съвпада с нашето ID 🔥
+  // ==============================================================================
+  const isOurClient = myAgencyId !== null && player.agencyId === myAgencyId;
+  const isRepresentedByOther = player.hasAgent && !isOurClient;
 
   // --- ЛОГИКА ЗА МАСКИРАНЕ НА СТАТИСТИКИТЕ ---
   const canSeeFullStats = isOurClient || (hasReport && scoutReportData?.knowledgeLevel === 5);
@@ -119,16 +140,16 @@ export default function PlayerDetails() {
     let barWidth = value;
 
     if (!canSeeFullStats) {
-        if (hasReport && scoutReportData) {
-            const range = (5 - scoutReportData.knowledgeLevel) * 4;
-            const min = Math.max(1, value - range);
-            const max = Math.min(99, value + range);
-            displayValue = `${min}-${max}`;
-            barWidth = max; 
-        } else {
-            displayValue = '?';
-            barWidth = 0;
-        }
+      if (hasReport && scoutReportData) {
+        const range = (5 - scoutReportData.knowledgeLevel) * 4;
+        const min = Math.max(1, value - range);
+        const max = Math.min(99, value + range);
+        displayValue = `${min}-${max}`;
+        barWidth = max;
+      } else {
+        displayValue = '?';
+        barWidth = 0;
+      }
     }
 
     const getColor = (val: number) => {
@@ -214,7 +235,7 @@ export default function PlayerDetails() {
           </div>
         </div>
 
-        {/* ACTIONS SECTION (artificially moved out of absolute positioning) */}
+        {/* ACTIONS SECTION */}
         <div className="flex flex-col gap-3 w-full lg:w-48 shrink-0 z-20 mt-4 lg:mt-0">
           {/* СКАУТСКИ БУТОН */}
           {!hasReport && !isOurClient ? (
@@ -234,15 +255,23 @@ export default function PlayerDetails() {
             </button>
           )}
 
-          {/* ДОГОВОРЕН БУТОН */}
+          {/* ДИНАМИЧЕН БУТОН ЗА ПОДПИСВАНЕ / ПОДХОД */}
           {!player.hasAgent ? (
-            <button
-              onClick={() => setIsPitchModalOpen(true)}
-              className="w-full px-4 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.3)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 text-sm"
-            >
+            <button onClick={() => setIsPitchModalOpen(true)} className="w-full px-4 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.3)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 text-sm">
               <FileSignature size={18} /> Pitch Player
             </button>
-          ) : null}
+          ) : isRepresentedByOther ? (
+            <button
+              onClick={() => setIsApproachModalOpen(true)}
+              className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-black uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(147,51,234,0.3)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 text-sm"
+            >
+              <Building2 size={18} /> Approach Agent
+            </button>
+          ) : (
+            <div className="w-full px-4 py-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold rounded-xl text-center text-sm">
+              Your Client
+            </div>
+          )}
         </div>
       </div>
 
@@ -267,7 +296,6 @@ export default function PlayerDetails() {
       </div>
 
       {/* TAB CONTENT AREAS */}
-
       {/* 1. ATTRIBUTES TAB */}
       {activeTab === 'attributes' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in slide-in-from-bottom-4 fade-in duration-300">
@@ -465,7 +493,7 @@ export default function PlayerDetails() {
         </div>
       )}
 
-      {/* THE MODAL */}
+      {/* THE MODALS */}
       <OfferRepresentationModal
         player={player}
         isOpen={isPitchModalOpen}
@@ -473,6 +501,16 @@ export default function PlayerDetails() {
         onSuccess={handlePitchSuccess}
       />
 
+      <ApproachAgentModal
+        player={player}
+        isOpen={isApproachModalOpen}
+        onClose={() => setIsApproachModalOpen(false)}
+        onSuccess={(msg) => {
+          setIsApproachModalOpen(false);
+          setSuccessMessage(msg);
+          fetchPlayerAndReport();
+        }}
+      />
     </div>
   );
 }

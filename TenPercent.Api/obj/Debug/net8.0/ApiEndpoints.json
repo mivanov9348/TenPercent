@@ -53,6 +53,22 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.AdminController",
+    "Method": "ImportMessageTemplates",
+    "RelativePath": "api/Admin/import-message-templates",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "file",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.AdminController",
     "Method": "ImportPositions",
     "RelativePath": "api/Admin/import-positions",
     "HttpMethod": "POST",
@@ -430,6 +446,27 @@
   },
   {
     "ContainingType": "TenPercent.Api.Controllers.NegotiationsController",
+    "Method": "ApproachAgent",
+    "RelativePath": "api/Negotiations/approach-agent",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "TenPercent.Application.DTOs.AgencyPoachOfferDto",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.NegotiationsController",
     "Method": "ProposeContract",
     "RelativePath": "api/Negotiations/propose",
     "HttpMethod": "POST",
@@ -460,6 +497,27 @@
       {
         "Name": "dto",
         "Type": "TenPercent.Application.DTOs.ContractOfferDto",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TenPercent.Api.Controllers.NegotiationsController",
+    "Method": "RespondToApproach",
+    "RelativePath": "api/Negotiations/respond-approach",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "TenPercent.Application.DTOs.RespondToMessageOfferDto",
         "IsRequired": true
       },
       {

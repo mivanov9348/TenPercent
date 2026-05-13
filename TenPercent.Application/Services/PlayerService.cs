@@ -23,12 +23,9 @@ namespace TenPercent.Application.Services
 
         public async Task<PlayerDetailsDto> GetPlayerDetailsAsync(int id)
         {
-
-            // 1. Identify the current active season
             var worldState = await _context.WorldStates.FirstOrDefaultAsync();
             var activeSeasonId = worldState?.CurrentSeasonId;
 
-            // 2. Fetch the core player entity with all necessary related data
             var player = await _context.Players
                 .Include(p => p.Club)
                 .Include(p => p.Agency)
@@ -40,7 +37,6 @@ namespace TenPercent.Application.Services
 
             if (player == null) return null;
 
-            // 3. Fetch recent match performances separately to avoid cartesian explosion in EF Core
             var recentMatches = await _context.PlayerMatchPerformances
                 .Include(m => m.Fixture)
                     .ThenInclude(f => f.HomeClub)
@@ -51,11 +47,9 @@ namespace TenPercent.Application.Services
                 .Take(5)
                 .ToListAsync();
 
-            // Extract the active contract and current season stats (guaranteed single due to filters above)
             var activeContract = player.ClubContracts.FirstOrDefault();
             var currentSeasonStats = player.SeasonPerformances.FirstOrDefault();
 
-            // 4. Map to DTO
             return new PlayerDetailsDto
             {
                 Id = player.Id,
@@ -65,41 +59,30 @@ namespace TenPercent.Application.Services
                 Position = player.Position?.Abbreviation ?? "UNK",
                 OVR = player.CurrentAbility,
                 POT = player.PotentialAbility,
-
-                // Core Attributes
                 Pace = player.Attributes.Pace,
                 Shooting = player.Attributes.Shooting,
                 Passing = player.Attributes.Passing,
                 Dribbling = player.Attributes.Dribbling,
                 Defending = player.Attributes.Defending,
                 Physical = player.Attributes.Physical,
-
-                // Hidden/Mental Attributes
                 Ambition = player.Attributes.Ambition,
                 Greed = player.Attributes.Greed,
                 Loyalty = player.Attributes.Loyalty,
-
-                // Market & Affiliations
                 MarketValue = player.MarketValue,
                 Form = player.Form,
                 ClubId = player.ClubId,
                 ClubName = player.Club?.Name,
+                AgencyId = player.AgencyId,
                 AgencyName = player.Agency?.Name,
                 HasAgent = player.AgencyId != null,
-
-                // Contract Details
                 WeeklyWage = activeContract?.WeeklyWage ?? 0,
                 ContractYearsLeft = activeContract != null ? (activeContract.EndSeasonNumber - activeContract.StartSeasonNumber) : 0,
-
-                // Season Performance Stats
                 SeasonAppearances = currentSeasonStats?.Appearances ?? 0,
                 SeasonGoals = currentSeasonStats?.Goals ?? 0,
                 SeasonAssists = currentSeasonStats?.Assists ?? 0,
                 SeasonAverageRating = currentSeasonStats?.AverageRating ?? 0,
                 SeasonYellowCards = currentSeasonStats?.YellowCards ?? 0,
                 SeasonRedCards = currentSeasonStats?.RedCards ?? 0,
-
-                // Match Log
                 RecentMatches = recentMatches.Select(m => new PlayerMatchDto
                 {
                     Gameweek = m.Fixture.Gameweek,
@@ -113,6 +96,7 @@ namespace TenPercent.Application.Services
                 }).ToList()
             };
         }
+
 
         public async Task<PaginatedResultDto<ScoutingPlayerDto>> GetScoutingPoolAsync(
             string? search, string? position, string? nationality,

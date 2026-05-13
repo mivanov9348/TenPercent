@@ -25,7 +25,6 @@
             return Ok(response);
         }
 
-        // НОВО: ENDPOINT ЗА ПРЕПОДПИСВАНЕ
         [HttpPost("renew")]
         public async Task<IActionResult> RenewContract([FromBody] ContractOfferDto dto, [FromQuery] int userId)
         {
@@ -33,6 +32,27 @@
             var response = await _negotiationService.RenewContractAsync(userId, dto);
             if (response.Status == "Error") return BadRequest(new { message = response.Message });
             return Ok(response);
+        }
+
+
+        [HttpPost("approach-agent")]
+        public async Task<IActionResult> ApproachAgent([FromBody] AgencyPoachOfferDto dto, [FromQuery] int userId)
+        {
+            if (userId <= 0) return Unauthorized("Invalid user.");
+            var result = await _negotiationService.SendPoachOfferAsync(userId, dto);
+
+            if (!result.Success) return BadRequest(new { message = result.Message });
+            return Ok(new { message = result.Message });
+        }
+
+        [HttpPost("respond-approach")]
+        public async Task<IActionResult> RespondToApproach([FromBody] RespondToMessageOfferDto dto, [FromQuery] int userId)
+        {
+            if (userId <= 0) return Unauthorized("Invalid user.");
+            var result = await _negotiationService.RespondToPoachOfferAsync(userId, dto);
+
+            if (!result.Success) return BadRequest(new { message = result.Message });
+            return Ok(new { message = result.Message });
         }
     }
 }
