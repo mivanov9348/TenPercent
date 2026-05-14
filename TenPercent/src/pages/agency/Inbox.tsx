@@ -4,6 +4,14 @@ import Swal from 'sweetalert2'; // <-- ИМПОРТИРАМЕ SWEETALERT
 import { API_URL } from '../../config';
 import OfferModal from './OfferModal';
 
+export interface ContractInfo {
+  playerName: string;
+  wageCommission: number;
+  transferCommission: number;
+  releaseClause: number | null;
+  endSeasonNumber: number;
+}
+
 export interface Message {
   id: number;
   senderName: string;
@@ -15,6 +23,7 @@ export interface Message {
   relatedEntityId: number | null;
   dataValue?: number;
   isActioned?: boolean;
+  currentContract?: ContractInfo; // НОВОТО ПОЛЕ
 }
 
 export default function Inbox() {

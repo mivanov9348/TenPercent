@@ -33,18 +33,52 @@
 
             var messages = await _messageService.GetAgencyInboxAsync(agent.Agency.Id);
 
-            var dtos = messages.Select(m => new MessageDto
+            // 1. Взимаме ID-тата на всички играчи, за които имаме получени оферти
+            var playerIdsWithOffers = messages
+                .Where(m => m.Type == Data.Enums.MessageType.TransferOffer && m.RelatedEntityId.HasValue)
+                .Select(m => m.RelatedEntityId.Value)
+                .Distinct()
+                .ToList();
+
+            // 2. Издърпваме текущите активни договори на тези играчи С ВАШАТА агенция
+            var activeContracts = await _context.RepresentationContracts
+                .Include(c => c.Player)
+                .Where(c => c.IsActive && c.AgencyId == agent.Agency.Id && playerIdsWithOffers.Contains(c.PlayerId))
+                .ToDictionaryAsync(c => c.PlayerId, c => c);
+
+            var dtos = messages.Select(m =>
             {
-                Id = m.Id,
-                SenderName = m.SenderName,
-                Subject = m.Subject,
-                Content = m.Content,
-                SentAt = m.SentAt,
-                IsRead = m.IsRead,
-                Type = m.Type.ToString(),
-                RelatedEntityId = m.RelatedEntityId,
-                DataValue = m.DataValue,
-                IsActioned = m.IsActioned
+                var dto = new MessageDto
+                {
+                    Id = m.Id,
+                    SenderName = m.SenderName,
+                    Subject = m.Subject,
+                    Content = m.Content,
+                    SentAt = m.SentAt,
+                    IsRead = m.IsRead,
+                    Type = m.Type.ToString(),
+                    RelatedEntityId = m.RelatedEntityId,
+                    DataValue = m.DataValue,
+                    IsActioned = m.IsActioned
+                };
+
+                // 3. Ако е оферта и намерим договор, го мапваме
+                if (m.Type == Data.Enums.MessageType.TransferOffer && m.RelatedEntityId.HasValue)
+                {
+                    if (activeContracts.TryGetValue(m.RelatedEntityId.Value, out var contract))
+                    {
+                        dto.CurrentContract = new ContractInfoDto
+                        {
+                            PlayerName = contract.Player.Name,
+                            WageCommission = contract.IncomeCommissionPercentage,
+                            TransferCommission = contract.TransferCommissionPercentage,
+                            ReleaseClause = contract.AgencyReleaseClause,
+                            EndSeasonNumber = contract.EndSeasonNumber
+                        };
+                    }
+                }
+
+                return dto;
             }).ToList();
 
             return Ok(dtos);

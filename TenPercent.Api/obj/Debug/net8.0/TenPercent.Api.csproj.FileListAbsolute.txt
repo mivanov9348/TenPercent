@@ -167,3 +167,4 @@ D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Cryp
 D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\Microsoft.Extensions.Identity.Core.dll
 D:\Projects\TenPercent\TenPercent.Api\bin\Debug\net8.0\Microsoft.Extensions.Identity.Stores.dll
+D:\Projects\TenPercent\TenPercent.Api\obj\Debug\net8.0\TenPercent.Api.MvcApplicationPartsAssemblyInfo.cs

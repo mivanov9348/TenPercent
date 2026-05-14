@@ -12,8 +12,8 @@
         public bool IsRead { get; set; }
         public string Type { get; set; }
         public int? RelatedEntityId { get; set; }
-
         public decimal? DataValue { get; set; }
         public bool IsActioned { get; set; }
+        public ContractInfoDto CurrentContract { get; set; }
     }
 }
