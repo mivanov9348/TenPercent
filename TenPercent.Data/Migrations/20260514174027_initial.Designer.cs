@@ -12,7 +12,7 @@ using TenPercent.Data;
 namespace TenPercent.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260511181618_initial")]
+    [Migration("20260514174027_initial")]
     partial class initial
     {
         /// <inheritdoc />

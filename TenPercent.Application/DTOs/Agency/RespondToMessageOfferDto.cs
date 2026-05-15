@@ -4,5 +4,6 @@
     {
         public int MessageId { get; set; }
         public bool IsAccepted { get; set; }
+        public decimal? CounterAmount { get; set; }
     }
 }

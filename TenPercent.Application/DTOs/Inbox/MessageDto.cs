@@ -1,6 +1,7 @@
 ﻿namespace TenPercent.Application.DTOs
 {
     using System;
+    using System.Text.Json.Serialization;
 
     public class MessageDto
     {
@@ -14,6 +15,10 @@
         public int? RelatedEntityId { get; set; }
         public decimal? DataValue { get; set; }
         public bool IsActioned { get; set; }
+        public string TargetPlayerName { get; set; }
+
+        // ЗАДАВАМЕ ИЗРИЧНО ИМЕТО ЗА REACT
+        [JsonPropertyName("currentContract")]
         public ContractInfoDto CurrentContract { get; set; }
     }
 }

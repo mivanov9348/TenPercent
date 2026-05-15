@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Loader2, DollarSign, Percent, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
 import { API_URL } from '../../config';
 import { useAuth } from '../../hooks/useAuth';
 import { useAgencyStore } from '../../store/useAgencyStore';
@@ -17,17 +18,17 @@ export default function OfferRepresentationModal({ player, isOpen, onClose, onSu
   const [wageComm, setWageComm] = useState<number>(10);
   const [transferComm, setTransferComm] = useState<number>(10);
   const [duration, setDuration] = useState<number>(3);
-  
+
   // Състояние за откупуване (Approach Agent)
   const [buyoutOffer, setBuyoutOffer] = useState<number>(50000);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [negotiationState, setNegotiationState] = useState<'idle' | 'countered' | 'rejected'>('idle');
   const [aiMessage, setAiMessage] = useState('');
 
   const { getUserIdOrRedirect } = useAuth();
-  const { updateBudget } = useAgencyStore(); 
+  const { updateBudget } = useAgencyStore();
 
   useEffect(() => {
     if (isOpen) {
@@ -57,15 +58,15 @@ export default function OfferRepresentationModal({ player, isOpen, onClose, onSu
       const response = await fetch(`${API_URL}/negotiations/approach-agent?userId=${userId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          targetPlayerId: player.id || player.playerId, 
-          offeredAmount: buyoutOffer 
+        body: JSON.stringify({
+          targetPlayerId: player.id || player.playerId,
+          offeredAmount: buyoutOffer
         })
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Error sending approach.');
-      
+
       onSuccess(data.message);
     } catch (err: any) {
       setError(err.message);
@@ -83,9 +84,6 @@ export default function OfferRepresentationModal({ player, isOpen, onClose, onSu
     const userId = getUserIdOrRedirect();
     if (!userId) return;
 
-    // ВНИМАНИЕ: Тук player.hasAgency се отнася до това дали ТИ преподписваш с него (Renew) или е свободен (Propose).
-    // Тъй като ако има ДРУГ агент изобщо не влизаме в тази функция (а в handleApproachSubmit), 
-    // тук player.hasAgency = true означава, че е ТВОЙ клиент!
     const endpoint = player.hasAgency ? 'renew' : 'propose';
 
     try {
@@ -98,28 +96,49 @@ export default function OfferRepresentationModal({ player, isOpen, onClose, onSu
           wageCommissionPercentage: wageComm,
           transferCommissionPercentage: transferComm,
           signingBonusPaid: signingBonus,
-          agencyReleaseClause: signingBonus * 2 
+          agencyReleaseClause: signingBonus * 2
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) throw new Error(data.message || 'Грешка при преговорите.');
-      
+
       if (data.status === 'Accepted') {
         updateBudget(-signingBonus);
+
+        // 2. SWEET ALERT ЗА УСПЕШЕН ДОГОВОР
+        await Swal.fire({
+          title: 'Договорът е подписан!',
+          text: data.message,
+          icon: 'success',
+          confirmButtonColor: '#10b981', // emerald-500
+          background: '#1f2937',
+          color: '#fff'
+        });
+
         onSuccess(data.message);
-      } 
+      }
       else if (data.status === 'CounterOffer') {
         setNegotiationState('countered');
         setAiMessage(data.message);
         if (data.counterSigningBonus !== undefined) setSigningBonus(data.counterSigningBonus);
         if (data.counterWageCommission !== undefined) setWageComm(data.counterWageCommission);
         if (data.counterTransferCommission !== undefined) setTransferComm(data.counterTransferCommission);
-      } 
+      }
       else if (data.status === 'Rejected') {
         setNegotiationState('rejected');
         setAiMessage(data.message);
+
+        // 3. SWEET ALERT ЗА ОТКАЗ (Опционално, ако искаш да изскача, вместо само да седи в модала)
+        Swal.fire({
+          title: 'Преговорите пропаднаха',
+          text: data.message,
+          icon: 'error',
+          confirmButtonColor: '#ef4444',
+          background: '#1f2937',
+          color: '#fff'
+        });
       }
 
     } catch (err: any) {
@@ -155,7 +174,7 @@ export default function OfferRepresentationModal({ player, isOpen, onClose, onSu
         </div>
 
         <form onSubmit={isApproachingForeignAgent ? handleApproachSubmit : handleContractSubmit} className="p-6 space-y-5">
-          {error && <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-sm font-bold flex gap-2 items-center"><AlertTriangle size={18}/> {error}</div>}
+          {error && <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-sm font-bold flex gap-2 items-center"><AlertTriangle size={18} /> {error}</div>}
 
           {/* ========================================================================= */}
           {/* СЦЕНАРИЙ 1: ПИТАМЕ ДРУГА АГЕНЦИЯ ЗА ИГРАЧ (BUYOUT OFFER) */}
@@ -168,15 +187,15 @@ export default function OfferRepresentationModal({ player, isOpen, onClose, onSu
 
               <div>
                 <label className="block text-sm font-bold text-gray-400 mb-2 flex items-center gap-2">
-                  <DollarSign size={16}/> Offered Buyout Fee
+                  <DollarSign size={16} /> Offered Buyout Fee
                 </label>
-                <input 
-                  type="number" 
-                  value={buyoutOffer} 
-                  onChange={e => setBuyoutOffer(Number(e.target.value))} 
-                  className="w-full bg-gray-950 border border-gray-700 rounded-lg py-4 px-4 text-white focus:border-purple-500 font-mono text-xl transition-all" 
-                  min="0" 
-                  step="5000" 
+                <input
+                  type="number"
+                  value={buyoutOffer}
+                  onChange={e => setBuyoutOffer(Number(e.target.value))}
+                  className="w-full bg-gray-950 border border-gray-700 rounded-lg py-4 px-4 text-white focus:border-purple-500 font-mono text-xl transition-all"
+                  min="0"
+                  step="5000"
                 />
               </div>
 
@@ -216,18 +235,18 @@ export default function OfferRepresentationModal({ player, isOpen, onClose, onSu
                 <>
                   <div>
                     <label className="block text-sm font-bold text-gray-400 mb-2 flex items-center gap-2">
-                      <DollarSign size={16}/> Signing Bonus (Cash on Hand)
+                      <DollarSign size={16} /> Signing Bonus (Cash on Hand)
                     </label>
                     <input type="number" value={signingBonus} onChange={e => setSigningBonus(Number(e.target.value))} className={`w-full bg-gray-950 border ${negotiationState === 'countered' ? 'border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.2)]' : 'border-gray-700'} rounded-lg py-3 px-4 text-white focus:border-yellow-500 font-mono text-lg transition-all`} min="0" step="1000" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-bold text-gray-400 mb-2 flex items-center gap-2"><Percent size={16}/> Wage Cut (%)</label>
+                      <label className="block text-sm font-bold text-gray-400 mb-2 flex items-center gap-2"><Percent size={16} /> Wage Cut (%)</label>
                       <input type="number" value={wageComm} onChange={e => setWageComm(Number(e.target.value))} className={`w-full bg-gray-950 border ${negotiationState === 'countered' ? 'border-yellow-500' : 'border-gray-700'} rounded-lg py-3 px-4 text-white focus:border-yellow-500 font-mono transition-all`} min="0" max="15" step="0.1" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-gray-400 mb-2 flex items-center gap-2"><Percent size={16}/> Transfer Cut (%)</label>
+                      <label className="block text-sm font-bold text-gray-400 mb-2 flex items-center gap-2"><Percent size={16} /> Transfer Cut (%)</label>
                       <input type="number" value={transferComm} onChange={e => setTransferComm(Number(e.target.value))} className={`w-full bg-gray-950 border ${negotiationState === 'countered' ? 'border-yellow-500' : 'border-gray-700'} rounded-lg py-3 px-4 text-white focus:border-yellow-500 font-mono transition-all`} min="0" max="15" step="0.1" />
                     </div>
                   </div>

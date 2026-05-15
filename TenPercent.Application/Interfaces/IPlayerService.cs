@@ -11,10 +11,8 @@
         Task<PaginatedResultDto<ScoutingPlayerDto>> GetScoutingPoolAsync(
             string? search, string? position, string? nationality,
             int? minAge, int? maxAge, decimal? maxValue,
-            bool? hasAgency, string? sortBy, int page, int pageSize);
-
+            bool? hasAgency, string? agencyName, string? sortBy, int page, int pageSize);
 
         Task ProcessYearlyProgressionAsync();
-
     }
 }

@@ -9,7 +9,11 @@
         public string Nationality { get; set; } = string.Empty;
         public decimal MarketValue { get; set; }
         public string ClubName { get; set; } = string.Empty;
+
         public bool HasAgency { get; set; }
+
+        // 🔥 ЕТО ГО НОВОТО ПОЛЕ 🔥
+        public string? AgencyName { get; set; }
 
         // --- FM STYLE ATTRIBUTES ---
         public string Pace { get; set; } = string.Empty;

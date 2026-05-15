@@ -3,24 +3,18 @@
   "WorkspaceRootPath": "D:\\Projects\\TenPercent\\TenPercent.Api\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\inboxcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\inboxcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Projects\\TenPercent\\TenPercent.Data\\Migrations\\20260514174027_initial.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\dtos\\inbox\\contractinfodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\dtos\\inbox\\messagedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\negotiationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\negotiationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\negotiationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\negotiationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5E72466-BF0C-428A-9CB1-1A05A5315055}|..\\TenPercent.Application\\TenPercent.Application.csproj|d:\\projects\\tenpercent\\tenpercent.application\\services\\messageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|d:\\projects\\tenpercent\\tenpercent.api\\controllers\\playerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BB378497-A751-19E2-0D6A-353B001AD5A8}|TenPercent.Api.csproj|solutionrelative:controllers\\playerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,7 +24,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -38,57 +32,46 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "20260514174027_initial.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Data\\Migrations\\20260514174027_initial.cs",
+              "RelativeDocumentMoniker": "..\\TenPercent.Data\\Migrations\\20260514174027_initial.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Data\\Migrations\\20260514174027_initial.cs",
+              "RelativeToolTip": "..\\TenPercent.Data\\Migrations\\20260514174027_initial.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-14T17:40:28.3Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PlayersController.cs",
+              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\PlayersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PlayersController.cs",
+              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\PlayersController.cs",
+              "RelativeToolTip": "Controllers\\PlayersController.cs",
+              "ViewState": "AgIAAI0AAAAAAAAAAAAYwKIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-14T12:51:49.951Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ContractInfoDto.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Inbox\\ContractInfoDto.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\DTOs\\Inbox\\ContractInfoDto.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Inbox\\ContractInfoDto.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\DTOs\\Inbox\\ContractInfoDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-13T04:52:12.441Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MessageDto.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Inbox\\MessageDto.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\DTOs\\Inbox\\MessageDto.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\DTOs\\Inbox\\MessageDto.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\DTOs\\Inbox\\MessageDto.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAUwBAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-12T17:39:53.965Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
               "Title": "NegotiationService.cs",
               "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\NegotiationService.cs",
               "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\NegotiationService.cs",
               "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\NegotiationService.cs",
               "RelativeToolTip": "..\\TenPercent.Application\\Services\\NegotiationService.cs",
-              "ViewState": "AgIAACoBAAAAAAAAAAAgwDwBAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAAAsBAAAAAAAAAAAgwBcBAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-12T17:25:03.873Z"
+              "WhenOpened": "2026-05-14T11:30:25.121Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "MessageService.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\MessageService.cs",
-              "RelativeDocumentMoniker": "..\\TenPercent.Application\\Services\\MessageService.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Application\\Services\\MessageService.cs",
-              "RelativeToolTip": "..\\TenPercent.Application\\Services\\MessageService.cs",
-              "ViewState": "AgIAAIgAAAAAAAAAAAAYwJ0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-12T17:24:52.111Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "NegotiationsController.cs",
               "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\NegotiationsController.cs",
               "RelativeDocumentMoniker": "Controllers\\NegotiationsController.cs",
@@ -96,20 +79,7 @@
               "RelativeToolTip": "Controllers\\NegotiationsController.cs",
               "ViewState": "AgIAACUAAAAAAAAAAAAQwDkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-12T17:23:37.764Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "InboxController.cs",
-              "DocumentMoniker": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\InboxController.cs",
-              "RelativeDocumentMoniker": "Controllers\\InboxController.cs",
-              "ToolTip": "D:\\Projects\\TenPercent\\TenPercent.Api\\Controllers\\InboxController.cs",
-              "RelativeToolTip": "Controllers\\InboxController.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAAAwCEAAAAPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-12T17:23:31.581Z",
+              "WhenOpened": "2026-05-14T11:29:25.29Z",
               "EditorCaption": ""
             }
           ]

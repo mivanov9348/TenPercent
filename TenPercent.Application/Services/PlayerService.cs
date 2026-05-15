@@ -98,10 +98,11 @@ namespace TenPercent.Application.Services
         }
 
 
+        // ДОБАВЕНО AgencyName в параметрите
         public async Task<PaginatedResultDto<ScoutingPlayerDto>> GetScoutingPoolAsync(
             string? search, string? position, string? nationality,
             int? minAge, int? maxAge, decimal? maxValue,
-            bool? hasAgency, string? sortBy, int page, int pageSize)
+            bool? hasAgency, string? agencyName, string? sortBy, int page, int pageSize)
         {
             // Намираме текущия сезон, за да покажем актуалните статистики
             var worldState = await _context.WorldStates.FirstOrDefaultAsync();
@@ -109,15 +110,19 @@ namespace TenPercent.Application.Services
 
             var query = _context.Players
                 .Include(p => p.Club)
+                .Include(p => p.Agency) // ВАЖНО ЗА ТЪРСЕНЕТО ПО АГЕНЦИЯ!
                 .Include(p => p.Position)
                 .Include(p => p.Attributes)
                 .Include(p => p.ClubContracts)
-                // НОВО: Взимаме само статистиките за текущия сезон
                 .Include(p => p.SeasonPerformances.Where(sp => sp.SeasonId == activeSeasonId))
                 .AsQueryable();
 
             // Apply filters dynamically
             if (hasAgency.HasValue) query = hasAgency.Value ? query.Where(p => p.AgencyId != null) : query.Where(p => p.AgencyId == null);
+
+            // НОВ ФИЛТЪР: Търсене по име на агенция
+            if (!string.IsNullOrWhiteSpace(agencyName)) query = query.Where(p => p.Agency != null && p.Agency.Name.Contains(agencyName));
+
             if (!string.IsNullOrWhiteSpace(search)) query = query.Where(p => p.Name.Contains(search));
             if (!string.IsNullOrWhiteSpace(position) && position != "All") query = query.Where(p => p.Position.Abbreviation == position);
             if (!string.IsNullOrWhiteSpace(nationality)) query = query.Where(p => p.Nationality.Contains(nationality));
@@ -140,12 +145,9 @@ namespace TenPercent.Application.Services
                 "Dribbling" => query.OrderByDescending(p => p.Attributes.Dribbling),
                 "Defending" => query.OrderByDescending(p => p.Attributes.Defending),
                 "Physical" => query.OrderByDescending(p => p.Attributes.Physical),
-
-                // НОВО: Сортиране по статистика
                 "Goals" => query.OrderByDescending(p => p.SeasonPerformances.FirstOrDefault() != null ? p.SeasonPerformances.FirstOrDefault()!.Goals : 0),
                 "Assists" => query.OrderByDescending(p => p.SeasonPerformances.FirstOrDefault() != null ? p.SeasonPerformances.FirstOrDefault()!.Assists : 0),
                 "Rating" => query.OrderByDescending(p => p.SeasonPerformances.FirstOrDefault() != null ? p.SeasonPerformances.FirstOrDefault()!.AverageRating : 0),
-
                 _ => query.OrderByDescending(p => p.MarketValue)
             };
 
@@ -156,7 +158,7 @@ namespace TenPercent.Application.Services
                  .Take(pageSize)
                  .ToListAsync();
 
-            int currentScoutingLevel = 1; // "Fog of War" ниво (засега хардкоднато)
+            int currentScoutingLevel = 1;
 
             var playersDto = rawPlayers.Select(p =>
             {
@@ -172,6 +174,7 @@ namespace TenPercent.Application.Services
                     MarketValue = p.MarketValue,
                     ClubName = p.Club != null ? p.Club.Name : "Free Agent",
                     HasAgency = p.AgencyId != null,
+                    AgencyName = p.Agency?.Name, // Пълним името на агенцията
 
                     Pace = _scoutingEngine.MaskAttribute(p.Attributes.Pace, currentScoutingLevel),
                     Shooting = _scoutingEngine.MaskAttribute(p.Attributes.Shooting, currentScoutingLevel),
@@ -180,7 +183,6 @@ namespace TenPercent.Application.Services
                     Defending = _scoutingEngine.MaskAttribute(p.Attributes.Defending, currentScoutingLevel),
                     Physical = _scoutingEngine.MaskAttribute(p.Attributes.Physical, currentScoutingLevel),
 
-                    // --- МАПВАНЕ НА СТАТИСТИКАТА ---
                     Apps = currentSeasonStats?.Appearances ?? 0,
                     Goals = currentSeasonStats?.Goals ?? 0,
                     Assists = currentSeasonStats?.Assists ?? 0,

@@ -41,10 +41,20 @@
                 .ToList();
 
             // 2. Издърпваме текущите активни договори на тези играчи С ВАШАТА агенция
-            var activeContracts = await _context.RepresentationContracts
+            var contractsList = await _context.RepresentationContracts
                 .Include(c => c.Player)
-                .Where(c => c.IsActive && c.AgencyId == agent.Agency.Id && playerIdsWithOffers.Contains(c.PlayerId))
-                .ToDictionaryAsync(c => c.PlayerId, c => c);
+                .Where(c => c.AgencyId == agent.Agency.Id && playerIdsWithOffers.Contains(c.PlayerId))
+                .ToListAsync();
+
+            var activeContracts = contractsList
+                .GroupBy(c => c.PlayerId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderByDescending(c => c.Id).First() // Взимаме винаги последния валиден договор
+                );
+
+            var allPlayerIds = messages.Where(m => m.RelatedEntityId.HasValue).Select(m => m.RelatedEntityId.Value).Distinct().ToList();
+            var playerNames = await _context.Players.Where(p => allPlayerIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id, p => p.Name);
 
             var dtos = messages.Select(m =>
             {
@@ -59,7 +69,9 @@
                     Type = m.Type.ToString(),
                     RelatedEntityId = m.RelatedEntityId,
                     DataValue = m.DataValue,
-                    IsActioned = m.IsActioned
+                    IsActioned = m.IsActioned,
+                    TargetPlayerName = m.RelatedEntityId.HasValue && playerNames.ContainsKey(m.RelatedEntityId.Value)
+                           ? playerNames[m.RelatedEntityId.Value] : "Unknown Player"
                 };
 
                 // 3. Ако е оферта и намерим договор, го мапваме

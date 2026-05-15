@@ -32,8 +32,9 @@ import AdminBank from './pages/admin/AdminBank';
 import AdminSettings from './pages/admin/AdminSettings';
 
 import ClubDetails from './pages/world/ClubDetails';
-import ScoutingPool from './pages/world/ScoutingPool';
+import ScoutingPool from './pages/world/scouting_pool/ScoutingPool';
 import MyShortlist from './pages/agency/MyShortlist';
+import QAJournal from './QAJournal';
 
 function App() {
   return (
@@ -89,6 +90,7 @@ function App() {
           </Route>
         </Route>
       </Routes>
+      <QAJournal />
     </BrowserRouter>
   );
 }

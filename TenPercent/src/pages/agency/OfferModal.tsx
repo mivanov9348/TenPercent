@@ -10,6 +10,13 @@ interface OfferModalProps {
 }
 
 export default function OfferModal({ isOpen, onClose, message, onRespond }: OfferModalProps) {
+  // ПРОВЕРКА 1: Какво влиза в модала? Този лог ще се покаже в конзолата, когато цъкнеш "VIEW OFFER"
+  if (isOpen) {
+      console.log("--- ПРОВЕРКА В OFFER MODAL ---");
+      console.log("Пълен обект message:", message);
+      console.log("Стойност на message.currentContract:", message?.currentContract);
+  }
+
   if (!isOpen || !message) return null;
 
   const handleConfirmAction = async (isAccepted: boolean) => {

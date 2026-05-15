@@ -7,7 +7,7 @@
     using TenPercent.Data;
     using TenPercent.Data.Models;
     using TenPercent.Application.DTOs;
-
+    using System.Linq;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -15,7 +15,7 @@
     {
         private readonly IPlayerService _playerService;
         private readonly IPlayerGeneratorService _playerGeneratorService;
-        private readonly AppDbContext _context; // НОВО: Добавяме контекста
+        private readonly AppDbContext _context;
 
         public PlayersController(
             IPlayerService playerService,
@@ -63,22 +63,22 @@
             [FromQuery] int? maxAge,
             [FromQuery] decimal? maxValue,
             [FromQuery] bool? hasAgency,
+            [FromQuery] string? AgencyName,
             [FromQuery] string? sortBy = "Value",
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
             var pool = await _playerService.GetScoutingPoolAsync(
                 search, position, nationality, minAge, maxAge,
-                maxValue, hasAgency, sortBy, page, pageSize);
+                maxValue, hasAgency, AgencyName, sortBy, page, pageSize);
 
             return Ok(pool);
         }
 
-        // --- НОВО: ДОБАВЯНЕ В ШОРТЛИСТ ---
+        // --- ДОБАВЯНЕ В ШОРТЛИСТ ---
         [HttpPost("{playerId}/shortlist")]
         public async Task<IActionResult> AddToShortlist(int playerId, [FromBody] AddToShortlistDto dto)
         {
-            // Намираме агенцията на този потребител
             var agent = await _context.Agents
                 .Include(a => a.Agency)
                 .FirstOrDefaultAsync(a => a.UserId == dto.UserId);
@@ -86,14 +86,12 @@
             if (agent?.Agency == null)
                 return BadRequest(new { message = "You do not have an agency." });
 
-            // Проверяваме дали играчът вече не е в шортлиста
             var alreadyShortlisted = await _context.AgencyShortlists
                 .AnyAsync(s => s.AgencyId == agent.Agency.Id && s.PlayerId == playerId);
 
             if (alreadyShortlisted)
                 return BadRequest(new { message = "Player is already in your shortlist." });
 
-            // Добавяме го
             var shortlistEntry = new AgencyShortlist
             {
                 AgencyId = agent.Agency.Id,
@@ -107,7 +105,7 @@
             return Ok(new { message = "Player added to shortlist successfully!" });
         }
 
-        // --- НОВО: ВЗИМАНЕ НА ШОРТЛИСТА ---
+        // --- ВЗИМАНЕ НА ШОРТЛИСТА ---
         [HttpGet("shortlist/{userId}")]
         public async Task<IActionResult> GetMyShortlist(int userId)
         {
@@ -118,11 +116,8 @@
             if (agent?.Agency == null)
                 return BadRequest(new { message = "You do not have an agency." });
 
+            // ОПТИМИЗИРАНО: Махнати са излишните Include, защото ползваме Select
             var shortlist = await _context.AgencyShortlists
-                .Include(s => s.Player)
-                    .ThenInclude(p => p.Position)
-                .Include(s => s.Player)
-                    .ThenInclude(p => p.Club)
                 .Where(s => s.AgencyId == agent.Agency.Id)
                 .OrderByDescending(s => s.AddedAt)
                 .Select(s => new
@@ -130,7 +125,8 @@
                     s.PlayerId,
                     s.Player.Name,
                     s.Player.Age,
-                    Position = s.Player.Position.Abbreviation,
+                    // Защита от null референция, ако играчът няма позиция
+                    Position = s.Player.Position != null ? s.Player.Position.Abbreviation : "Unknown",
                     s.Player.Nationality,
                     s.Player.MarketValue,
                     ClubName = s.Player.Club != null ? s.Player.Club.Name : "Free Agent",
@@ -141,7 +137,7 @@
             return Ok(shortlist);
         }
 
-        // --- НОВО: ПРЕМАХВАНЕ ОТ ШОРТЛИСТА ---
+        // --- ПРЕМАХВАНЕ ОТ ШОРТЛИСТА ---
         [HttpDelete("{playerId}/shortlist/{userId}")]
         public async Task<IActionResult> RemoveFromShortlist(int playerId, int userId)
         {

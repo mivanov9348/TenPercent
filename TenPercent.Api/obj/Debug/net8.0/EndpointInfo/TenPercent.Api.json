@@ -978,6 +978,13 @@
             }
           },
           {
+            "name": "AgencyName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "sortBy",
             "in": "query",
             "schema": {
@@ -1421,6 +1428,11 @@
           },
           "isAccepted": {
             "type": "boolean"
+          },
+          "counterAmount": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           }
         },
         "additionalProperties": false
