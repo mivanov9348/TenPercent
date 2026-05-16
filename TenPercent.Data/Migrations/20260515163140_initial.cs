@@ -109,6 +109,7 @@ namespace TenPercent.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Type = table.Column<int>(type: "int", nullable: false),
+                    TemplateCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SubjectTemplate = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     ContentTemplate = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },

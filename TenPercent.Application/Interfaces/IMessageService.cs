@@ -21,12 +21,13 @@
             MessageType type,
             int? relatedEntityId = null);
         Task<Message> SendTemplatedMessageAsync(
-            int? receiverAgencyId,
-            EntityType senderType,
-            int senderId,
-            string senderName,
-            MessageType type,
-            Dictionary<string, string> placeholders,
-            int? relatedEntityId = null);
+     int? receiverAgencyId,
+     EntityType senderType,
+     int senderId,
+     string senderName,
+     MessageType type,
+     Dictionary<string, string> placeholders,
+     int? relatedEntityId = null,
+     string? templateCode = null);
     }
 }

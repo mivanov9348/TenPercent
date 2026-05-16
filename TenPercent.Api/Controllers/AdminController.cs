@@ -330,19 +330,31 @@
 
             while (csv.Read())
             {
-                var typeStr = csv.GetField<string>("Type");
+                // В новия файл колоната се казва MessageType (число или стринг)
+                var messageTypeStr = csv.GetField<string>("MessageType");
+
+                // Четем новата колона TemplateCode. Тя може да е празна/null.
+                var templateCode = csv.GetField<string>("TemplateCode");
+
                 var subject = csv.GetField<string>("SubjectTemplate");
                 var content = csv.GetField<string>("ContentTemplate");
 
-                if (string.IsNullOrWhiteSpace(typeStr) || string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(content))
+                if (string.IsNullOrWhiteSpace(messageTypeStr) || string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(content))
                     continue;
 
-                // Опитваме се да парснем стринга към MessageType Енума (напр. "TransferOffer" -> MessageType.TransferOffer)
-                if (System.Enum.TryParse<MessageType>(typeStr, true, out var msgTypeEnum))
+                // Почистваме TemplateCode, ако е бил записан като "(null)" или празен стринг в CSV-то
+                if (string.IsNullOrWhiteSpace(templateCode) || templateCode.Trim().Equals("(null)", StringComparison.OrdinalIgnoreCase))
+                {
+                    templateCode = null;
+                }
+
+                // Опитваме се да парснем стринга (или числото) към MessageType Енума
+                if (System.Enum.TryParse<MessageType>(messageTypeStr, true, out var msgTypeEnum))
                 {
                     templates.Add(new MessageTemplate
                     {
                         Type = msgTypeEnum,
+                        TemplateCode = templateCode, // НОВО: Записваме кода!
                         SubjectTemplate = subject,
                         ContentTemplate = content
                     });

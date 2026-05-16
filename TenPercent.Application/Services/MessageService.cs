@@ -26,7 +26,6 @@
 
         public async Task<List<Message>> GetAgencyInboxAsync(int agencyId)
         {
-            // Взимаме съобщенията конкретно за тази агенция + глобалните (където ReceiverAgencyId е null)
             return await _context.Messages
                 .Where(m => m.ReceiverAgencyId == agencyId || m.ReceiverAgencyId == null)
                 .OrderByDescending(m => m.SentAt)
@@ -53,7 +52,6 @@
 
         public async Task<bool> DeleteMessageAsync(int messageId, int agencyId)
         {
-            // Позволяваме да трият само ЛИЧНИТЕ си съобщения. Глобалните не могат да се трият от един играч.
             var message = await _context.Messages
                 .FirstOrDefaultAsync(m => m.Id == messageId && m.ReceiverAgencyId == agencyId);
 
@@ -102,6 +100,7 @@
         // 3. УМНО ИЗПРАЩАНЕ ЧРЕЗ ШАБЛОНИ
         // ==========================================
 
+        // НОВО: Добавихме `string? templateCode = null` като параметър
         public async Task<Message> SendTemplatedMessageAsync(
             int? receiverAgencyId,
             EntityType senderType,
@@ -109,23 +108,36 @@
             string senderName,
             MessageType type,
             Dictionary<string, string> placeholders,
-            int? relatedEntityId = null)
+            int? relatedEntityId = null,
+            string? templateCode = null) // Този параметър ще ни позволи да търсим точно определено събитие
         {
-            // 1. Намираме всички шаблони за този ТИП съобщение
-            var templates = await _context.MessageTemplates
-                .Where(t => t.Type == type)
-                .ToListAsync();
+            // 1. Намираме шаблоните, базирано на Type и опционалния TemplateCode
+            var query = _context.MessageTemplates.Where(t => t.Type == type);
+
+            if (!string.IsNullOrEmpty(templateCode))
+            {
+                // Търсим специфичното събитие (напр. "WELCOME", "INJURY_MINOR")
+                query = query.Where(t => t.TemplateCode == templateCode);
+            }
+            else
+            {
+                // Ако не е подаден код, теглим само от "общите" съобщения, за да не пратим случайно контузия като обща новина
+                query = query.Where(t => string.IsNullOrEmpty(t.TemplateCode));
+            }
+
+            var templates = await query.ToListAsync();
 
             if (!templates.Any())
             {
-                // Fallback: Ако нямаме шаблони в базата, пращаме генерично съобщение, за да не крашне играта
+                // Fallback: Ако нямаме шаблони в базата, пращаме генерично съобщение
+                string fallbackSubject = string.IsNullOrEmpty(templateCode) ? "System Notification" : $"Alert: {templateCode}";
                 return await SendMessageAsync(
                     receiverAgencyId, senderType, senderId, senderName,
-                    "System Notification", "Message template missing for type: " + type.ToString(),
+                    fallbackSubject, "Message template missing. Ensure the database seeder has run.",
                     type, relatedEntityId);
             }
 
-            // 2. Избираме 1 на случаен принцип (за разнообразие)
+            // 2. Избираме 1 на случаен принцип измежду намерените (например от 5-те различни "WELCOME" съобщения)
             var selectedTemplate = templates[_rand.Next(templates.Count)];
 
             // 3. Заместваме плейсхолдърите

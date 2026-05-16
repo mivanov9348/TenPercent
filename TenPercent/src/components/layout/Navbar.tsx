@@ -1,13 +1,15 @@
+import { useEffect } from 'react'; // НОВО
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Users, Briefcase, Wallet, LogOut, Globe, Search, Mail } from 'lucide-react';
 import { useAgencyStore } from '../../store/useAgencyStore';
+import { API_URL } from '../../config'; // НОВО
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Взимаме бюджета от глобалния стейт
-  const { budget } = useAgencyStore();
+  // Взимаме бюджета и съобщенията от стейта
+  const { budget, unreadMessages, setUnreadMessages } = useAgencyStore();
 
   const handleLogout = () => {
     localStorage.removeItem('userId');
@@ -16,9 +18,29 @@ export default function Navbar() {
     navigate('/login');
   };
 
+  // НОВО: Дърпаме броя непрочетени съобщения при зареждане
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      const userId = localStorage.getItem('userId');
+      if (!userId) return;
+
+      try {
+        const res = await fetch(`${API_URL}/inbox/${userId}/unread-count`);
+        if (res.ok) {
+          const count = await res.json();
+          setUnreadMessages(count);
+        }
+      } catch (e) {
+        console.error("Failed to fetch unread messages count.");
+      }
+    };
+
+    fetchUnreadCount();
+  }, [setUnreadMessages]);
+
   const navLinks = [
     { name: 'Home', path: '/', icon: <Home size={18} /> },
-    { name: 'Inbox', path: '/inbox', icon: <Mail size={18} /> }, // НОВО: Inbox е тук
+    { name: 'Inbox', path: '/inbox', icon: <Mail size={18} /> },
     { name: 'My Agency', path: '/agency', icon: <Briefcase size={18} /> },
     { name: 'My Clients', path: '/players', icon: <Users size={18} /> },
     { name: 'Finance', path: '/finance', icon: <Wallet size={18} /> },
@@ -26,13 +48,9 @@ export default function Navbar() {
     { name: 'World', path: '/world', icon: <Globe size={18} /> },
   ];
 
-  // Форматиране на парите за хедъра
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   };
-
-  // ФЕЙК БРОЙ НЕПРОЧЕТЕНИ СЪОБЩЕНИЯ (Засега)
-  const unreadMessagesCount = 2;
 
   return (
     <nav className="bg-gray-950 border-b border-gray-800 shrink-0">
@@ -63,10 +81,10 @@ export default function Navbar() {
                 {link.icon}
                 {link.name}
                 
-                {/* БАДЖ ЗА НЕПРОЧЕТЕНИ СЪОБЩЕНИЯ ДО ТЕКСТА */}
-                {link.name === 'Inbox' && unreadMessagesCount > 0 && (
+                {/* БАДЖ ЗА НЕПРОЧЕТЕНИ СЪОБЩЕНИЯ - ВРЪЗКА СЪС СТЕЙТА */}
+                {link.name === 'Inbox' && unreadMessages > 0 && (
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] ml-1 ${isActive ? 'bg-black text-yellow-500' : 'bg-red-500 text-white'}`}>
-                    {unreadMessagesCount}
+                    {unreadMessages}
                   </span>
                 )}
               </Link>
@@ -74,10 +92,8 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Дясна част - Бюджет и Изход (Камбанката е премахната) */}
+        {/* Дясна част - Бюджет и Изход */}
         <div className="flex items-center gap-4">
-          
-          {/* БЮДЖЕТ */}
           <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg shadow-inner">
             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Budget</span>
             <span className="text-yellow-500 font-black font-mono text-sm">

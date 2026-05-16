@@ -14,11 +14,14 @@
     public class FinanceService : IFinanceService
     {
         private readonly AppDbContext _context;
-        private readonly Random _rand = new Random(); // НОВО: Рандъм генератор за инцидентите
+        private readonly IMessageService _messageService; // НОВО
+        private readonly Random _rand = new Random();
 
-        public FinanceService(AppDbContext context)
+        // НОВО: Инжектираме IMessageService
+        public FinanceService(AppDbContext context, IMessageService messageService)
         {
             _context = context;
+            _messageService = messageService;
         }
 
         public async Task<(bool Success, string Message)> ProcessTransactionAsync(
@@ -159,8 +162,6 @@
                 var agency = await _context.Agencies.FindAsync(id.Value);
                 if (agency == null) return (false, "Агенцията не е намерена.");
 
-                // РАЗРЕШАВАМЕ АГЕНЦИЯТА ДА ВЛЕЗЕ В МИНУС (Задлъжняване към банката)!
-                // Ако искаш агенцията да може да фалира, махаме проверката за достатъчно пари
                 agency.Budget += amount;
             }
             else if (type == EntityType.Player && id.HasValue)
@@ -245,7 +246,7 @@
             var activeClubContracts = await _context.ClubContracts
                 .Include(cc => cc.Club)
                 .Include(cc => cc.Player).ThenInclude(p => p.Position)
-                .Include(cc => cc.Player).ThenInclude(p => p.Attributes) // ТРЯБВАТ НИ АТРИБУТИТЕ ЗА ИНЦИДЕНТИ
+                .Include(cc => cc.Player).ThenInclude(p => p.Attributes)
                 .Include(cc => cc.Player).ThenInclude(p => p.RepresentationContracts.Where(rc => rc.IsActive))
                 .Where(cc => cc.IsActive && cc.WeeklyWage > 0)
                 .ToListAsync();
@@ -266,10 +267,10 @@
             int processedWages = 0;
             int processedCommissions = 0;
             int processedTaxes = 0;
-            int incidentCount = 0; // Брояч на инцидентите
+            int incidentCount = 0;
             decimal totalTaxCollected = 0m;
             decimal totalBonusesPaid = 0m;
-            decimal totalFinesPaid = 0m; // Сума на глобите
+            decimal totalFinesPaid = 0m;
 
             var transactionLogs = new List<Transaction>();
             using var dbTransaction = await _context.Database.BeginTransactionAsync();
@@ -329,16 +330,7 @@
                     processedWages++;
                     transactionLogs.Add(CreateLog(currentSeasonId, EntityType.Club, club.Id, EntityType.Player, player.Id, totalPlayerIncome, TransactionCategory.Wage, incomeDescription));
 
-                    // --- ДАНЪЦИ ИГРАЧ ---
-                    decimal wageTax = Math.Round(totalPlayerIncome * taxRate, 2);
-                    if (wageTax > 0)
-                    {
-                        player.Balance -= wageTax;
-                        bank.ReserveBalance += wageTax;
-                        transactionLogs.Add(CreateLog(currentSeasonId, EntityType.Player, player.Id, EntityType.Bank, bank.Id, wageTax, TransactionCategory.Tax, $"Income Tax for {player.Name}"));
-                        processedTaxes++;
-                        totalTaxCollected += wageTax;
-                    }
+                    // --- ДАНЪЦИ ИГРАЧ (ЗАКРИТИ ЗА QA) ---
 
                     // --- АГЕНТСКА КОМИСИОННА ---
                     var agentContract = player.RepresentationContracts.FirstOrDefault();
@@ -355,46 +347,28 @@
                             processedCommissions++;
                             transactionLogs.Add(CreateLog(currentSeasonId, EntityType.Player, player.Id, EntityType.Agency, agency.Id, commissionAmount, TransactionCategory.Commission, $"Commission ({agentContract.IncomeCommissionPercentage}%) from {player.Name}"));
 
-                            decimal commTax = Math.Round(commissionAmount * taxRate, 2);
-                            if (commTax > 0)
+                            // НОВО: ПРАЩАМЕ СЪОБЩЕНИЕ ЗА ПОЛУЧЕНАТА КОМИСИОННА
+                            var placeholders = new Dictionary<string, string>
                             {
-                                agency.Budget -= commTax;
-                                bank.ReserveBalance += commTax;
-                                transactionLogs.Add(CreateLog(currentSeasonId, EntityType.Agency, agency.Id, EntityType.Bank, bank.Id, commTax, TransactionCategory.Tax, $"Tax on commission from {player.Name}"));
-                                processedTaxes++;
-                                totalTaxCollected += commTax;
-                            }
+                                { "PlayerName", player.Name },
+                                { "Amount", commissionAmount.ToString("N0") }
+                            };
+
+                            await _messageService.SendTemplatedMessageAsync(
+                                receiverAgencyId: agency.Id,
+                                senderType: EntityType.System,
+                                senderId: 0,
+                                senderName: "Finance Dept.",
+                                type: MessageType.Finance,
+                                placeholders: placeholders,
+                                relatedEntityId: player.Id,
+                                templateCode: "COMMISSION" // Използваме кода от Excel таблицата
+                            );
+
+                            // --- ДАНЪК КОМИСИОННА (ЗАКРИТ ЗА QA) ---
                         }
 
-                        // ==========================================
-                        // 🔥 СИСТЕМА ЗА АГЕНТСКИ РИСК (ИНЦИДЕНТИ)
-                        // ==========================================
-
-                        // 1. Медицински разходи (Ако играчът се е контузил този кръг)
-                        if (weeklyPerformances.TryGetValue(player.Id, out var injuryPerf) && injuryPerf.InjuryDays > 0)
-                        {
-                            // Агенцията плаща за рехабилитация (между $5k и $50k)
-                            decimal medicalBill = _rand.Next(5000, 50001);
-                            agency.Budget -= medicalBill;
-                            bank.ReserveBalance += medicalBill; // Парите отиват в "икономиката"
-                            totalFinesPaid += medicalBill;
-                            incidentCount++;
-
-                            transactionLogs.Add(CreateLog(currentSeasonId, EntityType.Agency, agency.Id, EntityType.Bank, bank.Id, medicalBill, TransactionCategory.Penalty, $"Private Medical Treatment for {player.Name}"));
-                        }
-
-                        // 2. PR Скандал (Зависи от алчността и малко късмет)
-                        if (_rand.Next(1, 1000) < player.Attributes.Greed)
-                        {
-                            // Алчен играч прави скандал в медиите. Агенцията плаща за "чистене на имидж"
-                            decimal prCrisisCost = _rand.Next(10000, 100001);
-                            agency.Budget -= prCrisisCost;
-                            bank.ReserveBalance += prCrisisCost;
-                            totalFinesPaid += prCrisisCost;
-                            incidentCount++;
-
-                            transactionLogs.Add(CreateLog(currentSeasonId, EntityType.Agency, agency.Id, EntityType.Bank, bank.Id, prCrisisCost, TransactionCategory.Penalty, $"PR Crisis Management for {player.Name}"));
-                        }
+                        // --- СИСТЕМА ЗА АГЕНТСКИ РИСК (ИНЦИДЕНТИ) - ЗАКРИТА ЗА QA ---
                     }
                 }
 

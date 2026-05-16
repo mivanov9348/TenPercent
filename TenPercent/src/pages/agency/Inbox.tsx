@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Mail, MailOpen, AlertCircle, Briefcase, FileText, Loader2, Trash2, Edit3, CheckCircle2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { API_URL } from '../../config';
+import { useAgencyStore } from '../../store/useAgencyStore'
 import OfferModal from './OfferModal';
-import OfferRepresentationModal from '../world/OfferRepresentationModal'; 
+import OfferRepresentationModal from '../world/OfferRepresentationModal';
 
 export interface ContractInfo {
   playerName: string;
@@ -25,16 +26,17 @@ export interface Message {
   dataValue?: number;
   isActioned?: boolean;
   currentContract?: ContractInfo;
-  targetPlayerName?: string; 
+  targetPlayerName?: string;
 }
 
 export default function Inbox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeMessageId, setActiveMessageId] = useState<number | null>(null);
-  
+
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const [negotiatingPlayer, setNegotiatingPlayer] = useState<any>(null);
+  const { setUnreadMessages, decrementUnreadMessages } = useAgencyStore();
 
   useEffect(() => {
     setIsOfferModalOpen(false);
@@ -49,7 +51,8 @@ export default function Inbox() {
       const response = await fetch(`${API_URL}/inbox/${userId}`);
       if (response.ok) {
         const data = await response.json();
-        
+        setMessages(data);
+
         // ПРОВЕРКА 2: Какво точно връща бекендът?
         console.log("--- ПРОВЕРКА В INBOX (СЛЕД ФЕЧ) ---");
         console.log("Всички съобщения от сървъра:", data);
@@ -57,7 +60,10 @@ export default function Inbox() {
         console.log("Само трансферните оферти:", transferOffers);
 
         setMessages(data);
-        
+
+        const unreadCount = data.filter((m: Message) => !m.isRead).length;
+        setUnreadMessages(unreadCount);
+
         if (data.length > 0 && activeMessageId === null) {
           const firstUnread = data.find((m: Message) => !m.isRead);
           setActiveMessageId(firstUnread ? firstUnread.id : data[0].id);
@@ -84,8 +90,10 @@ export default function Inbox() {
     setActiveMessageId(msg.id);
     if (!msg.isRead) {
       setMessages(messages.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
+      decrementUnreadMessages();
+
       const userId = localStorage.getItem('userId');
-      try { await fetch(`${API_URL}/inbox/${userId}/read/${msg.id}`, { method: 'PUT' }); } catch (err) {}
+      try { await fetch(`${API_URL}/inbox/${userId}/read/${msg.id}`, { method: 'PUT' }); } catch (err) { }
     }
   };
 
@@ -107,13 +115,13 @@ export default function Inbox() {
       } else {
         Swal.fire({ icon: 'error', title: 'Oops...', text: 'Cannot delete message.', background: '#1f2937', color: '#fff' });
       }
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const handleOfferResponse = async (isAccepted: boolean, counterAmount?: number) => {
     if (!activeMessage) return;
     const userId = localStorage.getItem('userId');
-    
+
     try {
       const response = await fetch(`${API_URL}/negotiations/respond-approach?userId=${userId}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -130,7 +138,7 @@ export default function Inbox() {
       Swal.fire({ icon: 'success', title: titleMsg, text: data.message, confirmButtonColor: '#10b981', background: '#1f2937', color: '#fff' });
       setMessages(messages.map(m => m.id === activeMessage.id ? { ...m, isActioned: true } : m));
       setIsOfferModalOpen(false);
-      fetchMessages(); 
+      fetchMessages();
     } catch (err: any) {
       Swal.fire({ icon: 'error', title: 'Error processing offer', text: err.message, confirmButtonColor: '#eab308', background: '#1f2937', color: '#fff' });
     }
@@ -147,8 +155,8 @@ export default function Inbox() {
     setNegotiatingPlayer({
       id: activeMessage.relatedEntityId,
       name: activeMessage.targetPlayerName || "Unknown Player",
-      hasAgency: false, 
-      agencyName: "Unrepresented" 
+      hasAgency: false,
+      agencyName: "Unrepresented"
     });
   };
 
@@ -167,7 +175,7 @@ export default function Inbox() {
 
   return (
     <div className="h-[calc(100vh-8rem)] bg-gray-800 border border-gray-700 rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row relative">
-      
+
       {/* ЛЯВ ПАНЕЛ */}
       <div className="w-full md:w-1/3 border-r border-gray-700 bg-gray-900/50 flex flex-col h-full relative">
         <div className="p-4 border-b border-gray-700 flex items-center justify-between bg-gray-800 shrink-0">
@@ -178,11 +186,11 @@ export default function Inbox() {
             <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full animate-pulse">{messages.filter(m => !m.isRead).length} new</span>
           )}
         </div>
-        
+
         <div className="overflow-y-auto flex-1 p-2 space-y-2">
           {messages.length === 0 ? <div className="text-center text-gray-500 mt-10 text-sm">Нямате нови съобщения.</div> : (
             messages.map((msg) => (
-              <div 
+              <div
                 key={msg.id} onClick={() => handleSelectMessage(msg)}
                 className={`p-3 rounded-lg cursor-pointer transition-all border group relative ${activeMessageId === msg.id ? 'bg-gray-800 border-yellow-500/50 shadow-inner' : msg.isRead ? 'bg-transparent border-transparent hover:bg-gray-800' : 'bg-gray-800/80 border-l-4 border-l-yellow-500 border-t-transparent border-r-transparent border-b-transparent hover:bg-gray-800'}`}
               >
@@ -212,7 +220,7 @@ export default function Inbox() {
                 <p>{new Date(activeMessage.sentAt).toLocaleString()}</p>
               </div>
             </div>
-            
+
             <div className="text-gray-300 whitespace-pre-wrap leading-relaxed text-sm md:text-base">
               {activeMessage.content}
             </div>
@@ -221,7 +229,7 @@ export default function Inbox() {
             {activeMessage.type === 'TransferOffer' && (
               <div className="mt-8 pt-6 border-t border-gray-700">
                 {activeMessage.isActioned ? (
-                   <div className="bg-gray-900 border border-gray-700 text-gray-400 px-6 py-3 rounded-lg font-bold flex items-center gap-2 w-fit"><AlertCircle size={18} />Офертата е приключена</div>
+                  <div className="bg-gray-900 border border-gray-700 text-gray-400 px-6 py-3 rounded-lg font-bold flex items-center gap-2 w-fit"><AlertCircle size={18} />Офертата е приключена</div>
                 ) : (
                   <button onClick={() => setIsOfferModalOpen(true)} className="bg-yellow-500 text-black px-8 py-3 rounded-lg font-black hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20 flex items-center gap-2">
                     <Briefcase size={20} /> VIEW OFFER
@@ -234,7 +242,7 @@ export default function Inbox() {
             {activeMessage.type === 'ContractNegotiation' && (
               <div className="mt-8 pt-6 border-t border-gray-700">
                 {activeMessage.isActioned ? (
-                   <div className="bg-gray-900 border border-gray-700 text-gray-400 px-6 py-3 rounded-lg font-bold flex items-center gap-2 w-fit"><CheckCircle2 size={18} className="text-emerald-500" />Трансферът е финализиран</div>
+                  <div className="bg-gray-900 border border-gray-700 text-gray-400 px-6 py-3 rounded-lg font-bold flex items-center gap-2 w-fit"><CheckCircle2 size={18} className="text-emerald-500" />Трансферът е финализиран</div>
                 ) : (
                   <button onClick={openPlayerNegotiation} className="bg-purple-600 text-white px-8 py-3 rounded-lg font-black hover:bg-purple-500 transition-colors shadow-lg shadow-purple-900/30 flex items-center gap-2">
                     <Edit3 size={20} /> ПРЕДЛОЖИ ДОГОВОР НА ИГРАЧА
@@ -249,12 +257,12 @@ export default function Inbox() {
       </div>
 
       <OfferModal isOpen={isOfferModalOpen} onClose={() => setIsOfferModalOpen(false)} message={activeMessage} onRespond={handleOfferResponse} />
-      
-      <OfferRepresentationModal 
-        player={negotiatingPlayer || {}} 
-        isOpen={!!negotiatingPlayer} 
-        onClose={() => setNegotiatingPlayer(null)} 
-        onSuccess={handlePlayerContractSuccess} 
+
+      <OfferRepresentationModal
+        player={negotiatingPlayer || {}}
+        isOpen={!!negotiatingPlayer}
+        onClose={() => setNegotiatingPlayer(null)}
+        onSuccess={handlePlayerContractSuccess}
       />
 
     </div>

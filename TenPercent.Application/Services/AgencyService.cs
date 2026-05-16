@@ -16,12 +16,14 @@
     {
         private readonly AppDbContext _context;
         private readonly IFinanceService _financeService;
+        private readonly IMessageService _messageService;
         private readonly Random _rand = new Random();
 
-        public AgencyService(AppDbContext context, IFinanceService financeService)
+        public AgencyService(AppDbContext context, IFinanceService financeService, IMessageService messageService)
         {
             _context = context;
             _financeService = financeService;
+            _messageService = messageService;
         }
 
         public async Task<AgencyDto> GetMyAgencyAsync(int userId)
@@ -246,8 +248,8 @@
         public async Task<(bool Success, string Message)> CreateAgencyAsync(CreateAgencyDto dto)
         {
             var user = await _context.Users
-         .Include(u => u.Agent)
-         .FirstOrDefaultAsync(u => u.Id == dto.UserId);
+                .Include(u => u.Agent)
+                .FirstOrDefaultAsync(u => u.Id == dto.UserId);
 
             if (user == null) return (false, "User not found.");
             if (user.Agent != null) return (false, "This user already has an agency.");
@@ -292,6 +294,24 @@
                 }
 
                 await transaction.CommitAsync();
+
+                // 3. НОВО: ИЗПРАЩАМЕ WELCOME СЪОБЩЕНИЕТО
+                var placeholders = new Dictionary<string, string>
+                {
+                    { "ReceiverName", agency.Name }
+                };
+
+                await _messageService.SendTemplatedMessageAsync(
+                    receiverAgencyId: agency.Id,
+                    senderType: EntityType.System,
+                    senderId: 0,
+                    senderName: "TenPercent Admin",
+                    type: MessageType.Info,
+                    placeholders: placeholders,
+                    relatedEntityId: null,
+                    templateCode: "WELCOME" // Използваме кода от ексела!
+                );
+
                 return (true, "Agency created successfully! Welcome to the game.");
             }
             catch (Exception ex)

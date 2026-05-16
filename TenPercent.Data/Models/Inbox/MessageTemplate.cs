@@ -7,6 +7,7 @@
         public int Id { get; set; }
 
         public MessageType Type { get; set; }
+        public string? TemplateCode { get; set; }
 
         public string SubjectTemplate { get; set; } = string.Empty;
 

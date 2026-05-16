@@ -69,6 +69,7 @@
 
             // 5. Увеличаваме Gameweek на Сезона с 1
             activeSeason.CurrentGameweek++;
+            DateTime currentInGameDate = worldState.NextMatchdayDate ?? DateTime.UtcNow;
 
             // 6. Обновяваме датата на следващия мач
             worldState.NextMatchdayDate = DateTime.UtcNow.AddDays(1);

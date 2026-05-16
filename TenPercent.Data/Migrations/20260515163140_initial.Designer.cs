@@ -12,7 +12,7 @@ using TenPercent.Data;
 namespace TenPercent.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260514174027_initial")]
+    [Migration("20260515163140_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -649,6 +649,9 @@ namespace TenPercent.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("TemplateCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
