@@ -83,48 +83,51 @@
                 TopEarnerName = topEarner
             };
         }
-
-        public async Task<IEnumerable<AgencyPlayerDto>> GetAgencyPlayersAsync(int userId)
+        public async Task<List<AgencyPlayerDto>> GetAgencyPlayersAsync(int userId)
         {
+            // 1. Намираме агенцията на потребителя
             var agent = await _context.Agents
                 .Include(a => a.Agency)
                 .FirstOrDefaultAsync(a => a.UserId == userId);
 
-            if (agent?.Agency == null)
-                return null;
+            if (agent?.Agency == null) return null;
 
-            // Взимаме текущия сезон
+            // 2. Намираме кой е текущият активен сезон
             var worldState = await _context.WorldStates.FirstOrDefaultAsync();
-            int currentSeasonNumber = 1;
-            if (worldState != null && worldState.CurrentSeasonId.HasValue)
-            {
-                var activeSeason = await _context.Seasons.FindAsync(worldState.CurrentSeasonId.Value);
-                if (activeSeason != null) currentSeasonNumber = activeSeason.SeasonNumber;
-            }
+            var activeSeasonId = worldState?.CurrentSeasonId ?? 0;
 
+            // 3. Теглим играчите с нужните релации (ВКЛЮЧИТЕЛНО SeasonPerformances)
             var players = await _context.Players
+                .Include(p => p.Attributes)
                 .Include(p => p.Position)
                 .Include(p => p.Club)
-                .Include(p => p.Attributes)
                 .Include(p => p.ClubContracts.Where(c => c.IsActive))
                 .Include(p => p.RepresentationContracts.Where(c => c.IsActive))
+                .Include(p => p.SeasonPerformances.Where(sp => sp.SeasonId == activeSeasonId)) // <-- ВАЖНО: Теглим само за текущия сезон
                 .Where(p => p.AgencyId == agent.Agency.Id)
-                .Select(p => new AgencyPlayerDto
+                .ToListAsync();
+
+            // 4. Мапваме към DTO
+            var dtoList = players.Select(p =>
+            {
+                var activeClubContract = p.ClubContracts.FirstOrDefault();
+                var activeAgencyContract = p.RepresentationContracts.FirstOrDefault();
+                var currentSeasonStats = p.SeasonPerformances.FirstOrDefault(); // Взимаме статистиката
+
+                return new AgencyPlayerDto
                 {
                     Id = p.Id,
                     Name = p.Name,
-                    Pos = p.Position.Abbreviation,
                     Age = p.Age,
                     Nationality = p.Nationality,
-                    ClubName = p.Club != null ? p.Club.Name : "Free Agent",
-
+                    Pos = p.Position?.Abbreviation ?? "UNK",
                     Skill = p.CurrentAbility,
+                    ClubName = p.Club?.Name ?? "Free Agent",
                     Value = p.MarketValue,
-                    Wage = p.ClubContracts.Any() ? p.ClubContracts.First().WeeklyWage : 0,
+                    Wage = activeClubContract?.WeeklyWage ?? 0,
 
-                    // Изчисляване на оставащите сезони
-                    ClubContractYearsLeft = p.ClubContracts.Any() ? Math.Max(0, p.ClubContracts.First().EndSeasonNumber - currentSeasonNumber) : 0,
-                    AgencyContractYearsLeft = p.RepresentationContracts.Any() ? Math.Max(0, p.RepresentationContracts.First().EndSeasonNumber - currentSeasonNumber) : 0,
+                    ClubContractYearsLeft = activeClubContract != null ? (activeClubContract.EndSeasonNumber - activeClubContract.StartSeasonNumber) : 0,
+                    AgencyContractYearsLeft = activeAgencyContract != null ? (activeAgencyContract.EndSeasonNumber - activeAgencyContract.StartSeasonNumber) : 0,
 
                     // Атрибути
                     Pace = p.Attributes.Pace,
@@ -133,13 +136,16 @@
                     Dribbling = p.Attributes.Dribbling,
                     Defending = p.Attributes.Defending,
                     Physical = p.Attributes.Physical,
-                    Goalkeeping = p.Attributes.Goalkeeping,
-                    Vision = p.Attributes.Vision,
-                    Stamina = p.Attributes.Stamina
-                })
-                .ToListAsync();
 
-            return players;
+                    // НОВО: СТАТИСТИКИ
+                    Apps = currentSeasonStats?.Appearances ?? 0,
+                    Goals = currentSeasonStats?.Goals ?? 0,
+                    Assists = currentSeasonStats?.Assists ?? 0,
+                    AvgRating = currentSeasonStats?.AverageRating ?? 0.0m
+                };
+            }).ToList();
+
+            return dtoList;
         }
 
         public async Task<(bool Success, string Message, bool Accepted)> OfferRepresentationAsync(int userId, OfferRepresentationDto dto)

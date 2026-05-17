@@ -29,8 +29,13 @@ export default function SeasonStats() {
     return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-yellow-500" size={40} /></div>;
   }
 
-  // Проверка дали всички масиви са празни (т.е. сезонът тепърва започва)
-  const isDataEmpty = !stats || (stats.topScorers.length === 0 && stats.topRatings.length === 0);
+  // СИГУРНА ПРОВЕРКА: Използваме ?. за да предотвратим крашване, ако масивите липсват
+  const isDataEmpty = !stats || (
+    (stats.topScorers?.length || 0) === 0 && 
+    (stats.topRatings?.length || 0) === 0 &&
+    (stats.topAssists?.length || 0) === 0 &&
+    (stats.mostCards?.length || 0) === 0
+  );
 
   if (isDataEmpty) {
     return <div className="text-center text-gray-500 mt-10 font-bold bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-lg max-w-2xl mx-auto">No statistics available yet. Simulate some matches to see the leaderboards!</div>;
@@ -45,7 +50,7 @@ export default function SeasonStats() {
           <Target className="text-emerald-400" /> Golden Boot Race
         </h2>
         <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
-          {stats.topScorers.map((player: any, idx: number) => (
+          {stats.topScorers?.map((player: any, idx: number) => (
             <div key={player.id} onClick={() => navigate(`/world/player/${player.id}`)} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex items-center justify-between hover:border-gray-500 transition-colors cursor-pointer group">
               <div className="flex items-center gap-4">
                 <span className={`font-black w-6 text-center text-lg ${idx === 0 ? 'text-yellow-500' : idx === 1 ? 'text-gray-300' : idx === 2 ? 'text-amber-600' : 'text-gray-600'}`}>{idx + 1}</span>
@@ -66,7 +71,7 @@ export default function SeasonStats() {
               </div>
             </div>
           ))}
-          {stats.topScorers.length === 0 && <p className="text-center text-gray-500 py-4">No goals scored yet.</p>}
+          {(stats.topScorers?.length || 0) === 0 && <p className="text-center text-gray-500 py-4">No goals scored yet.</p>}
         </div>
       </div>
 
@@ -76,7 +81,7 @@ export default function SeasonStats() {
           <Star className="text-yellow-500" /> MVP Race (Avg Rating)
         </h2>
         <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
-          {stats.topRatings.map((player: any, idx: number) => (
+          {stats.topRatings?.map((player: any, idx: number) => (
             <div key={player.id} onClick={() => navigate(`/world/player/${player.id}`)} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex items-center justify-between hover:border-gray-500 transition-colors cursor-pointer group">
               <div className="flex items-center gap-4">
                 <span className={`font-black w-6 text-center text-lg ${idx === 0 ? 'text-yellow-500' : idx === 1 ? 'text-gray-300' : idx === 2 ? 'text-amber-600' : 'text-gray-600'}`}>{idx + 1}</span>
@@ -96,7 +101,7 @@ export default function SeasonStats() {
               </div>
             </div>
           ))}
-          {stats.topRatings.length === 0 && <p className="text-center text-gray-500 py-4">No ratings available.</p>}
+          {(stats.topRatings?.length || 0) === 0 && <p className="text-center text-gray-500 py-4">No ratings available.</p>}
         </div>
       </div>
 
@@ -106,7 +111,7 @@ export default function SeasonStats() {
           <Flame className="text-orange-500" /> Top Playmakers
         </h2>
         <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
-          {stats.topAssists.map((player: any, idx: number) => (
+          {stats.topAssists?.map((player: any, idx: number) => (
             <div key={player.id} onClick={() => navigate(`/world/player/${player.id}`)} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex items-center justify-between hover:border-gray-500 transition-colors cursor-pointer group">
               <div className="flex items-center gap-4">
                 <span className={`font-black w-6 text-center text-lg ${idx === 0 ? 'text-orange-500' : idx === 1 ? 'text-gray-300' : idx === 2 ? 'text-amber-600' : 'text-gray-600'}`}>{idx + 1}</span>
@@ -127,7 +132,7 @@ export default function SeasonStats() {
               </div>
             </div>
           ))}
-          {stats.topAssists.length === 0 && <p className="text-center text-gray-500 py-4">No assists recorded yet.</p>}
+          {(stats.topAssists?.length || 0) === 0 && <p className="text-center text-gray-500 py-4">No assists recorded yet.</p>}
         </div>
       </div>
 
@@ -137,7 +142,7 @@ export default function SeasonStats() {
           <ShieldAlert className="text-red-500" /> Disciplinary Report
         </h2>
         <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
-          {stats.mostCards.map((player: any, idx: number) => (
+          {stats.mostCards?.map((player: any, idx: number) => (
             <div key={player.id} onClick={() => navigate(`/world/player/${player.id}`)} className="bg-gray-900 border border-gray-700 p-3 rounded-lg flex items-center justify-between hover:border-gray-500 transition-colors cursor-pointer group">
               <div className="flex items-center gap-4">
                 <span className={`font-black w-6 text-center text-lg ${idx === 0 ? 'text-red-500' : 'text-gray-500'}`}>{idx + 1}</span>
@@ -152,7 +157,7 @@ export default function SeasonStats() {
               </div>
             </div>
           ))}
-          {stats.mostCards.length === 0 && <p className="text-center text-gray-500 py-4">No cards issued yet.</p>}
+          {(stats.mostCards?.length || 0) === 0 && <p className="text-center text-gray-500 py-4">No cards issued yet.</p>}
         </div>
       </div>
 

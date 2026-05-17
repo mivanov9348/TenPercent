@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Search, SlidersHorizontal, LayoutTemplate, Users, Star, Flame, Briefcase } from 'lucide-react';
 
-// Дефинираме интерфейс за всички филтри, за да е строго типизирано
 export interface FilterState {
   search: string;
   pos: string;
@@ -14,7 +13,7 @@ export interface FilterState {
 
 interface ScoutingFiltersProps {
   filters: FilterState;
-  setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+  onFilterChange: (key: keyof FilterState, value: any) => void;
   activeQuickFilter: string;
   handleQuickFilter: (filterId: string) => void;
   visibleColumns: any;
@@ -23,7 +22,7 @@ interface ScoutingFiltersProps {
 
 export default function ScoutingFilters({
   filters,
-  setFilters,
+  onFilterChange,
   activeQuickFilter,
   handleQuickFilter,
   visibleColumns,
@@ -33,7 +32,6 @@ export default function ScoutingFilters({
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const columnMenuRef = useRef<HTMLDivElement>(null);
 
-  // Затваряне на менюто за колони при клик отвън
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (columnMenuRef.current && !columnMenuRef.current.contains(event.target as Node)) {
@@ -44,11 +42,6 @@ export default function ScoutingFilters({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Помощна функция за ъпдейтване само на 1 филтър
-  const updateFilter = (key: keyof FilterState, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
-
   const quickFilters = [
     { id: 'all', label: 'All Database', icon: <Users size={16} /> },
     { id: 'wonderkids', label: 'Wonderkids (U21)', icon: <Star size={16} /> },
@@ -58,7 +51,6 @@ export default function ScoutingFilters({
 
   return (
     <div className="space-y-4">
-      {/* QUICK FILTERS */}
       <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
         {quickFilters.map(qf => (
           <button
@@ -75,25 +67,22 @@ export default function ScoutingFilters({
         ))}
       </div>
 
-      {/* MANUAL FILTERS & COLUMN CONTROLS */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-xl transition-all relative">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-          
-          {/* ТЪРСАЧКА */}
           <div className="relative lg:col-span-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={16} />
             <input
               type="text"
               placeholder="Search by name..."
               value={filters.search}
-              onChange={(e) => updateFilter('search', e.target.value)}
+              onChange={(e) => onFilterChange('search', e.target.value)}
               className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2.5 pl-9 pr-4 text-white focus:border-yellow-500 outline-none text-sm"
             />
           </div>
 
           <select
             value={filters.pos}
-            onChange={(e) => updateFilter('pos', e.target.value)}
+            onChange={(e) => onFilterChange('pos', e.target.value)}
             className="w-full bg-gray-950 border border-gray-800 text-white px-3 py-2.5 rounded-xl focus:border-yellow-500 outline-none text-sm cursor-pointer"
           >
             <option value="All">All Positions</option>
@@ -105,7 +94,7 @@ export default function ScoutingFilters({
 
           <select
             value={filters.hasAgency}
-            onChange={(e) => updateFilter('hasAgency', e.target.value)}
+            onChange={(e) => onFilterChange('hasAgency', e.target.value)}
             className="w-full bg-gray-950 border border-gray-800 text-white px-3 py-2.5 rounded-xl focus:border-yellow-500 outline-none cursor-pointer text-sm"
           >
             <option value="all">Agent Status: Everyone</option>
@@ -121,7 +110,6 @@ export default function ScoutingFilters({
               <SlidersHorizontal size={16} /> Filters
             </button>
 
-            {/* COLUMN CHOOSER TOGGLE */}
             <div className="relative" ref={columnMenuRef}>
               <button
                 onClick={() => setShowColumnMenu(!showColumnMenu)}
@@ -131,7 +119,6 @@ export default function ScoutingFilters({
                 <LayoutTemplate size={18} />
               </button>
 
-              {/* COLUMN DROPDOWN MENU */}
               {showColumnMenu && (
                 <div className="absolute right-0 mt-2 w-56 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
                   <div className="p-3 border-b border-gray-800 bg-gray-800/50">
@@ -169,24 +156,23 @@ export default function ScoutingFilters({
           </div>
         </div>
 
-        {/* ADVANCED FILTERS */}
         {showAdvanced && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-5 border-t border-gray-800 animate-in fade-in slide-in-from-top-2">
             <div>
               <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Nationality</label>
-              <input type="text" placeholder="e.g. Brazil" value={filters.nationality} onChange={(e) => updateFilter('nationality', e.target.value)} className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2 px-3 text-white focus:border-yellow-500 outline-none text-sm" />
+              <input type="text" placeholder="e.g. Brazil" value={filters.nationality} onChange={(e) => onFilterChange('nationality', e.target.value)} className="w-full bg-gray-950 border border-gray-800 rounded-xl py-2 px-3 text-white focus:border-yellow-500 outline-none text-sm" />
             </div>
             <div className="bg-gray-950 p-3 rounded-xl border border-gray-800">
               <label className="text-[10px] text-gray-500 uppercase font-bold flex justify-between">
                 <span>Min Age</span> <span className="text-yellow-500">{filters.minAge}</span>
               </label>
-              <input type="range" min="15" max="40" value={filters.minAge} onChange={(e) => updateFilter('minAge', Number(e.target.value))} className="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-yellow-500 mt-3" />
+              <input type="range" min="15" max="40" value={filters.minAge} onChange={(e) => onFilterChange('minAge', Number(e.target.value))} className="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-yellow-500 mt-3" />
             </div>
             <div className="bg-gray-950 p-3 rounded-xl border border-gray-800">
               <label className="text-[10px] text-gray-500 uppercase font-bold flex justify-between">
                 <span>Max Age</span> <span className="text-yellow-500">{filters.maxAge}</span>
               </label>
-              <input type="range" min="15" max="40" value={filters.maxAge} onChange={(e) => updateFilter('maxAge', Number(e.target.value))} className="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-yellow-500 mt-3" />
+              <input type="range" min="15" max="40" value={filters.maxAge} onChange={(e) => onFilterChange('maxAge', Number(e.target.value))} className="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-yellow-500 mt-3" />
             </div>
           </div>
         )}

@@ -27,5 +27,9 @@
         public int Goalkeeping { get; set; }
         public int Vision { get; set; }
         public int Stamina { get; set; }
+        public int Apps { get; set; }
+        public int Goals { get; set; }
+        public int Assists { get; set; }
+        public decimal AvgRating { get; set; }
     }
 }

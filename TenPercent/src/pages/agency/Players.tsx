@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, DollarSign, TrendingUp, AlertCircle, FileSignature, UserMinus, Loader2, UserPlus, FileText, Search, FilterX, BarChart2 } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, AlertCircle, FileSignature, UserMinus, Loader2, UserPlus, FileText, Search, FilterX, BarChart2, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../config';
 
@@ -55,7 +55,7 @@ export default function Players() {
     setMaxAge('');
   };
 
-  // --- СТАТИСТИКИ (базирани само на филтрираните играчи) ---
+  // --- СТАТИСТИКИ ---
   const totalWage = filteredPlayers.reduce((acc, p) => acc + p.wage, 0);
   const avgSkill = filteredPlayers.length > 0 
     ? Math.round(filteredPlayers.reduce((acc, p) => acc + p.skill, 0) / filteredPlayers.length) 
@@ -185,11 +185,14 @@ export default function Players() {
       <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden shadow-lg min-h-[400px] flex flex-col">
         {filteredPlayers.length > 0 ? (
           <div className="overflow-x-auto flex-1 custom-scrollbar">
-            <table className="w-full text-left border-collapse min-w-[1200px]">
+            {/* Леко увеличих min-width на таблицата, за да съберем новата колона комфортно */}
+            <table className="w-full text-left border-collapse min-w-[1300px]">
               <thead>
                 <tr className="bg-gray-900 border-b border-gray-700 text-[10px] uppercase tracking-wider text-gray-400">
                   <th className="p-4 font-bold">Client Info</th>
                   <th className="p-4 font-bold text-center">Attributes</th>
+                  {/* НОВА КОЛОНА: SEASON STATS */}
+                  <th className="p-4 font-bold text-center">Season Stats</th>
                   <th className="p-4 font-bold text-right">Value & Wage</th>
                   <th className="p-4 font-bold text-center">Club Contract</th>
                   <th className="p-4 font-bold text-center">Agency Contract</th>
@@ -231,6 +234,34 @@ export default function Players() {
                         <div className={`border rounded px-1 py-0.5 flex flex-col items-center ${getAttrColor(player.passing)}`}><span>PAS</span><span>{player.passing}</span></div>
                         <div className={`border rounded px-1 py-0.5 flex flex-col items-center ${getAttrColor(player.dribbling)}`}><span>DRI</span><span>{player.dribbling}</span></div>
                         <div className={`border rounded px-1 py-0.5 flex flex-col items-center ${getAttrColor(player.physical)}`}><span>PHY</span><span>{player.physical}</span></div>
+                      </div>
+                    </td>
+
+                    {/* НОВО: СТАТИСТИКИ (Season Stats) */}
+                    <td className="p-4 text-center">
+                      <div className="flex justify-center items-center gap-4 text-xs">
+                        <div className="flex flex-col items-center">
+                          <span className="text-[10px] text-gray-500 font-bold uppercase">Apps</span>
+                          <span className="font-bold text-gray-300">{player.apps ?? 0}</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <span className="text-[10px] text-gray-500 font-bold uppercase">Gls</span>
+                          <span className="font-bold text-white">{player.goals ?? 0}</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <span className="text-[10px] text-gray-500 font-bold uppercase">Ast</span>
+                          <span className="font-bold text-white">{player.assists ?? 0}</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <span className="text-[10px] text-gray-500 font-bold uppercase">Avg</span>
+                          <span className={`font-bold ${
+                            player.avgRating >= 7.5 ? 'text-emerald-400' :
+                            player.avgRating >= 6.5 ? 'text-yellow-400' :
+                            'text-gray-300'
+                          }`}>
+                            {player.avgRating ? player.avgRating.toFixed(1) : '0.0'}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     

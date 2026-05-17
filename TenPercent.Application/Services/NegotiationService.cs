@@ -203,7 +203,84 @@
                     };
 
                     _context.RepresentationContracts.Add(contract);
+                    int? oldAgencyId = player.AgencyId;
+                    string oldAgencyName = player.Agency?.Name ?? "Free Agent";
                     player.AgencyId = agency.Id;
+
+                    if (isRenewal)
+                    {
+                        var renewalPlaceholders = new Dictionary<string, string>
+                        {
+                            { "PlayerName", player.Name },
+                            { "DurationYears", offer.DurationYears.ToString() },
+                            { "WageCommission", offer.WageCommissionPercentage.ToString("F1") },
+                            { "TransferCommission", offer.TransferCommissionPercentage.ToString("F1") }
+                        };
+
+                        // Тегли на случаен принцип шаблон с код "CONTRACT_RENEWAL"
+                        await _messageService.SendTemplatedMessageAsync(
+                            receiverAgencyId: agency.Id,
+                            senderType: EntityType.Player,
+                            senderId: player.Id,
+                            senderName: player.Name,
+                            type: MessageType.Info,
+                            placeholders: renewalPlaceholders,
+                            relatedEntityId: player.Id,
+                            templateCode: "CONTRACT_RENEWAL"
+                        );
+                    }
+                    else
+                    {
+                        // Плейсхолдъри за нов трансфер
+                        var transferPlaceholders = new Dictionary<string, string>
+                        {
+                            { "PlayerName", player.Name },
+                            { "AgencyName", agency.Name },
+                            { "OldAgencyName", oldAgencyName },
+                            { "DurationYears", offer.DurationYears.ToString() },
+                            { "EndSeason", (currentSeasonNumber + offer.DurationYears).ToString() }
+                        };
+
+                        // 1. До твоята агенция (Лично съобщение, че трансферът е готов)
+                        // 3. Световна новина (за всички играчи в играта, receiverAgencyId = null)
+                        await _messageService.SendTemplatedMessageAsync(
+                            receiverAgencyId: null,
+                            senderType: EntityType.Agency, // Ако имаш EntityType.System, е по-добре да ползваш него тук
+                            senderId: agency.Id,
+                            senderName: "Global News", // НОВО - променено от Трансферен Център
+                            type: MessageType.News,
+                            placeholders: transferPlaceholders,
+                            relatedEntityId: player.Id,
+                            templateCode: "TRANSFER_SUCCESS_GLOBAL"
+                        );
+
+                        // 2. До старата агенция (Ако е имало такава)
+                        if (oldAgencyId.HasValue && oldAgencyId.Value != agency.Id)
+                        {
+                            await _messageService.SendTemplatedMessageAsync(
+                                receiverAgencyId: oldAgencyId.Value,
+                                senderType: EntityType.Agency,
+                                senderId: agency.Id,
+                                senderName: agency.Name,
+                                type: MessageType.TransferResponse,
+                                placeholders: transferPlaceholders,
+                                relatedEntityId: player.Id,
+                                templateCode: "TRANSFER_SUCCESS_SELLER"
+                            );
+                        }
+
+                        // 3. Световна новина (за всички играчи в играта, receiverAgencyId = null)
+                        await _messageService.SendTemplatedMessageAsync(
+                            receiverAgencyId: null,
+                            senderType: EntityType.Agency,
+                            senderId: agency.Id,
+                            senderName: "Трансферен Център",
+                            type: MessageType.News,
+                            placeholders: transferPlaceholders,
+                            relatedEntityId: player.Id,
+                            templateCode: "TRANSFER_SUCCESS_GLOBAL"
+                        );
+                    }
 
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();

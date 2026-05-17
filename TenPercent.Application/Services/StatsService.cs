@@ -1,6 +1,7 @@
 ﻿namespace TenPercent.Application.Services
 {
     using Microsoft.EntityFrameworkCore;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using TenPercent.Api.DTOs;
@@ -18,23 +19,42 @@
 
         public async Task<SeasonStatsDto> GetCurrentSeasonStatsAsync()
         {
+            // 1. НАМИРАНЕ НА СЕЗОНА: Първо търсим по флаг IsActive (най-сигурно)
             var activeSeason = await _context.Seasons.FirstOrDefaultAsync(s => s.IsActive);
 
-            // Ако няма активен сезон, връщаме празен обект (списоците вътре са вече инициализирани)
+            // Ако няма активен сезон по флаг, опитваме през WorldState като резервен вариант
             if (activeSeason == null)
             {
-                return new SeasonStatsDto();
+                var worldState = await _context.WorldStates.FirstOrDefaultAsync();
+                if (worldState != null && worldState.CurrentSeasonId.HasValue)
+                {
+                    activeSeason = await _context.Seasons.FindAsync(worldState.CurrentSeasonId.Value);
+                }
             }
 
-            var baseQuery = _context.PlayerSeasonStats
+            // Ако наистина няма никакъв сезон, връщаме празни инициализирани масиви, за да не гърми React
+            if (activeSeason == null)
+            {
+                return new SeasonStatsDto
+                {
+                    TopScorers = new List<TopStatDto>(),
+                    TopRatings = new List<TopStatDto>(),
+                    TopAssists = new List<TopStatDto>(),
+                    MostCards = new List<CardStatDto>()
+                };
+            }
+
+            // 2. БАЗОВА ЗАЯВКА: МАХНАХМЕ ps.Appearances > 0.
+            // По този начин, дори симулаторът да забрави да добави "Appearance" на играча,
+            // ако той има гол или асистенция, пак ще излезе в списъка!
+            var baseQuery = _context.PlayerSeasonStats // Забележка: Ако в AppDbContext се казва PlayerSeasonStats, промени го!
                 .Include(ps => ps.Player)
                 .ThenInclude(p => p.Club)
-                .Where(ps => ps.SeasonId == activeSeason.Id && ps.Appearances > 0);
+                .Where(ps => ps.SeasonId == activeSeason.Id);
 
             var topScorers = await baseQuery
                 .Where(ps => ps.Goals > 0)
                 .OrderByDescending(ps => ps.Goals)
-                .ThenBy(ps => ps.Appearances)
                 .Take(10)
                 .Select(ps => new TopStatDto
                 {
@@ -47,6 +67,7 @@
                 .ToListAsync();
 
             var topRatings = await baseQuery
+                .Where(ps => ps.AverageRating > 0) // Взимаме само играчи с реален рейтинг
                 .OrderByDescending(ps => ps.AverageRating)
                 .Take(10)
                 .Select(ps => new TopStatDto
@@ -62,7 +83,6 @@
             var topAssists = await baseQuery
                 .Where(ps => ps.Assists > 0)
                 .OrderByDescending(ps => ps.Assists)
-                .ThenBy(ps => ps.Appearances)
                 .Take(10)
                 .Select(ps => new TopStatDto
                 {
@@ -76,7 +96,7 @@
 
             var mostCards = await baseQuery
                 .Where(ps => ps.YellowCards > 0 || ps.RedCards > 0)
-                .OrderByDescending(ps => ps.RedCards * 3 + ps.YellowCards)
+                .OrderByDescending(ps => (ps.RedCards * 3) + ps.YellowCards) // Червеният картон тежи като 3 жълти за класацията
                 .Take(10)
                 .Select(ps => new CardStatDto
                 {

@@ -131,24 +131,46 @@ namespace TenPercent.Application.Services
             if (maxValue.HasValue) query = query.Where(p => p.MarketValue <= maxValue.Value);
 
             // Сортиране
+            // Сортиране
             query = sortBy switch
             {
-                "Value" => query.OrderByDescending(p => p.MarketValue),
-                "ValueAsc" => query.OrderBy(p => p.MarketValue),
+                "Value" => query.OrderBy(p => p.MarketValue),
+                "ValueDesc" => query.OrderByDescending(p => p.MarketValue),
+
+                "Wage" => query.OrderBy(p => p.ClubContracts.Where(c => c.IsActive).Max(c => (decimal?)c.WeeklyWage) ?? 0),
+                "WageDesc" => query.OrderByDescending(p => p.ClubContracts.Where(c => c.IsActive).Max(c => (decimal?)c.WeeklyWage) ?? 0),
+
                 "Age" => query.OrderBy(p => p.Age),
                 "AgeDesc" => query.OrderByDescending(p => p.Age),
-                "Wage" => query.OrderByDescending(p => p.ClubContracts.Any(c => c.IsActive)
-                                ? p.ClubContracts.FirstOrDefault(c => c.IsActive)!.WeeklyWage : 0),
-                "Pace" => query.OrderByDescending(p => p.Attributes.Pace),
-                "Shooting" => query.OrderByDescending(p => p.Attributes.Shooting),
-                "Passing" => query.OrderByDescending(p => p.Attributes.Passing),
-                "Dribbling" => query.OrderByDescending(p => p.Attributes.Dribbling),
-                "Defending" => query.OrderByDescending(p => p.Attributes.Defending),
-                "Physical" => query.OrderByDescending(p => p.Attributes.Physical),
-                "Goals" => query.OrderByDescending(p => p.SeasonPerformances.FirstOrDefault() != null ? p.SeasonPerformances.FirstOrDefault()!.Goals : 0),
-                "Assists" => query.OrderByDescending(p => p.SeasonPerformances.FirstOrDefault() != null ? p.SeasonPerformances.FirstOrDefault()!.Assists : 0),
-                "Rating" => query.OrderByDescending(p => p.SeasonPerformances.FirstOrDefault() != null ? p.SeasonPerformances.FirstOrDefault()!.AverageRating : 0),
-                _ => query.OrderByDescending(p => p.MarketValue)
+
+                "Pace" => query.OrderBy(p => p.Attributes.Pace),
+                "PaceDesc" => query.OrderByDescending(p => p.Attributes.Pace),
+
+                "Shooting" => query.OrderBy(p => p.Attributes.Shooting),
+                "ShootingDesc" => query.OrderByDescending(p => p.Attributes.Shooting),
+
+                "Passing" => query.OrderBy(p => p.Attributes.Passing),
+                "PassingDesc" => query.OrderByDescending(p => p.Attributes.Passing),
+
+                "Dribbling" => query.OrderBy(p => p.Attributes.Dribbling),
+                "DribblingDesc" => query.OrderByDescending(p => p.Attributes.Dribbling),
+
+                "Defending" => query.OrderBy(p => p.Attributes.Defending),
+                "DefendingDesc" => query.OrderByDescending(p => p.Attributes.Defending),
+
+                "Physical" => query.OrderBy(p => p.Attributes.Physical),
+                "PhysicalDesc" => query.OrderByDescending(p => p.Attributes.Physical),
+
+                "Goals" => query.OrderBy(p => p.SeasonPerformances.Where(sp => sp.SeasonId == activeSeasonId).Max(sp => (int?)sp.Goals) ?? 0),
+                "GoalsDesc" => query.OrderByDescending(p => p.SeasonPerformances.Where(sp => sp.SeasonId == activeSeasonId).Max(sp => (int?)sp.Goals) ?? 0),
+
+                "Assists" => query.OrderBy(p => p.SeasonPerformances.Where(sp => sp.SeasonId == activeSeasonId).Max(sp => (int?)sp.Assists) ?? 0),
+                "AssistsDesc" => query.OrderByDescending(p => p.SeasonPerformances.Where(sp => sp.SeasonId == activeSeasonId).Max(sp => (int?)sp.Assists) ?? 0),
+
+                "Rating" => query.OrderBy(p => p.SeasonPerformances.Where(sp => sp.SeasonId == activeSeasonId).Max(sp => (decimal?)sp.AverageRating) ?? 0),
+                "RatingDesc" => query.OrderByDescending(p => p.SeasonPerformances.Where(sp => sp.SeasonId == activeSeasonId).Max(sp => (decimal?)sp.AverageRating) ?? 0),
+
+                _ => query.OrderByDescending(p => p.MarketValue) // Дефолт
             };
 
             var totalCount = await query.CountAsync();

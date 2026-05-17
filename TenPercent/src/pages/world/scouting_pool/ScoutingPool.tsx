@@ -1,29 +1,30 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, UserPlus, Loader2, ChevronLeft, ChevronRight, Users, UserMinus, ArrowUpDown, BookmarkPlus, Shield } from 'lucide-react';
-import OfferRepresentationModal from '../OfferRepresentationModal';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, Loader2, ChevronLeft, ChevronRight, ArrowUpDown, BookmarkPlus, Shield } from 'lucide-react';
 import ScoutingFilters, { type FilterState } from './ScoutingFilters';
 
 export default function ScoutingPool() {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [players, setPlayers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [pagination, setPagination] = useState({ totalCount: 0, totalPages: 1, page: 1 });
+    const [pagination, setPagination] = useState({ totalCount: 0, totalPages: 1 });
 
-    // Обединен state за филтрите
+    // Инициализираме стейта директно от URL параметрите (или слагаме дефолтни)
     const [filters, setFilters] = useState<FilterState>({
-        search: '',
-        pos: 'All',
-        nationality: '',
-        minAge: 15,
-        maxAge: 40,
-        hasAgency: 'all'
+        search: searchParams.get('search') || '',
+        pos: searchParams.get('pos') || 'All',
+        nationality: searchParams.get('nationality') || '',
+        minAge: Number(searchParams.get('minAge')) || 15,
+        maxAge: Number(searchParams.get('maxAge')) || 40,
+        hasAgency: searchParams.get('hasAgency') || 'all',
+        agencyName: searchParams.get('agencyName') || ''
     });
 
-    const [activeQuickFilter, setActiveQuickFilter] = useState('all');
-    const [sortBy, setSortBy] = useState('Value');
-    const [pitchPlayer, setPitchPlayer] = useState<any>(null);
+    const [activeQuickFilter, setActiveQuickFilter] = useState(searchParams.get('quick') || 'all');
+    const [sortBy, setSortBy] = useState(searchParams.get('sortBy') || 'ValueDesc');
+    const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
 
     const [visibleColumns, setVisibleColumns] = useState({
         Age: true, Club: true, Status: true, Wage: false, Value: true,
@@ -31,38 +32,33 @@ export default function ScoutingPool() {
         Apps: false, Goals: false, Assists: false, Rating: false,
     });
 
-    const handlePitchSuccess = (message: string) => {
-        setPitchPlayer(null);
-        alert("🎉 " + message);
-        fetchPool(pagination.page);
-    };
+    // 1. Синхронизираме State -> URL
+    useEffect(() => {
+        const params = new URLSearchParams();
+        if (filters.search) params.set('search', filters.search);
+        if (filters.pos !== 'All') params.set('pos', filters.pos);
+        if (filters.nationality) params.set('nationality', filters.nationality);
+        if (filters.minAge !== 15) params.set('minAge', filters.minAge.toString());
+        if (filters.maxAge !== 40) params.set('maxAge', filters.maxAge.toString());
+        if (filters.hasAgency !== 'all') params.set('hasAgency', filters.hasAgency);
+        if (filters.agencyName) params.set('agencyName', filters.agencyName);
 
-    const handleQuickFilter = (filterId: string) => {
-        setActiveQuickFilter(filterId);
+        params.set('sortBy', sortBy);
+        params.set('page', page.toString());
+        params.set('quick', activeQuickFilter);
 
-        // Ресетваме специфичните филтри и прилагаме новите
-        let newFilters = { ...filters, search: '', pos: 'All', nationality: '' };
+        setSearchParams(params, { replace: true });
+    }, [filters, sortBy, page, activeQuickFilter, setSearchParams]);
 
-        switch (filterId) {
-            case 'wonderkids':
-                setFilters({ ...newFilters, minAge: 15, maxAge: 21, hasAgency: 'false' }); setSortBy('Value'); break;
-            case 'free_agents':
-                setFilters({ ...newFilters, minAge: 15, maxAge: 40, hasAgency: 'false' }); setSortBy('Value'); break;
-            case 'prime':
-                setFilters({ ...newFilters, minAge: 24, maxAge: 29, hasAgency: 'all' }); setSortBy('Value'); break;
-            case 'veterans':
-                setFilters({ ...newFilters, minAge: 32, maxAge: 40, hasAgency: 'all' }); setSortBy('Value'); break;
-            default:
-                setFilters({ ...newFilters, minAge: 15, maxAge: 40, hasAgency: 'all' }); setSortBy('Value'); break;
-        }
-    };
-
-    const fetchPool = async (targetPage: number = 1) => {
+    // 2. Fetch функция
+    const fetchPool = async () => {
         setIsLoading(true);
         try {
             const agencyParam = filters.hasAgency === 'all' ? '' : `&hasAgency=${filters.hasAgency}`;
             const natParam = filters.nationality ? `&nationality=${filters.nationality}` : '';
-            const url = `https://localhost:7135/api/players/get-pool?search=${filters.search}&position=${filters.pos}&minAge=${filters.minAge}&maxAge=${filters.maxAge}&sortBy=${sortBy}${agencyParam}${natParam}&page=${targetPage}&pageSize=20`;
+            const agencyNameParam = filters.agencyName ? `&AgencyName=${filters.agencyName}` : '';
+            
+            const url = `https://localhost:7135/api/players/get-pool?search=${filters.search}&position=${filters.pos}&minAge=${filters.minAge}&maxAge=${filters.maxAge}&sortBy=${sortBy}${agencyParam}${natParam}${agencyNameParam}&page=${page}&pageSize=20`;
 
             const response = await fetch(url);
             if (response.ok) {
@@ -70,8 +66,7 @@ export default function ScoutingPool() {
                 setPlayers(data.items || data.players || []);
                 setPagination({
                     totalCount: data.totalCount || 0,
-                    totalPages: data.totalPages || 1,
-                    page: data.page || 1
+                    totalPages: data.totalPages || 1
                 });
             }
         } catch (error) {
@@ -82,32 +77,57 @@ export default function ScoutingPool() {
         }
     };
 
-    // Слушаме за промени във филтрите (debounce)
+    // 3. Debounce за Fetch (слуша промени в State)
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
-            fetchPool(1);
+            fetchPool();
         }, 400);
         return () => clearTimeout(delayDebounceFn);
-    }, [filters, sortBy]);
+    }, [filters, sortBy, page]);
+
+    // --- ХЕНДЛЪРИ ЗА ПРОМЕНИ ---
+    const handleFilterChange = (key: keyof FilterState, value: any) => {
+        setFilters(prev => ({ ...prev, [key]: value }));
+        setPage(1); // Ресетваме на първа страница при промяна на филтър
+    };
+
+    const handleQuickFilter = (filterId: string) => {
+        setActiveQuickFilter(filterId);
+        setPage(1); // Ресетваме страницата
+        
+        let newFilters = { ...filters, search: '', pos: 'All', nationality: '', agencyName: '' };
+
+        switch (filterId) {
+            case 'wonderkids':
+                setFilters({ ...newFilters, minAge: 15, maxAge: 21, hasAgency: 'false' }); setSortBy('ValueDesc'); break;
+            case 'free_agents':
+                setFilters({ ...newFilters, minAge: 15, maxAge: 40, hasAgency: 'false' }); setSortBy('ValueDesc'); break;
+            case 'prime':
+                setFilters({ ...newFilters, minAge: 24, maxAge: 29, hasAgency: 'all' }); setSortBy('ValueDesc'); break;
+            case 'veterans':
+                setFilters({ ...newFilters, minAge: 32, maxAge: 40, hasAgency: 'all' }); setSortBy('ValueDesc'); break;
+            default:
+                setFilters({ ...newFilters, minAge: 15, maxAge: 40, hasAgency: 'all' }); setSortBy('ValueDesc'); break;
+        }
+    };
+
+    const handleSort = (column: string) => {
+        // Ако вече сме на този колона като Descending, сменяме на Ascending
+        const isDesc = sortBy === `${column}Desc`;
+        setSortBy(isDesc ? column : `${column}Desc`);
+        setActiveQuickFilter('custom');
+        setPage(1); // Ресетваме страницата
+    };
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {
-            fetchPool(newPage);
+            setPage(newPage);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
     const toggleColumn = (columnName: string) => {
-        setVisibleColumns(prev => ({
-            ...prev,
-            [columnName as keyof typeof visibleColumns]: !prev[columnName as keyof typeof visibleColumns]
-        }));
-    };
-
-    const handleSort = (column: string) => {
-        if (sortBy === column) setSortBy(`${column}Desc`);
-        else setSortBy(column);
-        setActiveQuickFilter('custom');
+        setVisibleColumns(prev => ({ ...prev, [columnName as keyof typeof visibleColumns]: !prev[columnName as keyof typeof visibleColumns] }));
     };
 
     const handleAddToShortlist = async (e: React.MouseEvent, playerId: number) => {
@@ -146,17 +166,15 @@ export default function ScoutingPool() {
                 </div>
             </div>
 
-            {/* ФИЛТРИТЕ СА ИЗНЕСЕНИ ТУК */}
             <ScoutingFilters
                 filters={filters}
-                setFilters={setFilters}
+                onFilterChange={handleFilterChange}
                 activeQuickFilter={activeQuickFilter}
                 handleQuickFilter={handleQuickFilter}
                 visibleColumns={visibleColumns}
                 toggleColumn={toggleColumn}
             />
 
-            {/* PLAYERS TABLE */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
                 {isLoading ? (
                     <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-yellow-500" size={40} /></div>
@@ -184,7 +202,7 @@ export default function ScoutingPool() {
 
                                     {visibleColumns.Club && <th className="px-4 py-4 min-w-[150px]">Current Club</th>}
                                     {visibleColumns.Status && <th className="px-2 py-4">Agency</th>}
-                                    {visibleColumns.Wage && <th className="px-4 py-4 text-right cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('Wage')}><div className="flex items-center justify-end gap-1">Wage <ArrowUpDown size={10} /></div></th>}
+                                    {visibleColumns.Wage && <th className="px-4 py-4 text-right cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('Wage')}><div className="flex items-center justify-end gap-1">Wage <ArrowUpDown size={10} className={sortBy.includes('Wage') ? 'text-yellow-500' : ''} /></div></th>}
                                     {visibleColumns.Value && <th className="px-4 py-4 text-right cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('Value')}><div className="flex items-center justify-end gap-1">Value <ArrowUpDown size={10} className={sortBy.includes('Value') ? 'text-yellow-500' : ''} /></div></th>}
                                     <th className="px-2 py-4"></th>
                                 </tr>
@@ -229,21 +247,15 @@ export default function ScoutingPool() {
                                                     </td>
                                                 )}
 
-                                                {/* ПРОМЕНЕНАТА КОЛОНА AGENCY */}
                                                 {visibleColumns.Status && (
                                                     <td className="px-2 py-3">
                                                         <div className="flex items-center gap-1 text-[11px] font-bold tracking-wider">
                                                             {p.hasAgency && p.agencyName ? (
-                                                                <span
-                                                                    className="text-purple-400 bg-purple-500/10 px-2 py-1 rounded flex items-center gap-1 truncate max-w-[150px]"
-                                                                    title={p.agencyName}
-                                                                >
+                                                                <span className="text-purple-400 bg-purple-500/10 px-2 py-1 rounded flex items-center gap-1 truncate max-w-[150px]" title={p.agencyName}>
                                                                     <Shield size={12} className="shrink-0" /> {p.agencyName}
                                                                 </span>
                                                             ) : (
-                                                                <span className="text-gray-600 italic px-2">
-                                                                    Free Agent
-                                                                </span>
+                                                                <span className="text-gray-600 italic px-2">Free Agent</span>
                                                             )}
                                                         </div>
                                                     </td>
@@ -255,9 +267,6 @@ export default function ScoutingPool() {
                                                 <td className="px-2 py-3 text-right">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <button onClick={(e) => handleAddToShortlist(e, p.id)} className="p-1.5 bg-gray-800 text-gray-400 hover:bg-yellow-500 hover:text-black rounded-lg transition-all" title="Add to Shortlist"><BookmarkPlus size={14} /></button>
-                                                        {!p.hasAgency && (
-                                                            <button onClick={(e) => { e.stopPropagation(); setPitchPlayer(p); }} className="p-1.5 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-black rounded-lg transition-all" title="Pitch Player"><UserPlus size={14} /></button>
-                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -272,16 +281,13 @@ export default function ScoutingPool() {
                 )}
             </div>
 
-            {/* PAGINATION */}
             {!isLoading && pagination.totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-8">
-                    <button onClick={() => handlePageChange(pagination.page - 1)} disabled={pagination.page === 1} className="p-2 bg-gray-800 text-gray-400 rounded-lg hover:bg-gray-700 disabled:opacity-30 transition-colors"><ChevronLeft /></button>
-                    <div className="text-gray-400 text-sm font-bold">Page <span className="text-white">{pagination.page}</span> of {pagination.totalPages}</div>
-                    <button onClick={() => handlePageChange(pagination.page + 1)} disabled={pagination.page === pagination.totalPages} className="p-2 bg-gray-800 text-gray-400 rounded-lg hover:bg-gray-700 disabled:opacity-30 transition-colors"><ChevronRight /></button>
+                    <button onClick={() => handlePageChange(page - 1)} disabled={page === 1} className="p-2 bg-gray-800 text-gray-400 rounded-lg hover:bg-gray-700 disabled:opacity-30 transition-colors"><ChevronLeft /></button>
+                    <div className="text-gray-400 text-sm font-bold">Page <span className="text-white">{page}</span> of {pagination.totalPages}</div>
+                    <button onClick={() => handlePageChange(page + 1)} disabled={page === pagination.totalPages} className="p-2 bg-gray-800 text-gray-400 rounded-lg hover:bg-gray-700 disabled:opacity-30 transition-colors"><ChevronRight /></button>
                 </div>
             )}
-
-            <OfferRepresentationModal player={pitchPlayer || {}} isOpen={!!pitchPlayer} onClose={() => setPitchPlayer(null)} onSuccess={handlePitchSuccess} />
         </div>
     );
 }
